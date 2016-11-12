@@ -534,6 +534,11 @@ public abstract class Node implements Cloneable, HasParentNode<Node>, Visitable 
         this.getChildNodes().forEach(c -> c.onSubStree(action));
     }
 
+    public void onSubStreeDepthFirst(ActionOnNode action) {
+        this.getChildNodes().forEach(c -> c.onSubStree(action));
+        action.execute(this);
+    }
+
     @Override
     public boolean isRegistered(AstObserver observer) {
         return this.observers.contains(observer);
