@@ -1,4 +1,4 @@
-package com.github.javaparser.printer;
+package com.github.javaparser.printer.lexicalpreservation;
 
 import com.github.javaparser.Position;
 import com.github.javaparser.Range;
@@ -11,8 +11,7 @@ import java.util.*;
 
 public class LexicalPreservingPrinter {
 
-    private Map<Node, String> textForNodes = new IdentityHashMap<>();
-    private Map<Node, IdentityHashMap<Node, String>> placeholdersMap = new IdentityHashMap<>();
+    private Map<Node, NodeText> textForNodes = new IdentityHashMap<>();
 
     public String print(Node node) {
         StringWriter writer = new StringWriter();
@@ -26,57 +25,55 @@ public class LexicalPreservingPrinter {
 
     public void print(Node node, Writer writer) throws IOException {
         if (textForNodes.containsKey(node)) {
-            final String text = textForNodes.get(node);
-            // Expand children
-            List<String> placeholders = new ArrayList<>(placeholdersMap.get(node).values());
-            // sort placeholders by position
-            placeholders.sort(new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    return text.indexOf(o2) - text.indexOf(o1);
-                }
-            });
-            int delta = 0;
-            String replacedText = text;
-            for (String placeholder : placeholders) {
-                Node child = placeholdersMap.get(node).entrySet().stream().filter(e -> e.getValue().equals(placeholder)).map(e -> e.getKey()).findFirst().get();
-                replacedText = replacedText.replace(placeholder, print(child));
-            }
-
-            writer.append(replacedText);
+            final NodeText text = textForNodes.get(node);
+            writer.append(text.expand());
         } else {
             writer.append(node.toString());
         }
     }
 
     public void registerText(Node node, String documentCode) {
-        IdentityHashMap<Node, String> pmap = new IdentityHashMap<>();
-        placeholdersMap.put(node, pmap);
-        int i = 0;
-        for (Node child : node.getChildNodes()) {
-            pmap.put(child, "#{CHILD" + (i++) + "}");
-        }
         String text = getRangeFromDocument(node.getRange(), documentCode);
-        text = putPlaceholders(documentCode, node.getRange(), text, pmap);
-        textForNodes.put(node, text);
+        NodeText nodeText = putPlaceholders(documentCode, node.getRange(), text, new ArrayList<>(node.getChildNodes()));
+        textForNodes.put(node, nodeText);
     }
 
-    private String putPlaceholders(String documentCode, Range range, String text, IdentityHashMap<Node, String> pmap) {
-        int initialIndex = findIndex(documentCode, range.begin);
-        List<Node> children = new ArrayList<>(pmap.keySet());
+    public NodeText getTextForNode(Node node) {
+        return textForNodes.get(node);
+    }
+
+    private NodeText putPlaceholders(String documentCode, Range range, String text, List<Node> children) {
+
         children.sort((o1, o2) -> o1.getRange().begin.compareTo(o2.getRange().begin));
 
-        int delta = 0;
+        NodeText nodeText = new NodeText();
+
+        int start = findIndex(documentCode, range.begin);
+        int caret = start;
         for (Node child : children) {
-            int fromStart = findIndex(documentCode, child.getBegin()) - initialIndex;
+            int childStartIndex = findIndex(documentCode, child.getBegin());
+            int childEndIndex = findIndex(documentCode, child.getEnd());
+            int fromStart = childStartIndex - caret;
+            if (fromStart > 0) {
+                nodeText.addElement(new StringNodeTextElement(text.substring(caret - start, childStartIndex - start)));
+                caret += fromStart;
+            }
+            nodeText.addElement(new ChildNodeTextElement(this, child));
             int lengthOfOriginalCode = getRangeFromDocument(child.getRange(), documentCode).length();
-            String newSubstring = pmap.get(child);
-            int index = fromStart + delta;
-            text = replaceSubstring(text, index, lengthOfOriginalCode, newSubstring);
-            delta += newSubstring.length() - lengthOfOriginalCode;
+            caret += lengthOfOriginalCode;
+            //int lengthOfOriginalCode = getRangeFromDocument(child.getRange(), documentCode).length();
+            //String newSubstring = pmap.get(child);
+            //int index = fromStart + delta;
+            //text = replaceSubstring(text, index, lengthOfOriginalCode, newSubstring);
+            //delta += newSubstring.length() - lengthOfOriginalCode;
+        }
+        // last string
+        int endOfNode = findIndex(documentCode, range.end) + 1;
+        if (caret < endOfNode) {
+            nodeText.addElement(new StringNodeTextElement(text.substring(caret - start)));
         }
 
-        return text;
+        return nodeText;
     }
 
     private String replaceSubstring(String original, int index, int lengthOfOldSubstring, String newSubstring) {
@@ -86,9 +83,6 @@ public class LexicalPreservingPrinter {
     private String getRangeFromDocument(Range range, String documentCode) {
         if (range.equals(Range.UNKNOWN)) {
             throw new IllegalArgumentException();
-        }
-        if (range.begin.equals(range.end)) {
-            return "";
         }
         return documentCode.substring(findIndex(documentCode, range.begin), findIndex(documentCode, range.end) + 1);
     }
@@ -128,10 +122,7 @@ public class LexicalPreservingPrinter {
             return;
         }
         Node parent = parentNode.get();
-        // find the placeholder
-        String placeholder = this.placeholdersMap.get(parent).get(child);
-        // remove the placeholder
-        String text = textForNodes.get(parent).replace(placeholder, "");
-        textForNodes.put(parent, text);
+
+        textForNodes.get(parent).removeElementsForChild(child);
     }
 }

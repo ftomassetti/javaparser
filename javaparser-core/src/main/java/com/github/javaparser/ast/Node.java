@@ -100,7 +100,7 @@ public abstract class Node implements Cloneable, HasParentNode<Node>, Visitable 
     protected static final PrettyPrinterConfiguration prettyPrinterNoCommentsConfiguration = new PrettyPrinterConfiguration().setPrintComments(false);
 
     @FunctionalInterface
-    interface ActionOnNode {
+    public interface ActionOnNode {
         void execute(Node node);
     }
     private Range range;
