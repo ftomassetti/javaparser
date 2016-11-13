@@ -356,7 +356,7 @@ public abstract class Node implements Cloneable, HasParentNode<Node>, Visitable 
     /**
      * Recursively finds all nodes of a certain type.
      *
-     * @param clazz the type of node to find.
+     * @param clazz the type of node to insert.
      */
     public <N extends Node> List<N> getNodesByType(Class<N> clazz) {
         List<N> nodes = new ArrayList<>();

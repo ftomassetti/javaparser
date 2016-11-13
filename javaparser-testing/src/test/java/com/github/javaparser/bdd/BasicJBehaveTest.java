@@ -48,7 +48,7 @@ abstract class BasicJBehaveTest extends JUnitStories {
     @Override
     public final Configuration configuration() {
         return new MostUsefulConfiguration()
-                // where to find the stories
+                // where to insert the stories
                 .useStoryLoader(new LoadFromClasspath(this.getClass()))
                 // Fails if Steps are not implemented
                 .usePendingStepStrategy(new FailingUponPendingStep())

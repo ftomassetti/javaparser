@@ -195,7 +195,7 @@ public interface NodeWithMembers<N extends Node> {
     }
 
     /**
-     * Try to find a {@link MethodDeclaration} by its name
+     * Try to insert a {@link MethodDeclaration} by its name
      *
      * @param name the name of the method
      * @return the methods found (multiple in case of polymorphism)
@@ -219,7 +219,7 @@ public interface NodeWithMembers<N extends Node> {
     }
 
     /**
-     * Try to find a {@link MethodDeclaration} by its parameters types
+     * Try to insert a {@link MethodDeclaration} by its parameters types
      *
      * @param paramTypes the types of parameters like "Map&lt;Integer,String&gt;","int" to match<br> void
      * foo(Map&lt;Integer,String&gt; myMap,int number)
@@ -234,7 +234,7 @@ public interface NodeWithMembers<N extends Node> {
     }
 
     /**
-     * Try to find a {@link MethodDeclaration} by its parameters types
+     * Try to insert a {@link MethodDeclaration} by its parameters types
      *
      * @param paramTypes the types of parameters like "Map&lt;Integer,String&gt;","int" to match<br> void
      * foo(Map&lt;Integer,String&gt; myMap,int number)
@@ -250,7 +250,7 @@ public interface NodeWithMembers<N extends Node> {
     }
 
     /**
-     * Try to find a {@link FieldDeclaration} by its name
+     * Try to insert a {@link FieldDeclaration} by its name
      *
      * @param name the name of the field
      * @return null if not found, the FieldDeclaration otherwise

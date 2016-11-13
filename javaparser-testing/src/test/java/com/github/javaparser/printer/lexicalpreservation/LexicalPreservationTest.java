@@ -70,6 +70,45 @@ public class LexicalPreservationTest {
     }
 
     @Test
+    public void printASuperSimpleClassWithAFieldAdded() {
+        String code = "class A {}";
+        CompilationUnit cu = JavaParser.parse(code);
+
+        LexicalPreservingPrinter lpp = new LexicalPreservingPrinter();
+        AstObserver observer = new PropagatingAstObserver() {
+            @Override
+            public void concretePropertyChange(Node observedNode, ObservableProperty property, Object oldValue, Object newValue) {
+                if (oldValue.equals(newValue)) {
+                    return;
+                }
+                if (oldValue instanceof Node && newValue instanceof Node) {
+                    lpp.getTextForNode(observedNode).replaceChild((Node)oldValue, (Node)newValue);
+                    return;
+                }
+                throw new UnsupportedOperationException(String.format("Property %s. OLD %s (%s) NEW %s (%s)", property, oldValue,
+                        oldValue.getClass(), newValue, newValue.getClass()));
+            }
+
+            @Override
+            public void concreteListChange(NodeList observedNode, ListChangeType type, int index, Node nodeAddedOrRemoved) {
+                if (type == type.REMOVAL) {
+                    lpp.updateTextBecauseOfRemovedChild(observedNode.getParentNode(), nodeAddedOrRemoved);
+                } else if (type == type.ADDITION) {
+                    lpp.updateTextBecauseOfAddedChild(observedNode, index, observedNode.getParentNode(), nodeAddedOrRemoved);
+                } else {
+                    throw new UnsupportedOperationException();
+                }
+            }
+        };
+        cu.registerForSubtree(observer);
+        cu.onSubStree(node -> lpp.registerText(node, code));
+
+        ClassOrInterfaceDeclaration classA = cu.getClassByName("A");
+        classA.addField("int", "myField");
+        assertEquals("class A {int myField  ;\n}", lpp.print(classA));
+    }
+
+    @Test
     public void printASuperSimpleClassWithoutChanges() {
         String code = "class A {}";
         CompilationUnit cu = JavaParser.parse(code);
