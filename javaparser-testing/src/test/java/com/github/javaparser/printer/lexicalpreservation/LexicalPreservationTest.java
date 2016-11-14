@@ -5,6 +5,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.observing.AstObserver;
 import com.github.javaparser.ast.observing.ObservableProperty;
@@ -75,32 +76,7 @@ public class LexicalPreservationTest {
         CompilationUnit cu = JavaParser.parse(code);
 
         LexicalPreservingPrinter lpp = new LexicalPreservingPrinter();
-        AstObserver observer = new PropagatingAstObserver() {
-            @Override
-            public void concretePropertyChange(Node observedNode, ObservableProperty property, Object oldValue, Object newValue) {
-                if (oldValue.equals(newValue)) {
-                    return;
-                }
-                if (oldValue instanceof Node && newValue instanceof Node) {
-                    lpp.getTextForNode(observedNode).replaceChild((Node)oldValue, (Node)newValue);
-                    return;
-                }
-                throw new UnsupportedOperationException(String.format("Property %s. OLD %s (%s) NEW %s (%s)", property, oldValue,
-                        oldValue.getClass(), newValue, newValue.getClass()));
-            }
-
-            @Override
-            public void concreteListChange(NodeList observedNode, ListChangeType type, int index, Node nodeAddedOrRemoved) {
-                if (type == type.REMOVAL) {
-                    lpp.updateTextBecauseOfRemovedChild(observedNode.getParentNode(), nodeAddedOrRemoved);
-                } else if (type == type.ADDITION) {
-                    lpp.updateTextBecauseOfAddedChild(observedNode, index, observedNode.getParentNode(), nodeAddedOrRemoved);
-                } else {
-                    throw new UnsupportedOperationException();
-                }
-            }
-        };
-        cu.registerForSubtree(observer);
+        cu.registerForSubtree(createObserver(lpp));
         cu.onSubStree(node -> lpp.registerText(node, code));
 
         ClassOrInterfaceDeclaration classA = cu.getClassByName("A");
@@ -176,5 +152,98 @@ public class LexicalPreservationTest {
                 "\n" +
                 "\n" +
                 "         void foo(int p  ) { return  'z'  \t; }}", lpp.print(c));
+    }
+
+    private AstObserver createObserver(LexicalPreservingPrinter lpp) {
+        return new PropagatingAstObserver() {
+            @Override
+            public void concretePropertyChange(Node observedNode, ObservableProperty property, Object oldValue, Object newValue) {
+                if (oldValue.equals(newValue)) {
+                    return;
+                }
+                if (oldValue instanceof Node && newValue instanceof Node) {
+                    lpp.getTextForNode(observedNode).replaceChild((Node)oldValue, (Node)newValue);
+                    return;
+                }
+                throw new UnsupportedOperationException(String.format("Property %s. OLD %s (%s) NEW %s (%s)", property, oldValue,
+                        oldValue.getClass(), newValue, newValue.getClass()));
+            }
+
+            @Override
+            public void concreteListChange(NodeList observedNode, ListChangeType type, int index, Node nodeAddedOrRemoved) {
+                if (type == type.REMOVAL) {
+                    lpp.updateTextBecauseOfRemovedChild(observedNode.getParentNode(), nodeAddedOrRemoved);
+                } else if (type == type.ADDITION) {
+                    lpp.updateTextBecauseOfAddedChild(observedNode, index, observedNode.getParentNode(), nodeAddedOrRemoved);
+                } else {
+                    throw new UnsupportedOperationException();
+                }
+            }
+        };
+    }
+
+    @Test
+    public void printASimpleMethodAddingAParameterToAMethodWithZeroParameters() {
+        String code = "class A { void foo() {} }";
+        CompilationUnit cu = JavaParser.parse(code);
+        LexicalPreservingPrinter lpp = new LexicalPreservingPrinter();
+        cu.registerForSubtree(createObserver(lpp));
+        cu.onSubStree(node -> lpp.registerText(node, code));
+
+        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
+        m.addParameter("float", "p1");
+        assertEquals("void foo(float p1) {}", lpp.print(m));
+    }
+
+    @Test
+    public void printASimpleMethodAddingAParameterToAMethodWithOneParameter() {
+        String code = "class A { void foo(char p1) {} }";
+        CompilationUnit cu = JavaParser.parse(code);
+        LexicalPreservingPrinter lpp = new LexicalPreservingPrinter();
+        cu.registerForSubtree(createObserver(lpp));
+        cu.onSubStree(node -> lpp.registerText(node, code));
+
+        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
+        m.addParameter("float", "p2");
+        assertEquals("void foo(char p1, float p2) {}", lpp.print(m));
+    }
+
+    @Test
+    public void printASimpleMethodRemovingAParameterToAMethodWithOneParameter() {
+        String code = "class A { void foo(float p1) {} }";
+        CompilationUnit cu = JavaParser.parse(code);
+        LexicalPreservingPrinter lpp = new LexicalPreservingPrinter();
+        cu.register(createObserver(lpp), Node.ObserverRegistrationMode.SELF_PROPAGATING);
+        cu.onSubStree(node -> lpp.registerText(node, code));
+
+        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
+        m.getParameters().remove(0);
+        assertEquals("void foo() {}", lpp.print(m));
+    }
+
+    @Test
+    public void printASimpleMethodRemovingParameterOneFromMethodWithTwoParameters() {
+        String code = "class A { void foo(char p1, int p2) {} }";
+        CompilationUnit cu = JavaParser.parse(code);
+        LexicalPreservingPrinter lpp = new LexicalPreservingPrinter();
+        cu.register(createObserver(lpp), Node.ObserverRegistrationMode.SELF_PROPAGATING);
+        cu.onSubStree(node -> lpp.registerText(node, code));
+
+        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
+        m.getParameters().remove(0);
+        assertEquals("void foo(int p2) {}", lpp.print(m));
+    }
+
+    @Test
+    public void printASimpleMethodRemovingParameterTwoFromMethodWithTwoParameters() {
+        String code = "class A { void foo(char p1, int p2) {} }";
+        CompilationUnit cu = JavaParser.parse(code);
+        LexicalPreservingPrinter lpp = new LexicalPreservingPrinter();
+        cu.register(createObserver(lpp), Node.ObserverRegistrationMode.SELF_PROPAGATING);
+        cu.onSubStree(node -> lpp.registerText(node, code));
+
+        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
+        m.getParameters().remove(1);
+        assertEquals("void foo(char p1) {}", lpp.print(m));
     }
 }

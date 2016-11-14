@@ -137,7 +137,8 @@ public class LexicalPreservingPrinter {
             Inserter inserter = getPositionFinder(parent.getClass(), nodeListName);
             inserter.insert(parent, child);
         } else {
-            throw new UnsupportedOperationException(nodeListName);
+            Inserter inserter = insertAfterChild(nodeList.get(index - 1), ", ");
+            inserter.insert(parent, child);
         }
     }
 
@@ -174,6 +175,8 @@ public class LexicalPreservingPrinter {
                 } catch (NoSuchMethodException e) {
                     throw new RuntimeException(e);
                 }
+            case "MethodDeclaration:Parameters":
+                return insertAfter("(");
         }
 
         throw new UnsupportedOperationException(key);
@@ -207,6 +210,28 @@ public class LexicalPreservingPrinter {
             textForNodes.put(node, prettyPrintingTextNode(node));
         }
         return textForNodes.get(node);
+    }
+
+    private Inserter insertAfterChild(Node childToFollow, String separatorBefore) {
+        return (parent, child) -> {
+            NodeText nodeText = getOrCreateNodeText(parent);
+            if (childToFollow == null) {
+                nodeText.addElement(0, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
+                return;
+            }
+            for (int i=0; i< nodeText.numberOfElements();i++) {
+                NodeTextElement element = nodeText.getTextElement(i);
+                if (element instanceof ChildNodeTextElement) {
+                    ChildNodeTextElement childElement = (ChildNodeTextElement)element;
+                    if (childElement.getChild() == childToFollow) {
+                        nodeText.addString(i+1, separatorBefore);
+                        nodeText.addElement(i+2, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
+                        return;
+                    }
+                }
+            }
+            throw new IllegalArgumentException();
+        };
     }
 
     private Inserter insertAfterChild(Method method, String separatorBefore) {
