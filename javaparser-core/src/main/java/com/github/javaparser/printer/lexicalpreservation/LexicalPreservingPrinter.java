@@ -117,13 +117,26 @@ public class LexicalPreservingPrinter {
         return indexOfLineStart + column - 1;
     }
 
-    public void updateTextBecauseOfRemovedChild(Optional<Node> parentNode, Node child) {
+    public void updateTextBecauseOfRemovedChild(NodeList nodeList, int index, Optional<Node> parentNode, Node child) {
         if (!parentNode.isPresent()) {
             return;
         }
         Node parent = parentNode.get();
+        String key = parent.getClass().getSimpleName() + ":" + findNodeListName(nodeList);
 
-        textForNodes.get(parent).removeElementsForChild(child);
+        switch (key) {
+            case "MethodDeclaration:Parameters":
+                if (index == 0 && nodeList.size() > 1) {
+                    // we should remove all the text between the child and the comma
+                    textForNodes.get(parent).removeTextBetween(child, ",");
+                }
+                if (index != 0) {
+                    // we should remove all the text between the child and the comma
+                    textForNodes.get(parent).removeTextBetween(",", child);
+                }
+            default:
+                textForNodes.get(parent).removeElementsForChild(child);
+        }
     }
 
     public void updateTextBecauseOfAddedChild(NodeList nodeList, int index, Optional<Node> parentNode, Node child) {
@@ -131,7 +144,7 @@ public class LexicalPreservingPrinter {
             return;
         }
         Node parent = parentNode.get();
-        String nodeListName = findNodeListName(nodeList, parent);
+        String nodeListName = findNodeListName(nodeList);
 
         if (index == 0) {
             Inserter inserter = getPositionFinder(parent.getClass(), nodeListName);
@@ -142,7 +155,8 @@ public class LexicalPreservingPrinter {
         }
     }
 
-    private String findNodeListName(NodeList nodeList, Node parent) {
+    private String findNodeListName(NodeList nodeList) {
+        Node parent = nodeList.getParentNodeForChildren();
         for (Method m : parent.getClass().getMethods()) {
             if (m.getParameterCount() == 0 && m.getReturnType().getCanonicalName().equals(NodeList.class.getCanonicalName())) {
                 try {

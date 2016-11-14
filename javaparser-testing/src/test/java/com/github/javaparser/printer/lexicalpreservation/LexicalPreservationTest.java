@@ -127,21 +127,7 @@ public class LexicalPreservationTest {
         String code = "class /*a comment*/ A {\t\t\n int f;\n\n\n         void foo(int p  ) { return  'z'  \t; }}";
         CompilationUnit cu = JavaParser.parse(code);
         LexicalPreservingPrinter lpp = new LexicalPreservingPrinter();
-        AstObserver observer = new PropagatingAstObserver() {
-            @Override
-            public void concretePropertyChange(Node observedNode, ObservableProperty property, Object oldValue, Object newValue) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public void concreteListChange(NodeList observedNode, ListChangeType type, int index, Node nodeAddedOrRemoved) {
-                if (type == type.REMOVAL) {
-                    lpp.updateTextBecauseOfRemovedChild(observedNode.getParentNode(), nodeAddedOrRemoved);
-                } else {
-                    throw new UnsupportedOperationException();
-                }
-            }
-        };
+        AstObserver observer = createObserver(lpp);
         cu.registerForSubtree(observer);
         cu.onSubStree(node -> lpp.registerText(node, code));
 
@@ -172,7 +158,7 @@ public class LexicalPreservationTest {
             @Override
             public void concreteListChange(NodeList observedNode, ListChangeType type, int index, Node nodeAddedOrRemoved) {
                 if (type == type.REMOVAL) {
-                    lpp.updateTextBecauseOfRemovedChild(observedNode.getParentNode(), nodeAddedOrRemoved);
+                    lpp.updateTextBecauseOfRemovedChild(observedNode, index, observedNode.getParentNode(), nodeAddedOrRemoved);
                 } else if (type == type.ADDITION) {
                     lpp.updateTextBecauseOfAddedChild(observedNode, index, observedNode.getParentNode(), nodeAddedOrRemoved);
                 } else {
@@ -231,7 +217,7 @@ public class LexicalPreservationTest {
 
         MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
         m.getParameters().remove(0);
-        assertEquals("void foo(int p2) {}", lpp.print(m));
+        assertEquals("void foo( int p2) {}", lpp.print(m));
     }
 
     @Test

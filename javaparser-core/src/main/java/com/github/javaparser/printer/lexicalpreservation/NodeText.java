@@ -90,4 +90,34 @@ class NodeText {
     public void addString(int index, String string) {
         elements.add(index, new StringNodeTextElement(string));
     }
+
+    public void removeTextBetween(String substring, Node child) {
+        for (int i=0; i<elements.size(); i++) {
+            NodeTextElement element = elements.get(i);
+            if (element instanceof ChildNodeTextElement) {
+                ChildNodeTextElement childNodeTextElement = (ChildNodeTextElement)element;
+                if (childNodeTextElement.getChild() == child) {
+                    if (i==0 || !(elements.get(i - 1) instanceof StringNodeTextElement)) {
+                        throw new IllegalArgumentException();
+                    }
+                    ((StringNodeTextElement)elements.get(i - 1)).removeFromDelimiterToEnd(substring);
+                }
+            }
+        }
+    }
+
+    public void removeTextBetween(Node child, String substring) {
+        for (int i=0; i<elements.size(); i++) {
+            NodeTextElement element = elements.get(i);
+            if (element instanceof ChildNodeTextElement) {
+                ChildNodeTextElement childNodeTextElement = (ChildNodeTextElement)element;
+                if (childNodeTextElement.getChild() == child) {
+                    if (i==(elements.size() - 1) || !(elements.get(i + 1) instanceof StringNodeTextElement)) {
+                        throw new IllegalArgumentException();
+                    }
+                    ((StringNodeTextElement)elements.get(i + 1)).removeUntilDelimiter(substring);
+                }
+            }
+        }
+    }
 }

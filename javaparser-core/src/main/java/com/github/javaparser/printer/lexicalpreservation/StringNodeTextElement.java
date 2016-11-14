@@ -15,4 +15,20 @@ class StringNodeTextElement extends NodeTextElement {
     public String getText() {
         return text;
     }
+
+    public void removeFromDelimiterToEnd(String substring) {
+        int index = text.lastIndexOf(substring);
+        if (index == -1) {
+            throw new IllegalArgumentException();
+        }
+        text = text.substring(0, index);
+    }
+
+    public void removeUntilDelimiter(String substring) {
+        int index = text.indexOf(substring);
+        if (index == -1) {
+            throw new IllegalArgumentException("Cannot find '" + substring+ "' in '" + text + "'");
+        }
+        text = text.substring(index + substring.length());
+    }
 }

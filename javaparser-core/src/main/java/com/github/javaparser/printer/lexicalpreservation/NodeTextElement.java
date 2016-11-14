@@ -5,4 +5,6 @@ package com.github.javaparser.printer.lexicalpreservation;
  */
 abstract class NodeTextElement {
     abstract String expand();
+
+
 }
