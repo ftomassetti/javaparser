@@ -2,9 +2,14 @@ package com.github.javaparser.printer.lexicalpreservation;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.BinaryExpr;
+import com.github.javaparser.ast.expr.IntegerLiteralExpr;
 import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.Statement;
 import org.junit.Test;
 
 import static com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter.setup;
@@ -147,5 +152,21 @@ public class LexicalPreservationTest {
         MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
         m.getParameters().remove(1);
         assertEquals("void foo(char p1) {}", lpp.print(m));
+    }
+
+    @Test
+    public void printASimpleMethodAddingAStatement() {
+        String code = "class A { void foo(char p1, int p2) {} }";
+        CompilationUnit cu = JavaParser.parse(code);
+        LexicalPreservingPrinter lpp = setup(cu, code);
+
+        Statement s = new ExpressionStmt(new BinaryExpr(
+                new IntegerLiteralExpr("10"), new IntegerLiteralExpr("2"), BinaryExpr.Operator.plus
+        ));
+        NodeList<Statement> stmts = cu.getClassByName("A").getMethodsByName("foo").get(0).getBody().get().getStmts();
+        stmts.add(s);
+        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
+        assertEquals("void foo(char p1, int p2) {\n" +
+                "    10 + 2;}", lpp.print(m));
     }
 }

@@ -195,6 +195,8 @@ public class LexicalPreservingPrinter {
                 }
             case "MethodDeclaration:Parameters":
                 return insertAfter("(", InsertionMode.PLAIN);
+            case "BlockStmt:Stmts":
+                return insertAfter("{", InsertionMode.ON_ITS_OWN_LINE);
         }
 
         throw new UnsupportedOperationException(key);
