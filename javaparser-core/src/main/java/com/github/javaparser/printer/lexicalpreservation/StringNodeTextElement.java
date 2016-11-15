@@ -24,11 +24,14 @@ class StringNodeTextElement extends NodeTextElement {
         text = text.substring(0, index);
     }
 
-    public void removeUntilDelimiter(String substring) {
+    public void removeUntilDelimiter(String substring, boolean removeSpaceImmediatelyAfter) {
         int index = text.indexOf(substring);
         if (index == -1) {
             throw new IllegalArgumentException("Cannot find '" + substring+ "' in '" + text + "'");
         }
         text = text.substring(index + substring.length());
+        while (text.startsWith(" ") || text.startsWith("\t")) {
+            text = text.substring(1);
+        }
     }
 }

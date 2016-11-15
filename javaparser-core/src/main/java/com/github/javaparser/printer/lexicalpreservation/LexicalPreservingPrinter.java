@@ -132,7 +132,7 @@ public class LexicalPreservingPrinter {
             case "MethodDeclaration:Parameters":
                 if (index == 0 && nodeList.size() > 1) {
                     // we should remove all the text between the child and the comma
-                    textForNodes.get(parent).removeTextBetween(child, ",");
+                    textForNodes.get(parent).removeTextBetween(child, ",", true);
                 }
                 if (index != 0) {
                     // we should remove all the text between the child and the comma
@@ -186,7 +186,7 @@ public class LexicalPreservingPrinter {
         String key = String.format("%s:%s", parentClass.getSimpleName(), nodeListName);
         switch (key) {
             case "ClassOrInterfaceDeclaration:Members":
-                return insertAfter("{");
+                return insertAfter("{", InsertionMode.ON_ITS_OWN_LINE);
             case "FieldDeclaration:Variables":
                 try {
                     return insertAfterChild(FieldDeclaration.class.getMethod("getElementType"), " ");
@@ -194,7 +194,7 @@ public class LexicalPreservingPrinter {
                     throw new RuntimeException(e);
                 }
             case "MethodDeclaration:Parameters":
-                return insertAfter("(");
+                return insertAfter("(", InsertionMode.PLAIN);
         }
 
         throw new UnsupportedOperationException(key);
@@ -213,9 +213,8 @@ public class LexicalPreservingPrinter {
             nodeText.addList(fieldDeclaration.getAnnotations(), "\n", true);
             printModifiers(nodeText, fieldDeclaration.getModifiers());
             nodeText.addChild(fieldDeclaration.getElementType());
-            nodeText.addString(" ");
             nodeText.addList(fieldDeclaration.getArrayBracketPairsAfterElementType(), "", true);
-            nodeText.addString(" ");
+            //nodeText.addString(" ");
             nodeText.addList(fieldDeclaration.getVariables(), ", ", false);
             nodeText.addString(";\n");
             return nodeText;
@@ -281,7 +280,12 @@ public class LexicalPreservingPrinter {
         };
     }
 
-    private Inserter insertAfter(final String subString) {
+    private enum InsertionMode {
+        PLAIN,
+        ON_ITS_OWN_LINE
+    }
+
+    private Inserter insertAfter(final String subString, InsertionMode insertionMode) {
         return (parent, child) -> {
             NodeText nodeText = textForNodes.get(parent);
             for (int i=0; i< nodeText.numberOfElements();i++) {
@@ -292,6 +296,10 @@ public class LexicalPreservingPrinter {
                     if (index != -1) {
                         int end = index + subString.length();
                         String textBefore = stringElement.getText().substring(0, end);
+                        if (insertionMode == InsertionMode.ON_ITS_OWN_LINE) {
+                            // TODO calculate correct indentation
+                            textBefore += "\n    ";
+                        }
                         String textAfter = stringElement.getText().substring(end);
                         if (textAfter.isEmpty()) {
                             nodeText.addElement(i+1, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));

@@ -106,7 +106,7 @@ class NodeText {
         }
     }
 
-    public void removeTextBetween(Node child, String substring) {
+    public void removeTextBetween(Node child, String substring, boolean removeSpaceImmediatelyAfter) {
         for (int i=0; i<elements.size(); i++) {
             NodeTextElement element = elements.get(i);
             if (element instanceof ChildNodeTextElement) {
@@ -115,7 +115,7 @@ class NodeText {
                     if (i==(elements.size() - 1) || !(elements.get(i + 1) instanceof StringNodeTextElement)) {
                         throw new IllegalArgumentException();
                     }
-                    ((StringNodeTextElement)elements.get(i + 1)).removeUntilDelimiter(substring);
+                    ((StringNodeTextElement)elements.get(i + 1)).removeUntilDelimiter(substring, removeSpaceImmediatelyAfter);
                 }
             }
         }

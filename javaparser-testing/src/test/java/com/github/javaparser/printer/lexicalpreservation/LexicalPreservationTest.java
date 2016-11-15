@@ -2,13 +2,9 @@ package com.github.javaparser.printer.lexicalpreservation;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.SimpleName;
-import com.github.javaparser.ast.observing.AstObserver;
-import com.github.javaparser.ast.observing.ObservableProperty;
-import com.github.javaparser.ast.observing.PropagatingAstObserver;
 import org.junit.Test;
 
 import static com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter.setup;
@@ -20,16 +16,7 @@ public class LexicalPreservationTest {
     public void checkNodeTextCreatedForSimplestClass() {
         String code = "class A {}";
         CompilationUnit cu = JavaParser.parse(code);
-
-        AstObserver observer = new PropagatingAstObserver() {
-            @Override
-            public void concretePropertyChange(Node observedNode, ObservableProperty property, Object oldValue, Object newValue) {
-                throw new UnsupportedOperationException();
-            }
-        };
-        LexicalPreservingPrinter lpp = new LexicalPreservingPrinter();
-        cu.registerForSubtree(observer);
-        cu.onSubStree(node -> lpp.registerText(node, code));
+        LexicalPreservingPrinter lpp = setup(cu, code);
 
         // CU
         assertEquals(1, lpp.getTextForNode(cu).numberOfElements());
@@ -69,7 +56,7 @@ public class LexicalPreservationTest {
 
         ClassOrInterfaceDeclaration classA = cu.getClassByName("A");
         classA.addField("int", "myField");
-        assertEquals("class A {int myField  ;\n}", lpp.print(classA));
+        assertEquals("class A {\n    int myField;\n}", lpp.print(classA));
     }
 
     @Test
@@ -148,7 +135,7 @@ public class LexicalPreservationTest {
 
         MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
         m.getParameters().remove(0);
-        assertEquals("void foo( int p2) {}", lpp.print(m));
+        assertEquals("void foo(int p2) {}", lpp.print(m));
     }
 
     @Test
