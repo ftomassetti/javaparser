@@ -2,10 +2,14 @@ package com.github.javaparser.printer.lexicalpreservation;
 
 import com.github.javaparser.Position;
 import com.github.javaparser.Range;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.observing.AstObserver;
+import com.github.javaparser.ast.observing.ObservableProperty;
+import com.github.javaparser.ast.observing.PropagatingAstObserver;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -301,6 +305,42 @@ public class LexicalPreservingPrinter {
                 }
             }
             throw new IllegalArgumentException();
+        };
+    }
+
+    public static LexicalPreservingPrinter setup(CompilationUnit cu, String code) {
+        LexicalPreservingPrinter lpp = new LexicalPreservingPrinter();
+        AstObserver observer = createObserver(lpp);
+        cu.registerForSubtree(observer);
+        cu.onSubStree(node -> lpp.registerText(node, code));
+        return lpp;
+    }
+
+    private static AstObserver createObserver(LexicalPreservingPrinter lpp) {
+        return new PropagatingAstObserver() {
+            @Override
+            public void concretePropertyChange(Node observedNode, ObservableProperty property, Object oldValue, Object newValue) {
+                if (oldValue.equals(newValue)) {
+                    return;
+                }
+                if (oldValue instanceof Node && newValue instanceof Node) {
+                    lpp.getTextForNode(observedNode).replaceChild((Node)oldValue, (Node)newValue);
+                    return;
+                }
+                throw new UnsupportedOperationException(String.format("Property %s. OLD %s (%s) NEW %s (%s)", property, oldValue,
+                        oldValue.getClass(), newValue, newValue.getClass()));
+            }
+
+            @Override
+            public void concreteListChange(NodeList observedNode, ListChangeType type, int index, Node nodeAddedOrRemoved) {
+                if (type == type.REMOVAL) {
+                    lpp.updateTextBecauseOfRemovedChild(observedNode, index, observedNode.getParentNode(), nodeAddedOrRemoved);
+                } else if (type == type.ADDITION) {
+                    lpp.updateTextBecauseOfAddedChild(observedNode, index, observedNode.getParentNode(), nodeAddedOrRemoved);
+                } else {
+                    throw new UnsupportedOperationException();
+                }
+            }
         };
     }
 }

@@ -3,7 +3,6 @@ package com.github.javaparser.printer.lexicalpreservation;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.SimpleName;
@@ -12,6 +11,7 @@ import com.github.javaparser.ast.observing.ObservableProperty;
 import com.github.javaparser.ast.observing.PropagatingAstObserver;
 import org.junit.Test;
 
+import static com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter.setup;
 import static org.junit.Assert.assertEquals;
 
 public class LexicalPreservationTest {
@@ -56,7 +56,7 @@ public class LexicalPreservationTest {
     public void printASuperSimpleCUWithoutChanges() {
         String code = "class A {}";
         CompilationUnit cu = JavaParser.parse(code);
-        LexicalPreservingPrinter lpp = setupLpp(cu, code);
+        LexicalPreservingPrinter lpp = setup(cu, code);
 
         assertEquals(code, lpp.print(cu));
     }
@@ -65,7 +65,7 @@ public class LexicalPreservationTest {
     public void printASuperSimpleClassWithAFieldAdded() {
         String code = "class A {}";
         CompilationUnit cu = JavaParser.parse(code);
-        LexicalPreservingPrinter lpp = setupLpp(cu, code);
+        LexicalPreservingPrinter lpp = setup(cu, code);
 
         ClassOrInterfaceDeclaration classA = cu.getClassByName("A");
         classA.addField("int", "myField");
@@ -76,7 +76,7 @@ public class LexicalPreservationTest {
     public void printASuperSimpleClassWithoutChanges() {
         String code = "class A {}";
         CompilationUnit cu = JavaParser.parse(code);
-        LexicalPreservingPrinter lpp = setupLpp(cu, code);
+        LexicalPreservingPrinter lpp = setup(cu, code);
 
         assertEquals(code, lpp.print(cu.getClassByName("A")));
     }
@@ -85,7 +85,7 @@ public class LexicalPreservationTest {
     public void printASimpleCUWithoutChanges() {
         String code = "class /*a comment*/ A {\t\t\n int f;\n\n\n         void foo(int p  ) { return  'z'  \t; }}";
         CompilationUnit cu = JavaParser.parse(code);
-        LexicalPreservingPrinter lpp = setupLpp(cu, code);
+        LexicalPreservingPrinter lpp = setup(cu, code);
 
         assertEquals(code, lpp.print(cu));
         assertEquals(code, lpp.print(cu.getClassByName("A")));
@@ -96,7 +96,7 @@ public class LexicalPreservationTest {
     public void printASimpleClassRemovingAField() {
         String code = "class /*a comment*/ A {\t\t\n int f;\n\n\n         void foo(int p  ) { return  'z'  \t; }}";
         CompilationUnit cu = JavaParser.parse(code);
-        LexicalPreservingPrinter lpp = setupLpp(cu, code);
+        LexicalPreservingPrinter lpp = setup(cu, code);
 
         ClassOrInterfaceDeclaration c = cu.getClassByName("A");
         c.getMembers().remove(0);
@@ -107,39 +107,11 @@ public class LexicalPreservationTest {
                 "         void foo(int p  ) { return  'z'  \t; }}", lpp.print(c));
     }
 
-    private AstObserver createObserver(LexicalPreservingPrinter lpp) {
-        return new PropagatingAstObserver() {
-            @Override
-            public void concretePropertyChange(Node observedNode, ObservableProperty property, Object oldValue, Object newValue) {
-                if (oldValue.equals(newValue)) {
-                    return;
-                }
-                if (oldValue instanceof Node && newValue instanceof Node) {
-                    lpp.getTextForNode(observedNode).replaceChild((Node)oldValue, (Node)newValue);
-                    return;
-                }
-                throw new UnsupportedOperationException(String.format("Property %s. OLD %s (%s) NEW %s (%s)", property, oldValue,
-                        oldValue.getClass(), newValue, newValue.getClass()));
-            }
-
-            @Override
-            public void concreteListChange(NodeList observedNode, ListChangeType type, int index, Node nodeAddedOrRemoved) {
-                if (type == type.REMOVAL) {
-                    lpp.updateTextBecauseOfRemovedChild(observedNode, index, observedNode.getParentNode(), nodeAddedOrRemoved);
-                } else if (type == type.ADDITION) {
-                    lpp.updateTextBecauseOfAddedChild(observedNode, index, observedNode.getParentNode(), nodeAddedOrRemoved);
-                } else {
-                    throw new UnsupportedOperationException();
-                }
-            }
-        };
-    }
-
     @Test
     public void printASimpleMethodAddingAParameterToAMethodWithZeroParameters() {
         String code = "class A { void foo() {} }";
         CompilationUnit cu = JavaParser.parse(code);
-        LexicalPreservingPrinter lpp = setupLpp(cu, code);
+        LexicalPreservingPrinter lpp = setup(cu, code);
 
         MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
         m.addParameter("float", "p1");
@@ -150,7 +122,7 @@ public class LexicalPreservationTest {
     public void printASimpleMethodAddingAParameterToAMethodWithOneParameter() {
         String code = "class A { void foo(char p1) {} }";
         CompilationUnit cu = JavaParser.parse(code);
-        LexicalPreservingPrinter lpp = setupLpp(cu, code);
+        LexicalPreservingPrinter lpp = setup(cu, code);
 
         MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
         m.addParameter("float", "p2");
@@ -161,7 +133,7 @@ public class LexicalPreservationTest {
     public void printASimpleMethodRemovingAParameterToAMethodWithOneParameter() {
         String code = "class A { void foo(float p1) {} }";
         CompilationUnit cu = JavaParser.parse(code);
-        LexicalPreservingPrinter lpp = setupLpp(cu, code);
+        LexicalPreservingPrinter lpp = setup(cu, code);
 
         MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
         m.getParameters().remove(0);
@@ -172,7 +144,7 @@ public class LexicalPreservationTest {
     public void printASimpleMethodRemovingParameterOneFromMethodWithTwoParameters() {
         String code = "class A { void foo(char p1, int p2) {} }";
         CompilationUnit cu = JavaParser.parse(code);
-        LexicalPreservingPrinter lpp = setupLpp(cu, code);
+        LexicalPreservingPrinter lpp = setup(cu, code);
 
         MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
         m.getParameters().remove(0);
@@ -183,18 +155,10 @@ public class LexicalPreservationTest {
     public void printASimpleMethodRemovingParameterTwoFromMethodWithTwoParameters() {
         String code = "class A { void foo(char p1, int p2) {} }";
         CompilationUnit cu = JavaParser.parse(code);
-        LexicalPreservingPrinter lpp = setupLpp(cu, code);
+        LexicalPreservingPrinter lpp = setup(cu, code);
 
         MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
         m.getParameters().remove(1);
         assertEquals("void foo(char p1) {}", lpp.print(m));
-    }
-
-    private LexicalPreservingPrinter setupLpp(CompilationUnit cu, String code) {
-        LexicalPreservingPrinter lpp = new LexicalPreservingPrinter();
-        AstObserver observer = createObserver(lpp);
-        cu.registerForSubtree(observer);
-        cu.onSubStree(node -> lpp.registerText(node, code));
-        return lpp;
     }
 }
