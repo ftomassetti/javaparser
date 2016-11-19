@@ -34,4 +34,8 @@ class StringNodeTextElement extends NodeTextElement {
             text = text.substring(1);
         }
     }
+
+    public NodeTextElement removeString(String string) {
+        return new StringNodeTextElement(text.replaceAll(string, ""));
+    }
 }

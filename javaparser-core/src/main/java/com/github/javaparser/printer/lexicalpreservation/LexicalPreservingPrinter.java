@@ -330,15 +330,29 @@ public class LexicalPreservingPrinter {
         return new PropagatingAstObserver() {
             @Override
             public void concretePropertyChange(Node observedNode, ObservableProperty property, Object oldValue, Object newValue) {
-                if (oldValue.equals(newValue)) {
+                if (oldValue != null && oldValue.equals(newValue)) {
                     return;
                 }
                 if (oldValue instanceof Node && newValue instanceof Node) {
                     lpp.getTextForNode(observedNode).replaceChild((Node)oldValue, (Node)newValue);
                     return;
                 }
+                if (oldValue == null && newValue instanceof Node) {
+                    throw new UnsupportedOperationException();
+                }
+                if ((oldValue instanceof EnumSet) && ObservableProperty.MODIFIERS == property){
+                    EnumSet<Modifier> oldEnumSet = (EnumSet<Modifier>)oldValue;
+                    EnumSet<Modifier> newEnumSet = (EnumSet<Modifier>)newValue;
+                    for (Modifier removedModifier : oldEnumSet.stream().filter(e -> !newEnumSet.contains(e)).collect(Collectors.toList())) {
+                        lpp.getOrCreateNodeText(observedNode).removeString(removedModifier.name().toLowerCase());
+                    }
+                    for (Modifier addedModifier : newEnumSet.stream().filter(e -> !oldEnumSet.contains(e)).collect(Collectors.toList())) {
+                        lpp.getOrCreateNodeText(observedNode).addAtBeginningString(addedModifier.name().toLowerCase());
+                    }
+                    return;
+                }
                 throw new UnsupportedOperationException(String.format("Property %s. OLD %s (%s) NEW %s (%s)", property, oldValue,
-                        oldValue.getClass(), newValue, newValue.getClass()));
+                        oldValue == null ? "": oldValue.getClass(), newValue, newValue == null ? "": newValue.getClass()));
             }
 
             @Override

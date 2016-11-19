@@ -120,4 +120,18 @@ class NodeText {
             }
         }
     }
+
+    public void removeString(String string) {
+        for (int i=0; i<elements.size(); i++) {
+            NodeTextElement element = elements.get(i);
+            if (element instanceof StringNodeTextElement) {
+                StringNodeTextElement stringNodeTextElement = (StringNodeTextElement)element;
+                elements.set(i, stringNodeTextElement.removeString(string));
+            }
+        }
+    }
+
+    public void addAtBeginningString(String string) {
+        elements.add(0, new StringNodeTextElement(string));
+    }
 }
