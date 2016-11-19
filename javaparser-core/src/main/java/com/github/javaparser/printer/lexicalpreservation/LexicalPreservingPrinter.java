@@ -341,7 +341,12 @@ public class LexicalPreservingPrinter {
                     return;
                 }
                 if (oldValue == null && newValue instanceof Node) {
-                    throw new UnsupportedOperationException();
+                    if (property == ObservableProperty.INIT) {
+                        lpp.getOrCreateNodeText(observedNode).addString(" = ");
+                        lpp.getOrCreateNodeText(observedNode).addChild((Node)newValue);
+                        return;
+                    }
+                    throw new UnsupportedOperationException("Set property " + property);
                 }
                 if ((oldValue instanceof EnumSet) && ObservableProperty.MODIFIERS == property){
                     EnumSet<Modifier> oldEnumSet = (EnumSet<Modifier>)oldValue;
@@ -350,7 +355,7 @@ public class LexicalPreservingPrinter {
                         lpp.getOrCreateNodeText(observedNode).removeString(removedModifier.name().toLowerCase());
                     }
                     for (Modifier addedModifier : newEnumSet.stream().filter(e -> !oldEnumSet.contains(e)).collect(Collectors.toList())) {
-                        lpp.getOrCreateNodeText(observedNode).addAtBeginningString(addedModifier.name().toLowerCase());
+                        lpp.getOrCreateNodeText(observedNode).addAtBeginningString(addedModifier.name().toLowerCase() + " ");
                     }
                     return;
                 }
