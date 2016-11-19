@@ -34,6 +34,14 @@ public class TransformationsTest {
         assertEquals(expectedCode, actualCode);
     }
 
+    private void assertUnchanged(String exampleName) throws IOException {
+        InputStream is = this.getClass().getResourceAsStream("/com/github/javaparser/lexical_preservation_samples/" + exampleName + "_original.java.txt");
+        String code = read(is);
+        CompilationUnit cu = JavaParser.parse(code);
+        lpp = setup(cu, code);
+        assertEquals(code, lpp.print(cu));
+    }
+
     private String read(InputStream inputStream) throws IOException {
         ByteArrayOutputStream result = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
@@ -42,6 +50,12 @@ public class TransformationsTest {
             result.write(buffer, 0, length);
         }
         return result.toString("UTF-8");
+    }
+
+    @Test
+    public void unchanged() throws IOException {
+        assertUnchanged("Example1");
+        assertUnchanged("Example2");
     }
 
     @Test

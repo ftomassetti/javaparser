@@ -47,6 +47,9 @@ public class LexicalPreservingPrinter {
     }
 
     public void registerText(Node node, String documentCode) {
+        if (node instanceof CompilationUnit) {
+            node.setRange(node.getRange().withBegin(Position.HOME));
+        }
         String text = getRangeFromDocument(node.getRange(), documentCode);
         NodeText nodeText = putPlaceholders(documentCode, node.getRange(), text, new ArrayList<>(node.getChildNodes()));
         textForNodes.put(node, nodeText);
@@ -349,6 +352,9 @@ public class LexicalPreservingPrinter {
                     for (Modifier addedModifier : newEnumSet.stream().filter(e -> !oldEnumSet.contains(e)).collect(Collectors.toList())) {
                         lpp.getOrCreateNodeText(observedNode).addAtBeginningString(addedModifier.name().toLowerCase());
                     }
+                    return;
+                }
+                if (property == ObservableProperty.RANGE) {
                     return;
                 }
                 throw new UnsupportedOperationException(String.format("Property %s. OLD %s (%s) NEW %s (%s)", property, oldValue,
