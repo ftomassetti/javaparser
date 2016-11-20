@@ -5,6 +5,8 @@ import com.github.javaparser.ParseStart;
 import com.github.javaparser.StreamProvider;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.expr.Expression;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -70,6 +72,13 @@ public class TransformationsTest {
         CompilationUnit cu = parseExample("Example2");
         cu.getClassByName("A").getFieldByName("a").getVariable(0).setInit("10");
         assertTransformed("Example2", cu);
+    }
+
+    @Test
+    public void example3() throws IOException {
+        CompilationUnit cu = parseExample("Example3");
+        cu.getClassByName("A").getFieldByName("a").getVariable(0).setInit((Expression) null);
+        assertTransformed("Example3", cu);
     }
 
 }

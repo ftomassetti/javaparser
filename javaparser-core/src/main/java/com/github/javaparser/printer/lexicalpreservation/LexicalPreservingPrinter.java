@@ -348,6 +348,14 @@ public class LexicalPreservingPrinter {
                     }
                     throw new UnsupportedOperationException("Set property " + property);
                 }
+                if (oldValue instanceof Node && newValue == null) {
+                    if (property == ObservableProperty.INIT) {
+                        lpp.getOrCreateNodeText(observedNode).removeTextBetween("=", (Node)oldValue);
+                        lpp.getOrCreateNodeText(observedNode).removeElementsForChild((Node)oldValue);
+                        return;
+                    }
+                    throw new UnsupportedOperationException("Unset property " + property);
+                }
                 if ((oldValue instanceof EnumSet) && ObservableProperty.MODIFIERS == property){
                     EnumSet<Modifier> oldEnumSet = (EnumSet<Modifier>)oldValue;
                     EnumSet<Modifier> newEnumSet = (EnumSet<Modifier>)newValue;
