@@ -57,7 +57,7 @@ a {
   color: #fff;
   text-align: center;
   background-color: #159957;
-  background-image: linear-gradient(120deg, #155799, #159957); }
+  background-image: linear-gradient(120deg, #34302F, #000000); }
 
 @media screen and (min-width: 64em) {
   .page-header {
@@ -73,7 +73,9 @@ a {
 
 .project-name {
   margin-top: 0;
-  margin-bottom: 0.1rem; }
+  margin-bottom: 0.1rem; 
+  /*background-color: black;*/
+}
 
 @media screen and (min-width: 64em) {
   .project-name {
@@ -243,3 +245,15 @@ a {
 @media screen and (max-width: 42em) {
   .site-footer {
     font-size: 0.9rem; } }
+
+.title-font {
+  font-family: 'Courgette', cursive;
+  display: inline;
+  margin-left:10px;
+}
+
+img.logo {
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+}
