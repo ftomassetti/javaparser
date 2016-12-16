@@ -7,9 +7,9 @@ import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.observing.AstObserver;
-import com.github.javaparser.ast.observing.ObservableProperty;
-import com.github.javaparser.ast.observing.PropagatingAstObserver;
+import com.github.javaparser.ast.observer.AstObserver;
+import com.github.javaparser.ast.observer.ObservableProperty;
+import com.github.javaparser.ast.observer.PropagatingAstObserver;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -47,11 +47,8 @@ public class LexicalPreservingPrinter {
     }
 
     public void registerText(Node node, String documentCode) {
-        if (node instanceof CompilationUnit) {
-            node.setRange(node.getRange().withBegin(Position.HOME));
-        }
-        String text = getRangeFromDocument(node.getRange(), documentCode);
-        NodeText nodeText = putPlaceholders(documentCode, node.getRange(), text, new ArrayList<>(node.getChildNodes()));
+        String text = getRangeFromDocument(node.getRange().get(), documentCode);
+        NodeText nodeText = putPlaceholders(documentCode, node.getRange().get(), text, new ArrayList<>(node.getChildNodes()));
         textForNodes.put(node, nodeText);
     }
 
@@ -61,21 +58,21 @@ public class LexicalPreservingPrinter {
 
     private NodeText putPlaceholders(String documentCode, Range range, String text, List<Node> children) {
 
-        children.sort((o1, o2) -> o1.getRange().begin.compareTo(o2.getRange().begin));
+        children.sort((o1, o2) -> o1.getRange().get().begin.compareTo(o2.getRange().get().begin));
 
         NodeText nodeText = new NodeText(this);
 
         int start = findIndex(documentCode, range.begin);
         int caret = start;
         for (Node child : children) {
-            int childStartIndex = findIndex(documentCode, child.getBegin());
+            int childStartIndex = findIndex(documentCode, child.getBegin().get());
             int fromStart = childStartIndex - caret;
             if (fromStart > 0) {
                 nodeText.addElement(new StringNodeTextElement(text.substring(caret - start, childStartIndex - start)));
                 caret += fromStart;
             }
             nodeText.addElement(new ChildNodeTextElement(this, child));
-            int lengthOfOriginalCode = getRangeFromDocument(child.getRange(), documentCode).length();
+            int lengthOfOriginalCode = getRangeFromDocument(child.getRange().get(), documentCode).length();
             caret += lengthOfOriginalCode;
         }
         // last string
@@ -88,9 +85,6 @@ public class LexicalPreservingPrinter {
     }
 
     private String getRangeFromDocument(Range range, String documentCode) {
-        if (range.equals(Range.UNKNOWN)) {
-            throw new IllegalArgumentException();
-        }
         return documentCode.substring(findIndex(documentCode, range.begin), findIndex(documentCode, range.end) + 1);
     }
 
@@ -207,7 +201,7 @@ public class LexicalPreservingPrinter {
 
     private void printModifiers(NodeText nodeText, final EnumSet<Modifier> modifiers) {
         if (modifiers.size() > 0) {
-            nodeText.addElement(new StringNodeTextElement(modifiers.stream().map(Modifier::getLib).collect(Collectors.joining(" ")) + " "));
+            nodeText.addElement(new StringNodeTextElement(modifiers.stream().map(Modifier::name).collect(Collectors.joining(" ")) + " "));
         }
     }
 
@@ -218,7 +212,7 @@ public class LexicalPreservingPrinter {
             nodeText.addList(fieldDeclaration.getAnnotations(), "\n", true);
             printModifiers(nodeText, fieldDeclaration.getModifiers());
             nodeText.addChild(fieldDeclaration.getElementType());
-            nodeText.addList(fieldDeclaration.getArrayBracketPairsAfterElementType(), "", true);
+            //nodeText.addList(fieldDeclaration.getAr(), "", true);
             //nodeText.addString(" ");
             nodeText.addList(fieldDeclaration.getVariables(), ", ", false);
             nodeText.addString(";\n");
@@ -341,7 +335,7 @@ public class LexicalPreservingPrinter {
                     return;
                 }
                 if (oldValue == null && newValue instanceof Node) {
-                    if (property == ObservableProperty.INIT) {
+                    if (property == ObservableProperty.INITIALIZER) {
                         lpp.getOrCreateNodeText(observedNode).addString(" = ");
                         lpp.getOrCreateNodeText(observedNode).addChild((Node)newValue);
                         return;
@@ -349,7 +343,7 @@ public class LexicalPreservingPrinter {
                     throw new UnsupportedOperationException("Set property " + property);
                 }
                 if (oldValue instanceof Node && newValue == null) {
-                    if (property == ObservableProperty.INIT) {
+                    if (property == ObservableProperty.INITIALIZER) {
                         lpp.getOrCreateNodeText(observedNode).removeTextBetween("=", (Node)oldValue);
                         lpp.getOrCreateNodeText(observedNode).removeElementsForChild((Node)oldValue);
                         return;

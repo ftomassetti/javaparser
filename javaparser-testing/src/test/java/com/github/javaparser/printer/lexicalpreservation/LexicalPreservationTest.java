@@ -161,9 +161,9 @@ public class LexicalPreservationTest {
         LexicalPreservingPrinter lpp = setup(cu, code);
 
         Statement s = new ExpressionStmt(new BinaryExpr(
-                new IntegerLiteralExpr("10"), new IntegerLiteralExpr("2"), BinaryExpr.Operator.plus
+                new IntegerLiteralExpr("10"), new IntegerLiteralExpr("2"), BinaryExpr.Operator.PLUS
         ));
-        NodeList<Statement> stmts = cu.getClassByName("A").getMethodsByName("foo").get(0).getBody().get().getStmts();
+        NodeList<Statement> stmts = cu.getClassByName("A").getMethodsByName("foo").get(0).getBody().get().getStatements();
         stmts.add(s);
         MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
         assertEquals("void foo(char p1, int p2) {\n" +

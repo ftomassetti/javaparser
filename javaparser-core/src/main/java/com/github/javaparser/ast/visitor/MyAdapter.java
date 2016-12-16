@@ -8,11 +8,6 @@ import com.github.javaparser.ast.imports.*;
 public class MyAdapter extends VoidVisitorAdapter {
 
     @Override
-    public void visit(EmptyImportDeclaration n, Object arg) {
-        super.visit(n, arg);
-    }
-
-    @Override
     public void visit(SingleStaticImportDeclaration n, Object arg) {
         super.visit(n, arg);
     }
