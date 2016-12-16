@@ -38,6 +38,7 @@ public class TransformationsTest {
         String code = read(is);
         CompilationUnit cu = JavaParser.parse(code);
         lpp = setup(cu, code);
+        assertEquals(code, cu.toString());
         assertEquals(code, lpp.print(cu));
     }
 
