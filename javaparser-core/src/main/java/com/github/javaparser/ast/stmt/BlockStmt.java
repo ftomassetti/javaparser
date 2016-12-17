@@ -80,9 +80,4 @@ public final class BlockStmt extends Statement implements NodeWithStatements<Blo
         return Arrays.asList(statements);
     }
 
-    @Override
-    public List<NodeList<?>> getNodeLists() {
-        return Arrays.asList(statements);
-    }
-
 }
