@@ -143,53 +143,57 @@ public class LexicalPreservationTest {
         m.addParameter("float", "p2");
         assertEquals("void foo(char p1, float p2) {}", lpp.print(m));
     }
-//
-//    @Test
-//    public void printASimpleMethodRemovingAParameterToAMethodWithOneParameter() {
-//        String code = "class A { void foo(float p1) {} }";
-//        CompilationUnit cu = JavaParser.parse(code);
-//        LexicalPreservingPrinter lpp = setup(cu, code);
-//
-//        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
-//        m.getParameters().remove(0);
-//        assertEquals("void foo() {}", lpp.print(m));
-//    }
-//
-//    @Test
-//    public void printASimpleMethodRemovingParameterOneFromMethodWithTwoParameters() {
-//        String code = "class A { void foo(char p1, int p2) {} }";
-//        CompilationUnit cu = JavaParser.parse(code);
-//        LexicalPreservingPrinter lpp = setup(cu, code);
-//
-//        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
-//        m.getParameters().remove(0);
-//        assertEquals("void foo(int p2) {}", lpp.print(m));
-//    }
-//
-//    @Test
-//    public void printASimpleMethodRemovingParameterTwoFromMethodWithTwoParameters() {
-//        String code = "class A { void foo(char p1, int p2) {} }";
-//        CompilationUnit cu = JavaParser.parse(code);
-//        LexicalPreservingPrinter lpp = setup(cu, code);
-//
-//        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
-//        m.getParameters().remove(1);
-//        assertEquals("void foo(char p1) {}", lpp.print(m));
-//    }
-//
-//    @Test
-//    public void printASimpleMethodAddingAStatement() {
-//        String code = "class A { void foo(char p1, int p2) {} }";
-//        CompilationUnit cu = JavaParser.parse(code);
-//        LexicalPreservingPrinter lpp = setup(cu, code);
-//
-//        Statement s = new ExpressionStmt(new BinaryExpr(
-//                new IntegerLiteralExpr("10"), new IntegerLiteralExpr("2"), BinaryExpr.Operator.PLUS
-//        ));
-//        NodeList<Statement> stmts = cu.getClassByName("A").getMethodsByName("foo").get(0).getBody().get().getStatements();
-//        stmts.add(s);
-//        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
-//        assertEquals("void foo(char p1, int p2) {\n" +
-//                "    10 + 2;}", lpp.print(m));
-//    }
+
+    @Test
+    public void printASimpleMethodRemovingAParameterToAMethodWithOneParameter() {
+        String code = "class A { void foo(float p1) {} }";
+        ParseResult<CompilationUnit> parseResult = new JavaParser().parse(ParseStart.COMPILATION_UNIT, Providers.provider(code));
+        LexicalPreservingPrinter lpp = setup(parseResult);
+        CompilationUnit cu = parseResult.getResult().get();
+
+        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
+        m.getParameters().remove(0);
+        assertEquals("void foo() {}", lpp.print(m));
+    }
+
+    @Test
+    public void printASimpleMethodRemovingParameterOneFromMethodWithTwoParameters() {
+        String code = "class A { void foo(char p1, int p2) {} }";
+        ParseResult<CompilationUnit> parseResult = new JavaParser().parse(ParseStart.COMPILATION_UNIT, Providers.provider(code));
+        LexicalPreservingPrinter lpp = setup(parseResult);
+        CompilationUnit cu = parseResult.getResult().get();
+
+        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
+        m.getParameters().remove(0);
+        assertEquals("void foo(int p2) {}", lpp.print(m));
+    }
+
+    @Test
+    public void printASimpleMethodRemovingParameterTwoFromMethodWithTwoParameters() {
+        String code = "class A { void foo(char p1, int p2) {} }";
+        ParseResult<CompilationUnit> parseResult = new JavaParser().parse(ParseStart.COMPILATION_UNIT, Providers.provider(code));
+        LexicalPreservingPrinter lpp = setup(parseResult);
+        CompilationUnit cu = parseResult.getResult().get();
+
+        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
+        m.getParameters().remove(1);
+        assertEquals("void foo(char p1) {}", lpp.print(m));
+    }
+
+    @Test
+    public void printASimpleMethodAddingAStatement() {
+        String code = "class A { void foo(char p1, int p2) {} }";
+        ParseResult<CompilationUnit> parseResult = new JavaParser().parse(ParseStart.COMPILATION_UNIT, Providers.provider(code));
+        LexicalPreservingPrinter lpp = setup(parseResult);
+        CompilationUnit cu = parseResult.getResult().get();
+
+        Statement s = new ExpressionStmt(new BinaryExpr(
+                new IntegerLiteralExpr("10"), new IntegerLiteralExpr("2"), BinaryExpr.Operator.PLUS
+        ));
+        NodeList<Statement> stmts = cu.getClassByName("A").getMethodsByName("foo").get(0).getBody().get().getStatements();
+        stmts.add(s);
+        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
+        assertEquals("void foo(char p1, int p2) {\n" +
+                "    10 + 2;}", lpp.print(m));
+    }
 }

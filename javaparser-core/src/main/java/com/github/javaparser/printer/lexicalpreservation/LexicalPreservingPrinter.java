@@ -99,7 +99,7 @@ public class LexicalPreservingPrinter {
             Inserter inserter = getPositionFinder(parent.getClass(), nodeListName);
             inserter.insert(parent, /*separatorsAtStartList(nodeList),*/ child);
         } else {
-            Inserter inserter = insertAfterChild(nodeList.get(index - 1), ", ");
+            Inserter inserter = insertAfterChild(nodeList.get(index - 1), Separator.COMMA, Separator.SPACE);
             inserter.insert(parent, child);
         }
     }
@@ -233,32 +233,38 @@ public class LexicalPreservingPrinter {
         }
     }
 
-    private Inserter insertAfterChild(Method method, Separator separator) {
+    private Inserter insertAfterChild(Method method, Separator... separators) {
         return (parent, child) -> {
             try {
                 NodeText nodeText = getOrCreateNodeText(parent);
                 Node childToFollow = (Node) method.invoke(parent);
                 if (childToFollow == null) {
-                    nodeText.addElement(0, new ChildTextElement(LexicalPreservingPrinter.this, child));
-                    return;
+                    throw new IllegalArgumentException();
                 }
+                insertAfterChild(childToFollow, separators).insert(parent, child);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    private Inserter insertAfterChild(Node childToFollow, Separator... separators) {
+        return (parent, child) -> {
+                NodeText nodeText = getOrCreateNodeText(parent);
                 for (int i=0; i< nodeText.numberOfElements();i++) {
                     TextElement element = nodeText.getTextElement(i);
                     if (element instanceof ChildTextElement) {
                         ChildTextElement childElement = (ChildTextElement)element;
                         if (childElement.getChild() == childToFollow) {
-                            nodeText.addToken(separator.getTokenKind(), separator.getText());
-                            nodeText.addElement(i+2, new ChildTextElement(LexicalPreservingPrinter.this, child));
+                            for (Separator s : separators) {
+                                nodeText.addToken(++i, s);
+                            }
+                            nodeText.addElement(++i, new ChildTextElement(LexicalPreservingPrinter.this, child));
                             return;
                         }
                     }
                 }
                 throw new IllegalArgumentException();
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            } catch (InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
         };
     }
 
