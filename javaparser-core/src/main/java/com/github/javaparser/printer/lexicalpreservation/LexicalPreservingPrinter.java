@@ -58,26 +58,25 @@ public class LexicalPreservingPrinter {
     }
 
     private void updateTextBecauseOfRemovedChild(NodeList nodeList, int index, Optional<Node> parentNode, Node child) {
-        throw new UnsupportedOperationException();
-//        if (!parentNode.isPresent()) {
-//            return;
-//        }
-//        Node parent = parentNode.get();
-//        String key = parent.getClass().getSimpleName() + ":" + findNodeListName(nodeList);
-//
-//        switch (key) {
-//            case "MethodDeclaration:Parameters":
-//                if (index == 0 && nodeList.size() > 1) {
-//                    // we should remove all the text between the child and the comma
-//                    textForNodes.get(parent).removeTextBetween(child, ",", true);
-//                }
-//                if (index != 0) {
-//                    // we should remove all the text between the child and the comma
-//                    textForNodes.get(parent).removeTextBetween(",", child);
-//                }
-//            default:
-//                textForNodes.get(parent).removeElementsForChild(child);
-//        }
+        if (!parentNode.isPresent()) {
+            return;
+        }
+        Node parent = parentNode.get();
+        String key = parent.getClass().getSimpleName() + ":" + findNodeListName(nodeList);
+
+        switch (key) {
+            case "MethodDeclaration:Parameters":
+                if (index == 0 && nodeList.size() > 1) {
+                    // we should remove all the text between the child and the comma
+                    textForNodes.get(parent).removeTextBetween(child, ASTParserConstants.COMMA, true);
+                }
+                if (index != 0) {
+                    // we should remove all the text between the child and the comma
+                    textForNodes.get(parent).removeTextBetween(ASTParserConstants.COMMA, child);
+                }
+            default:
+                textForNodes.get(parent).removeElementsForChild(child);
+        }
     }
 
     private Separator[] separatorsAtStartList(NodeList nodeList) {
@@ -161,7 +160,7 @@ public class LexicalPreservingPrinter {
             FieldDeclaration fieldDeclaration = (FieldDeclaration)node;
             nodeText.addList(fieldDeclaration.getAnnotations(), true, Separator.NEWLINE);
             printModifiers(nodeText, fieldDeclaration.getModifiers());
-            nodeText.addChild(fieldDeclaration.getElementType());
+            nodeText.addChild(fieldDeclaration.getCommonType());
             //nodeText.addList(fieldDeclaration.getAr(), "", true);
             //nodeText.addString(" ");
             nodeText.addList(fieldDeclaration.getVariables(), false, Separator.COMMA, Separator.SPACE);
@@ -172,7 +171,8 @@ public class LexicalPreservingPrinter {
         throw new UnsupportedOperationException(node.getClass().getCanonicalName());
     }
 
-    private NodeText getOrCreateNodeText(Node node) {
+    // Visible for testing
+    NodeText getOrCreateNodeText(Node node) {
         if (!textForNodes.containsKey(node)) {
             textForNodes.put(node, prettyPrintingTextNode(node));
         }

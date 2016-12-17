@@ -4,6 +4,7 @@ import com.github.javaparser.*;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.IntegerLiteralExpr;
@@ -43,6 +44,22 @@ public class LexicalPreservationTest {
         assertEquals(ASTParserConstants.EOF, ((TokenTextElement)lpp.getTextForNode(classA).getTextElement(6)).getTokenKind());
     }
 
+    /*@Test
+    public void checkNodeTextCreatedForField() {
+        String code = "class A {int i;}";
+        ParseResult<CompilationUnit> parseResult = new JavaParser().parse(ParseStart.COMPILATION_UNIT, Providers.provider(code));
+        LexicalPreservingPrinter lpp = new LexicalPreservingPrinter();
+        CompilationUnit cu = parseResult.getResult().get();
+
+        ClassOrInterfaceDeclaration classA = cu.getClassByName("A");
+        FieldDeclaration fd = classA.getFieldByName("i");
+        NodeText nodeText = lpp.getOrCreateNodeText(fd);
+        assertEquals(3, nodeText.numberOfElements());
+        assertEquals(" ", nodeText.getTextElement(0).expand());
+        assertEquals("", nodeText.getTextElement(1).expand());
+        assertEquals("", nodeText.getTextElement(2).expand());
+    }*/
+
     @Test
     public void printASuperSimpleCUWithoutChanges() {
         String code = "class A {}";
@@ -64,63 +81,68 @@ public class LexicalPreservationTest {
         classA.addField("int", "myField");
         assertEquals("class A {\n    int myField;\n}", lpp.print(classA));
     }
-//
-//    @Test
-//    public void printASuperSimpleClassWithoutChanges() {
-//        String code = "class A {}";
-//        CompilationUnit cu = JavaParser.parse(code);
-//        LexicalPreservingPrinter lpp = setup(cu, code);
-//
-//        assertEquals(code, lpp.print(cu.getClassByName("A")));
-//    }
-//
-//    @Test
-//    public void printASimpleCUWithoutChanges() {
-//        String code = "class /*a comment*/ A {\t\t\n int f;\n\n\n         void foo(int p  ) { return  'z'  \t; }}";
-//        CompilationUnit cu = JavaParser.parse(code);
-//        LexicalPreservingPrinter lpp = setup(cu, code);
-//
-//        assertEquals(code, lpp.print(cu));
-//        assertEquals(code, lpp.print(cu.getClassByName("A")));
-//        assertEquals("void foo(int p  ) { return  'z'  \t; }", lpp.print(cu.getClassByName("A").getMethodsByName("foo").get(0)));
-//    }
-//
-//    @Test
-//    public void printASimpleClassRemovingAField() {
-//        String code = "class /*a comment*/ A {\t\t\n int f;\n\n\n         void foo(int p  ) { return  'z'  \t; }}";
-//        CompilationUnit cu = JavaParser.parse(code);
-//        LexicalPreservingPrinter lpp = setup(cu, code);
-//
-//        ClassOrInterfaceDeclaration c = cu.getClassByName("A");
-//        c.getMembers().remove(0);
-//        assertEquals("class /*a comment*/ A {\t\t\n" +
-//                " \n" +
-//                "\n" +
-//                "\n" +
-//                "         void foo(int p  ) { return  'z'  \t; }}", lpp.print(c));
-//    }
-//
-//    @Test
-//    public void printASimpleMethodAddingAParameterToAMethodWithZeroParameters() {
-//        String code = "class A { void foo() {} }";
-//        CompilationUnit cu = JavaParser.parse(code);
-//        LexicalPreservingPrinter lpp = setup(cu, code);
-//
-//        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
-//        m.addParameter("float", "p1");
-//        assertEquals("void foo(float p1) {}", lpp.print(m));
-//    }
-//
-//    @Test
-//    public void printASimpleMethodAddingAParameterToAMethodWithOneParameter() {
-//        String code = "class A { void foo(char p1) {} }";
-//        CompilationUnit cu = JavaParser.parse(code);
-//        LexicalPreservingPrinter lpp = setup(cu, code);
-//
-//        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
-//        m.addParameter("float", "p2");
-//        assertEquals("void foo(char p1, float p2) {}", lpp.print(m));
-//    }
+
+    @Test
+    public void printASuperSimpleClassWithoutChanges() {
+        String code = "class A {}";
+        ParseResult<CompilationUnit> parseResult = new JavaParser().parse(ParseStart.COMPILATION_UNIT, Providers.provider(code));
+        LexicalPreservingPrinter lpp = setup(parseResult);
+        CompilationUnit cu = parseResult.getResult().get();
+
+        assertEquals(code, lpp.print(cu.getClassByName("A")));
+    }
+
+    @Test
+    public void printASimpleCUWithoutChanges() {
+        String code = "class /*a comment*/ A {\t\t\n int f;\n\n\n         void foo(int p  ) { return  'z'  \t; }}";
+        ParseResult<CompilationUnit> parseResult = new JavaParser().parse(ParseStart.COMPILATION_UNIT, Providers.provider(code));
+        LexicalPreservingPrinter lpp = setup(parseResult);
+        CompilationUnit cu = parseResult.getResult().get();
+
+        assertEquals(code, lpp.print(cu));
+        assertEquals(code, lpp.print(cu.getClassByName("A")));
+        assertEquals("void foo(int p  ) { return  'z'  \t; }", lpp.print(cu.getClassByName("A").getMethodsByName("foo").get(0)));
+    }
+
+    @Test
+    public void printASimpleClassRemovingAField() {
+        String code = "class /*a comment*/ A {\t\t\n int f;\n\n\n         void foo(int p  ) { return  'z'  \t; }}";
+        ParseResult<CompilationUnit> parseResult = new JavaParser().parse(ParseStart.COMPILATION_UNIT, Providers.provider(code));
+        LexicalPreservingPrinter lpp = setup(parseResult);
+        CompilationUnit cu = parseResult.getResult().get();
+
+        ClassOrInterfaceDeclaration c = cu.getClassByName("A");
+        c.getMembers().remove(0);
+        assertEquals("class /*a comment*/ A {\t\t\n" +
+                " \n" +
+                "\n" +
+                "\n" +
+                "         void foo(int p  ) { return  'z'  \t; }}", lpp.print(c));
+    }
+
+    @Test
+    public void printASimpleMethodAddingAParameterToAMethodWithZeroParameters() {
+        String code = "class A { void foo() {} }";
+        ParseResult<CompilationUnit> parseResult = new JavaParser().parse(ParseStart.COMPILATION_UNIT, Providers.provider(code));
+        LexicalPreservingPrinter lpp = setup(parseResult);
+        CompilationUnit cu = parseResult.getResult().get();
+
+        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
+        m.addParameter("float", "p1");
+        assertEquals("void foo(float p1) {}", lpp.print(m));
+    }
+
+    @Test
+    public void printASimpleMethodAddingAParameterToAMethodWithOneParameter() {
+        String code = "class A { void foo(char p1) {} }";
+        ParseResult<CompilationUnit> parseResult = new JavaParser().parse(ParseStart.COMPILATION_UNIT, Providers.provider(code));
+        LexicalPreservingPrinter lpp = setup(parseResult);
+        CompilationUnit cu = parseResult.getResult().get();
+
+        MethodDeclaration m = cu.getClassByName("A").getMethodsByName("foo").get(0);
+        m.addParameter("float", "p2");
+        assertEquals("void foo(char p1, float p2) {}", lpp.print(m));
+    }
 //
 //    @Test
 //    public void printASimpleMethodRemovingAParameterToAMethodWithOneParameter() {

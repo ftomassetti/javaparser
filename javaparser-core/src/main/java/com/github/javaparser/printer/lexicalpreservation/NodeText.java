@@ -40,9 +40,9 @@ class NodeText {
         this.elements.add(index, nodeTextElement);
     }
 
-//    public void removeElementsForChild(Node child) {
-//        elements.removeIf(e -> e instanceof ChildNodeTextElement && ((ChildNodeTextElement)e).getChild() == child);
-//    }
+    public void removeElementsForChild(Node child) {
+        elements.removeIf(e -> e instanceof ChildTextElement && ((ChildTextElement)e).getChild() == child);
+    }
 
     // Visible for testing
     int numberOfElements() {
@@ -109,35 +109,34 @@ class NodeText {
 //        elements.add(index, new StringNodeTextElement(string));
 //    }
 //
-//    public void removeTextBetween(String substring, Node child) {
-//        for (int i=0; i<elements.size(); i++) {
-//            NodeTextElement element = elements.get(i);
-//            if (element instanceof ChildNodeTextElement) {
-//                ChildNodeTextElement childNodeTextElement = (ChildNodeTextElement)element;
-//                if (childNodeTextElement.getChild() == child) {
-//                    if (i==0 || !(elements.get(i - 1) instanceof StringNodeTextElement)) {
-//                        throw new IllegalArgumentException();
-//                    }
-//                    ((StringNodeTextElement)elements.get(i - 1)).removeFromDelimiterToEnd(substring);
-//                }
-//            }
-//        }
-//    }
-//
-//    public void removeTextBetween(Node child, String substring, boolean removeSpaceImmediatelyAfter) {
-//        for (int i=0; i<elements.size(); i++) {
-//            NodeTextElement element = elements.get(i);
-//            if (element instanceof ChildNodeTextElement) {
-//                ChildNodeTextElement childNodeTextElement = (ChildNodeTextElement)element;
-//                if (childNodeTextElement.getChild() == child) {
-//                    if (i==(elements.size() - 1) || !(elements.get(i + 1) instanceof StringNodeTextElement)) {
-//                        throw new IllegalArgumentException();
-//                    }
-//                    ((StringNodeTextElement)elements.get(i + 1)).removeUntilDelimiter(substring, removeSpaceImmediatelyAfter);
-//                }
-//            }
-//        }
-//    }
+    public void removeTextBetween(int tokenKind, Node child) {
+        int lastTokenFound = -1;
+        for (int i=0; i<elements.size(); i++) {
+            TextElement element = elements.get(i);
+            if (element instanceof ChildTextElement) {
+                ChildTextElement childNodeTextElement = (ChildTextElement)element;
+                if (childNodeTextElement.getChild() == child) {
+                    if (lastTokenFound == -1) {
+                        throw new IllegalArgumentException();
+                    }
+                    while (i > lastTokenFound) {
+                        elements.remove(--i);
+                    }
+                    return;
+                }
+            } else if (element instanceof TokenTextElement){
+                TokenTextElement tokenTextElement = (TokenTextElement)element;
+                if (tokenTextElement.getTokenKind() == tokenKind) {
+                    lastTokenFound = i;
+                }
+            }
+        }
+    }
+
+    public void removeTextBetween(Node child, int tokenKind, boolean removeSpaceImmediatelyAfter) {
+       // FIXME
+       removeTextBetween(tokenKind, child);
+    }
 //
 //    public void removeString(String string) {
 //        for (int i=0; i<elements.size(); i++) {
