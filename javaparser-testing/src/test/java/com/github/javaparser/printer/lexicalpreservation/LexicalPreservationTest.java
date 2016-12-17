@@ -41,28 +41,29 @@ public class LexicalPreservationTest {
         assertEquals("", lpp.getTextForNode(classA).getTextElement(6).expand());
         assertEquals(true, lpp.getTextForNode(classA).getTextElement(6) instanceof TokenTextElement);
         assertEquals(ASTParserConstants.EOF, ((TokenTextElement)lpp.getTextForNode(classA).getTextElement(6)).getTokenKind());
-        
     }
-//
-//    @Test
-//    public void printASuperSimpleCUWithoutChanges() {
-//        String code = "class A {}";
-//        CompilationUnit cu = JavaParser.parse(code);
-//        LexicalPreservingPrinter lpp = setup(cu, code);
-//
-//        assertEquals(code, lpp.print(cu));
-//    }
-//
-//    @Test
-//    public void printASuperSimpleClassWithAFieldAdded() {
-//        String code = "class A {}";
-//        CompilationUnit cu = JavaParser.parse(code);
-//        LexicalPreservingPrinter lpp = setup(cu, code);
-//
-//        ClassOrInterfaceDeclaration classA = cu.getClassByName("A");
-//        classA.addField("int", "myField");
-//        assertEquals("class A {\n    int myField;\n}", lpp.print(classA));
-//    }
+
+    @Test
+    public void printASuperSimpleCUWithoutChanges() {
+        String code = "class A {}";
+        ParseResult<CompilationUnit> parseResult = new JavaParser().parse(ParseStart.COMPILATION_UNIT, Providers.provider(code));
+        LexicalPreservingPrinter lpp = setup(parseResult);
+        CompilationUnit cu = parseResult.getResult().get();
+
+        assertEquals(code, lpp.print(cu));
+    }
+
+    @Test
+    public void printASuperSimpleClassWithAFieldAdded() {
+        String code = "class A {}";
+        ParseResult<CompilationUnit> parseResult = new JavaParser().parse(ParseStart.COMPILATION_UNIT, Providers.provider(code));
+        LexicalPreservingPrinter lpp = setup(parseResult);
+        CompilationUnit cu = parseResult.getResult().get();
+
+        ClassOrInterfaceDeclaration classA = cu.getClassByName("A");
+        classA.addField("int", "myField");
+        assertEquals("class A {\n    int myField;\n}", lpp.print(classA));
+    }
 //
 //    @Test
 //    public void printASuperSimpleClassWithoutChanges() {
