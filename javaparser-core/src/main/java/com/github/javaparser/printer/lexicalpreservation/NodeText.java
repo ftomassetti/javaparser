@@ -45,10 +45,10 @@ class NodeText {
         return elements.size();
     }
 
-//    // Visible for testing
-//    NodeTextElement getTextElement(int index) {
-//        return elements.get(index);
-//    }
+    // Visible for testing
+    TextElement getTextElement(int index) {
+        return elements.get(index);
+    }
 //
 //    public void replaceElement(int index, NodeTextElement nodeTextElement) {
 //        this.elements.remove(index);

@@ -1,9 +1,6 @@
 package com.github.javaparser.printer.lexicalpreservation;
 
-import com.github.javaparser.JavaParser;
-import com.github.javaparser.ParseResult;
-import com.github.javaparser.ParseStart;
-import com.github.javaparser.Providers;
+import com.github.javaparser.*;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -23,28 +20,28 @@ public class LexicalPreservationTest {
     @Test
     public void checkNodeTextCreatedForSimplestClass() {
         String code = "class A {}";
-        ParseResult parseResult = new JavaParser().parse(ParseStart.COMPILATION_UNIT, Providers.provider(code));
+        ParseResult<CompilationUnit> parseResult = new JavaParser().parse(ParseStart.COMPILATION_UNIT, Providers.provider(code));
         LexicalPreservingPrinter lpp = setup(parseResult);
-//
-//        // CU
-//        assertEquals(1, lpp.getTextForNode(cu).numberOfElements());
-//        assertEquals(true, lpp.getTextForNode(cu).getTextElement(0) instanceof ChildNodeTextElement);
-//        assertEquals(cu.getClassByName("A"), ((ChildNodeTextElement)lpp.getTextForNode(cu).getTextElement(0)).getChild());
-//
-//        // Class
-//        ClassOrInterfaceDeclaration classA = cu.getClassByName("A");
-//        assertEquals(3, lpp.getTextForNode(classA).numberOfElements());
-//        assertEquals(true, lpp.getTextForNode(classA).getTextElement(0) instanceof StringNodeTextElement);
-//        assertEquals("class ", ((StringNodeTextElement)lpp.getTextForNode(classA).getTextElement(0)).getText());
-//        assertEquals(true, lpp.getTextForNode(classA).getTextElement(1) instanceof ChildNodeTextElement);
-//        assertEquals(classA.getName(), ((ChildNodeTextElement)lpp.getTextForNode(classA).getTextElement(1)).getChild());
-//        assertEquals(" {}", ((StringNodeTextElement)lpp.getTextForNode(classA).getTextElement(2)).getText());
-//
-//        // SimpleName
-//        SimpleName aName = classA.getName();
-//        assertEquals(1, lpp.getTextForNode(aName).numberOfElements());
-//        assertEquals(true, lpp.getTextForNode(aName).getTextElement(0) instanceof StringNodeTextElement);
-//        assertEquals("A", ((StringNodeTextElement)lpp.getTextForNode(aName).getTextElement(0)).getText());
+        CompilationUnit cu = parseResult.getResult().get();
+
+        // CU
+        assertEquals(1, lpp.getTextForNode(cu).numberOfElements());
+        assertEquals(true, lpp.getTextForNode(cu).getTextElement(0) instanceof ChildTextElement);
+        assertEquals(cu.getClassByName("A"), ((ChildTextElement)lpp.getTextForNode(cu).getTextElement(0)).getChild());
+
+        // Class
+        ClassOrInterfaceDeclaration classA = cu.getClassByName("A");
+        assertEquals(7, lpp.getTextForNode(classA).numberOfElements());
+        assertEquals("class", lpp.getTextForNode(classA).getTextElement(0).expand());
+        assertEquals(" ", lpp.getTextForNode(classA).getTextElement(1).expand());
+        assertEquals("A", lpp.getTextForNode(classA).getTextElement(2).expand());
+        assertEquals(" ", lpp.getTextForNode(classA).getTextElement(3).expand());
+        assertEquals("{", lpp.getTextForNode(classA).getTextElement(4).expand());
+        assertEquals("}", lpp.getTextForNode(classA).getTextElement(5).expand());
+        assertEquals("", lpp.getTextForNode(classA).getTextElement(6).expand());
+        assertEquals(true, lpp.getTextForNode(classA).getTextElement(6) instanceof TokenTextElement);
+        assertEquals(ASTParserConstants.EOF, ((TokenTextElement)lpp.getTextForNode(classA).getTextElement(6)).getTokenKind());
+        
     }
 //
 //    @Test

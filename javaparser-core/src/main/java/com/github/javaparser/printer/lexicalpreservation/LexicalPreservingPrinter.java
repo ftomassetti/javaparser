@@ -48,7 +48,7 @@ public class LexicalPreservingPrinter {
         }
     }
 
-    private NodeText getTextForNode(Node node) {
+    public NodeText getTextForNode(Node node) {
         return textForNodes.get(node);
     }
 

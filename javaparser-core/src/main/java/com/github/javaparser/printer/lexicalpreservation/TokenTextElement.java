@@ -15,6 +15,15 @@ class TokenTextElement extends TextElement {
         return token.getText();
     }
 
+    // Visible for testing
+    String getText() {
+        return token.getText();
+    }
+
+    public int getTokenKind() {
+        return token.getKind();
+    }
+
 //    public void removeFromDelimiterToEnd(String substring) {
 //        int index = text.lastIndexOf(substring);
 //        if (index == -1) {
