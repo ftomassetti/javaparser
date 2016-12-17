@@ -22,6 +22,9 @@ public class LexicalPreservingPrinter {
 
     private interface Inserter {
         void insert(Node parent, Node child);
+        /*default void insert(Node parent, Node child) {
+            insert(parent, new Separator[]{}, child);
+        }*/
     }
 
     private Map<Node, NodeText> textForNodes = new IdentityHashMap<>();
@@ -77,6 +80,15 @@ public class LexicalPreservingPrinter {
 //        }
     }
 
+    private Separator[] separatorsAtStartList(NodeList nodeList) {
+        switch (findNodeListName(nodeList)) {
+            case "Members":
+                return new Separator[]{Separator.NEWLINE, Separator.TAB};
+            default:
+                return new Separator[]{};
+        }
+    }
+
     private void updateTextBecauseOfAddedChild(NodeList nodeList, int index, Optional<Node> parentNode, Node child) {
         if (!parentNode.isPresent()) {
             return;
@@ -86,7 +98,7 @@ public class LexicalPreservingPrinter {
 
         if (index == 0) {
             Inserter inserter = getPositionFinder(parent.getClass(), nodeListName);
-            inserter.insert(parent, child);
+            inserter.insert(parent, /*separatorsAtStartList(nodeList),*/ child);
         } else {
             Inserter inserter = insertAfterChild(nodeList.get(index - 1), ", ");
             inserter.insert(parent, child);
@@ -192,9 +204,10 @@ public class LexicalPreservingPrinter {
 
     enum Separator {
         COMMA(ASTParserConstants.COMMA, ","),
-        SPACE(ASTParserConstants.LPAREN, " "),
+        SPACE(0, " "),
         SEMICOLON(ASTParserConstants.SEMICOLON, ";"),
-        NEWLINE(ASTParserConstants.LPAREN, "\n");
+        NEWLINE(0, "\n"),
+        TAB(0, "    ");
         private String text;
         private int tokenKind;
 
@@ -262,7 +275,15 @@ public class LexicalPreservingPrinter {
                 if (element instanceof TokenTextElement) {
                     TokenTextElement tokenTextElement = (TokenTextElement)element;
                     if (tokenTextElement.getTokenKind() == tokenKind) {
-                        nodeText.addElement(i + 1, new ChildTextElement(LexicalPreservingPrinter.this, child));
+                        int it = i+1;
+                        if (insertionMode == InsertionMode.ON_ITS_OWN_LINE) {
+                            nodeText.addToken(it++, Separator.NEWLINE);
+                            nodeText.addToken(it++, Separator.TAB);
+                        }
+                        nodeText.addElement(it++, new ChildTextElement(LexicalPreservingPrinter.this, child));
+                        if (insertionMode == InsertionMode.ON_ITS_OWN_LINE) {
+                            nodeText.addToken(it++, Separator.NEWLINE);
+                        }
                         return;
                     }
                 }

@@ -57,6 +57,10 @@ class NodeText {
     public void addToken(int tokenKind, String text) {
         elements.add(new TokenTextElement(tokenKind, text));
     }
+
+    public void addToken(int index, int tokenKind, String text) {
+        elements.add(index, new TokenTextElement(tokenKind, text));
+    }
 //
 //    public void replaceElement(int index, NodeTextElement nodeTextElement) {
 //        this.elements.remove(index);
@@ -77,6 +81,10 @@ class NodeText {
 
     public void addToken(LexicalPreservingPrinter.Separator separator) {
         addToken(separator.getTokenKind(), separator.getText());
+    }
+
+    public void addToken(int index, LexicalPreservingPrinter.Separator separator) {
+        addToken(index, separator.getTokenKind(), separator.getText());
     }
 //
 //    public void addString(String string) {
