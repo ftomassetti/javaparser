@@ -4,24 +4,30 @@ import com.github.javaparser.JavaToken;
 
 class TokenTextElement extends TextElement {
 
-    private JavaToken token;
+    private int tokenKind;
+    private String text;
 
     TokenTextElement(JavaToken token) {
-        this.token = token;
+        this(token.getKind(), token.getText());
+    }
+
+    TokenTextElement(int tokenKind, String text) {
+        this.tokenKind = tokenKind;
+        this.text = text;
     }
 
     @Override
     String expand() {
-        return token.getText();
+        return text;
     }
 
     // Visible for testing
     String getText() {
-        return token.getText();
+        return text;
     }
 
     public int getTokenKind() {
-        return token.getKind();
+        return tokenKind;
     }
 
 //    public void removeFromDelimiterToEnd(String substring) {

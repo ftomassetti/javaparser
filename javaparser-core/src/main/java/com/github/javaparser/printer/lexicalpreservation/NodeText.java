@@ -17,6 +17,10 @@ class NodeText {
         this.elements = elements;
     }
 
+    public NodeText(LexicalPreservingPrinter lexicalPreservingPrinter) {
+        this(lexicalPreservingPrinter, new LinkedList<>());
+    }
+
     String expand() {
         StringBuffer sb = new StringBuffer();
 
@@ -24,18 +28,18 @@ class NodeText {
         return sb.toString();
     }
 
-//    public void addElement(NodeTextElement nodeTextElement) {
-//        this.elements.add(nodeTextElement);
-//    }
-//
-//    public void addChild(Node child) {
-//        addElement(new ChildNodeTextElement(lexicalPreservingPrinter, child));
-//    }
-//
-//    public void addElement(int index, NodeTextElement nodeTextElement) {
-//        this.elements.add(index, nodeTextElement);
-//    }
-//
+    public void addElement(TextElement nodeTextElement) {
+        this.elements.add(nodeTextElement);
+    }
+
+    public void addChild(Node child) {
+        addElement(new ChildTextElement(lexicalPreservingPrinter, child));
+    }
+
+    public void addElement(int index, TextElement nodeTextElement) {
+        this.elements.add(index, nodeTextElement);
+    }
+
 //    public void removeElementsForChild(Node child) {
 //        elements.removeIf(e -> e instanceof ChildNodeTextElement && ((ChildNodeTextElement)e).getChild() == child);
 //    }
@@ -49,21 +53,31 @@ class NodeText {
     TextElement getTextElement(int index) {
         return elements.get(index);
     }
+
+    public void addToken(int tokenKind, String text) {
+        elements.add(new TokenTextElement(tokenKind, text));
+    }
 //
 //    public void replaceElement(int index, NodeTextElement nodeTextElement) {
 //        this.elements.remove(index);
 //        addElement(index, nodeTextElement);
 //    }
 //
-//    public void addList(NodeList<?> children, String separator, boolean separatorAfterLast) {
-//        for (int i=0; i<children.size(); i++) {
-//            Node child = children.get(i);
-//            addElement(new ChildNodeTextElement(lexicalPreservingPrinter, child));
-//            if ((i+1)<children.size() || separatorAfterLast) {
-//                addElement(new StringNodeTextElement(separator));
-//            }
-//        }
-//    }
+    public void addList(NodeList<?> children, boolean separatorAfterLast, LexicalPreservingPrinter.Separator... separators) {
+        for (int i=0; i<children.size(); i++) {
+            Node child = children.get(i);
+            addElement(new ChildTextElement(lexicalPreservingPrinter, child));
+            if ((i+1)<children.size() || separatorAfterLast) {
+                for (LexicalPreservingPrinter.Separator s : separators) {
+                    addToken(s);
+                }
+            }
+        }
+    }
+
+    public void addToken(LexicalPreservingPrinter.Separator separator) {
+        addToken(separator.getTokenKind(), separator.getText());
+    }
 //
 //    public void addString(String string) {
 //        addElement(new StringNodeTextElement(string));

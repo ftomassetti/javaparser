@@ -1,9 +1,6 @@
 package com.github.javaparser.printer.lexicalpreservation;
 
-import com.github.javaparser.JavaToken;
-import com.github.javaparser.ParseResult;
-import com.github.javaparser.Position;
-import com.github.javaparser.Range;
+import com.github.javaparser.*;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -123,42 +120,43 @@ public class LexicalPreservingPrinter {
         String key = String.format("%s:%s", parentClass.getSimpleName(), nodeListName);
         switch (key) {
             case "ClassOrInterfaceDeclaration:Members":
-                return insertAfter("{", InsertionMode.ON_ITS_OWN_LINE);
+                return insertAfter(ASTParserConstants.LBRACE, InsertionMode.ON_ITS_OWN_LINE);
             case "FieldDeclaration:Variables":
                 try {
-                    return insertAfterChild(FieldDeclaration.class.getMethod("getElementType"), " ");
+                    return insertAfterChild(FieldDeclaration.class.getMethod("getElementType"), Separator.SPACE);
                 } catch (NoSuchMethodException e) {
                     throw new RuntimeException(e);
                 }
             case "MethodDeclaration:Parameters":
-                return insertAfter("(", InsertionMode.PLAIN);
+                return insertAfter(ASTParserConstants.LPAREN, InsertionMode.PLAIN);
             case "BlockStmt:Stmts":
-                return insertAfter("{", InsertionMode.ON_ITS_OWN_LINE);
+                return insertAfter(ASTParserConstants.LBRACE, InsertionMode.ON_ITS_OWN_LINE);
         }
 
         throw new UnsupportedOperationException(key);
     }
 
     private void printModifiers(NodeText nodeText, final EnumSet<Modifier> modifiers) {
-        throw new UnsupportedOperationException();
-        //if (modifiers.size() > 0) {
-        //    nodeText.addElement(new StringNodeTextElement(modifiers.stream().map(Modifier::name).collect(Collectors.joining(" ")) + " "));
-        //}
+        modifiers.forEach(m -> {
+            nodeText.addToken(Separator.fromModifier(m));
+            nodeText.addToken(Separator.SPACE);
+        });
     }
 
     private NodeText prettyPrintingTextNode(Node node) {
-//        NodeText nodeText = new NodeText(this);
-//        if (node instanceof FieldDeclaration) {
-//            FieldDeclaration fieldDeclaration = (FieldDeclaration)node;
-//            nodeText.addList(fieldDeclaration.getAnnotations(), "\n", true);
-//            printModifiers(nodeText, fieldDeclaration.getModifiers());
-//            nodeText.addChild(fieldDeclaration.getElementType());
-//            //nodeText.addList(fieldDeclaration.getAr(), "", true);
-//            //nodeText.addString(" ");
-//            nodeText.addList(fieldDeclaration.getVariables(), ", ", false);
-//            nodeText.addString(";\n");
-//            return nodeText;
-//        }
+        NodeText nodeText = new NodeText(this);
+        if (node instanceof FieldDeclaration) {
+            FieldDeclaration fieldDeclaration = (FieldDeclaration)node;
+            nodeText.addList(fieldDeclaration.getAnnotations(), true, Separator.NEWLINE);
+            printModifiers(nodeText, fieldDeclaration.getModifiers());
+            nodeText.addChild(fieldDeclaration.getElementType());
+            //nodeText.addList(fieldDeclaration.getAr(), "", true);
+            //nodeText.addString(" ");
+            nodeText.addList(fieldDeclaration.getVariables(), false, Separator.COMMA, Separator.SPACE);
+            nodeText.addToken(Separator.SEMICOLON);
+            nodeText.addToken(Separator.NEWLINE);
+            return nodeText;
+        }
         throw new UnsupportedOperationException(node.getClass().getCanonicalName());
     }
 
@@ -192,34 +190,63 @@ public class LexicalPreservingPrinter {
 //        };
     }
 
-    private Inserter insertAfterChild(Method method, String separatorBefore) {
-        throw new UnsupportedOperationException();
-//        return (parent, child) -> {
-//            try {
-//                NodeText nodeText = getOrCreateNodeText(parent);
-//                Node childToFollow = (Node) method.invoke(parent);
-//                if (childToFollow == null) {
-//                    nodeText.addElement(0, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
-//                    return;
-//                }
-//                for (int i=0; i< nodeText.numberOfElements();i++) {
-//                    NodeTextElement element = nodeText.getTextElement(i);
-//                    if (element instanceof ChildNodeTextElement) {
-//                        ChildNodeTextElement childElement = (ChildNodeTextElement)element;
-//                        if (childElement.getChild() == childToFollow) {
-//                            nodeText.addString(i+1, separatorBefore);
-//                            nodeText.addElement(i+2, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
-//                            return;
-//                        }
-//                    }
-//                }
-//                throw new IllegalArgumentException();
-//            } catch (IllegalAccessException e) {
-//                throw new RuntimeException(e);
-//            } catch (InvocationTargetException e) {
-//                throw new RuntimeException(e);
-//            }
-//        };
+    enum Separator {
+        COMMA(ASTParserConstants.COMMA, ","),
+        SPACE(ASTParserConstants.LPAREN, " "),
+        SEMICOLON(ASTParserConstants.SEMICOLON, ";"),
+        NEWLINE(ASTParserConstants.LPAREN, "\n");
+        private String text;
+        private int tokenKind;
+
+        Separator(int tokenKind, String text) {
+            this.text = text;
+            this.tokenKind = tokenKind;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public int getTokenKind() {
+            return tokenKind;
+        }
+
+        public static Separator fromModifier(Modifier modifier) {
+            Separator separator = Separator.valueOf(modifier.name());
+            if (separator == null) {
+                throw new IllegalArgumentException(modifier.toString());
+            }
+            return separator;
+        }
+    }
+
+    private Inserter insertAfterChild(Method method, Separator separator) {
+        return (parent, child) -> {
+            try {
+                NodeText nodeText = getOrCreateNodeText(parent);
+                Node childToFollow = (Node) method.invoke(parent);
+                if (childToFollow == null) {
+                    nodeText.addElement(0, new ChildTextElement(LexicalPreservingPrinter.this, child));
+                    return;
+                }
+                for (int i=0; i< nodeText.numberOfElements();i++) {
+                    TextElement element = nodeText.getTextElement(i);
+                    if (element instanceof ChildTextElement) {
+                        ChildTextElement childElement = (ChildTextElement)element;
+                        if (childElement.getChild() == childToFollow) {
+                            nodeText.addToken(separator.getTokenKind(), separator.getText());
+                            nodeText.addElement(i+2, new ChildTextElement(LexicalPreservingPrinter.this, child));
+                            return;
+                        }
+                    }
+                }
+                throw new IllegalArgumentException();
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        };
     }
 
     private enum InsertionMode {
@@ -227,36 +254,21 @@ public class LexicalPreservingPrinter {
         ON_ITS_OWN_LINE
     }
 
-    private Inserter insertAfter(final String subString, InsertionMode insertionMode) {
-        throw new UnsupportedOperationException();
-//        return (parent, child) -> {
-//            NodeText nodeText = textForNodes.get(parent);
-//            for (int i=0; i< nodeText.numberOfElements();i++) {
-//                NodeTextElement element = nodeText.getTextElement(i);
-//                if (element instanceof StringNodeTextElement) {
-//                    StringNodeTextElement stringElement = (StringNodeTextElement)element;
-//                    int index = stringElement.getText().indexOf(subString);
-//                    if (index != -1) {
-//                        int end = index + subString.length();
-//                        String textBefore = stringElement.getText().substring(0, end);
-//                        if (insertionMode == InsertionMode.ON_ITS_OWN_LINE) {
-//                            // TODO calculate correct indentation
-//                            textBefore += "\n    ";
-//                        }
-//                        String textAfter = stringElement.getText().substring(end);
-//                        if (textAfter.isEmpty()) {
-//                            nodeText.addElement(i+1, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
-//                        } else {
-//                            nodeText.replaceElement(i, new StringNodeTextElement(textBefore));
-//                            nodeText.addElement(i+1, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
-//                            nodeText.addElement(i+2, new StringNodeTextElement(textAfter));
-//                        }
-//                        return;
-//                    }
-//                }
-//            }
-//            throw new IllegalArgumentException();
-//        };
+    private Inserter insertAfter(final int tokenKind, InsertionMode insertionMode) {
+        return (parent, child) -> {
+            NodeText nodeText = textForNodes.get(parent);
+            for (int i=0; i< nodeText.numberOfElements();i++) {
+                TextElement element = nodeText.getTextElement(i);
+                if (element instanceof TokenTextElement) {
+                    TokenTextElement tokenTextElement = (TokenTextElement)element;
+                    if (tokenTextElement.getTokenKind() == tokenKind) {
+                        nodeText.addElement(i + 1, new ChildTextElement(LexicalPreservingPrinter.this, child));
+                        return;
+                    }
+                }
+            }
+            throw new IllegalArgumentException("I could not find the token of type " + tokenKind);
+        };
     }
 
     public static <T extends Node> LexicalPreservingPrinter setup(ParseResult<T> parseResult) {
