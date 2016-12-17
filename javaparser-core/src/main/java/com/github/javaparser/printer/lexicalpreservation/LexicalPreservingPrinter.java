@@ -4,7 +4,6 @@ import com.github.javaparser.JavaToken;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.Position;
 import com.github.javaparser.Range;
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -12,6 +11,7 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.observer.AstObserver;
 import com.github.javaparser.ast.observer.ObservableProperty;
 import com.github.javaparser.ast.observer.PropagatingAstObserver;
+import com.github.javaparser.utils.Pair;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -48,71 +48,8 @@ public class LexicalPreservingPrinter {
         }
     }
 
-    private void registerText(Node node, String documentCode) {
-        String text = getRangeFromDocument(node.getRange().get(), documentCode);
-        NodeText nodeText = putPlaceholders(documentCode, node.getRange().get(), text, new ArrayList<>(node.getChildNodes()));
-        textForNodes.put(node, nodeText);
-    }
-
     private NodeText getTextForNode(Node node) {
         return textForNodes.get(node);
-    }
-
-    private NodeText putPlaceholders(String documentCode, Range range, String text, List<Node> children) {
-
-        children.sort((o1, o2) -> o1.getRange().get().begin.compareTo(o2.getRange().get().begin));
-
-        NodeText nodeText = new NodeText(this);
-
-        int start = findIndex(documentCode, range.begin);
-        int caret = start;
-        for (Node child : children) {
-            int childStartIndex = findIndex(documentCode, child.getBegin().get());
-            int fromStart = childStartIndex - caret;
-            if (fromStart > 0) {
-                nodeText.addElement(new StringNodeTextElement(text.substring(caret - start, childStartIndex - start)));
-                caret += fromStart;
-            }
-            nodeText.addElement(new ChildNodeTextElement(this, child));
-            int lengthOfOriginalCode = getRangeFromDocument(child.getRange().get(), documentCode).length();
-            caret += lengthOfOriginalCode;
-        }
-        // last string
-        int endOfNode = findIndex(documentCode, range.end) + 1;
-        if (caret < endOfNode) {
-            nodeText.addElement(new StringNodeTextElement(text.substring(caret - start)));
-        }
-
-        return nodeText;
-    }
-
-    private String getRangeFromDocument(Range range, String documentCode) {
-        return documentCode.substring(findIndex(documentCode, range.begin), findIndex(documentCode, range.end) + 1);
-    }
-
-    private int findIndex(String documentCode, Position position) {
-        int indexOfLineStart = 0;
-        for (int i = 1; i < position.line; i++) {
-            int indexR = documentCode.indexOf('\r', indexOfLineStart);
-            int indexN = documentCode.indexOf('\n', indexOfLineStart);
-            int nextIndex = -1;
-            if (indexN == -1 && indexR != -1) {
-                nextIndex = indexR;
-            } else if (indexN != -1 && indexR == -1) {
-                nextIndex = indexN;
-            } else {
-                nextIndex = Math.min(indexR, indexN);
-            }
-            if (nextIndex == -1) {
-                throw new IllegalArgumentException("Searching for line "+position.line);
-            }
-            if ((documentCode.charAt(nextIndex) == '\r' && documentCode.charAt(nextIndex + 1) == '\n') ||
-                    (documentCode.charAt(nextIndex) == '\n' && documentCode.charAt(nextIndex + 1) == '\r')) {
-                nextIndex++;
-            }
-            indexOfLineStart = nextIndex + 1;
-        }
-        return findIndexOfColumn(documentCode, indexOfLineStart, position.column);
     }
 
     private int findIndexOfColumn(String documentCode, int indexOfLineStart, int column) {
@@ -121,25 +58,26 @@ public class LexicalPreservingPrinter {
     }
 
     private void updateTextBecauseOfRemovedChild(NodeList nodeList, int index, Optional<Node> parentNode, Node child) {
-        if (!parentNode.isPresent()) {
-            return;
-        }
-        Node parent = parentNode.get();
-        String key = parent.getClass().getSimpleName() + ":" + findNodeListName(nodeList);
-
-        switch (key) {
-            case "MethodDeclaration:Parameters":
-                if (index == 0 && nodeList.size() > 1) {
-                    // we should remove all the text between the child and the comma
-                    textForNodes.get(parent).removeTextBetween(child, ",", true);
-                }
-                if (index != 0) {
-                    // we should remove all the text between the child and the comma
-                    textForNodes.get(parent).removeTextBetween(",", child);
-                }
-            default:
-                textForNodes.get(parent).removeElementsForChild(child);
-        }
+        throw new UnsupportedOperationException();
+//        if (!parentNode.isPresent()) {
+//            return;
+//        }
+//        Node parent = parentNode.get();
+//        String key = parent.getClass().getSimpleName() + ":" + findNodeListName(nodeList);
+//
+//        switch (key) {
+//            case "MethodDeclaration:Parameters":
+//                if (index == 0 && nodeList.size() > 1) {
+//                    // we should remove all the text between the child and the comma
+//                    textForNodes.get(parent).removeTextBetween(child, ",", true);
+//                }
+//                if (index != 0) {
+//                    // we should remove all the text between the child and the comma
+//                    textForNodes.get(parent).removeTextBetween(",", child);
+//                }
+//            default:
+//                textForNodes.get(parent).removeElementsForChild(child);
+//        }
     }
 
     private void updateTextBecauseOfAddedChild(NodeList nodeList, int index, Optional<Node> parentNode, Node child) {
@@ -202,24 +140,25 @@ public class LexicalPreservingPrinter {
     }
 
     private void printModifiers(NodeText nodeText, final EnumSet<Modifier> modifiers) {
-        if (modifiers.size() > 0) {
-            nodeText.addElement(new StringNodeTextElement(modifiers.stream().map(Modifier::name).collect(Collectors.joining(" ")) + " "));
-        }
+        throw new UnsupportedOperationException();
+        //if (modifiers.size() > 0) {
+        //    nodeText.addElement(new StringNodeTextElement(modifiers.stream().map(Modifier::name).collect(Collectors.joining(" ")) + " "));
+        //}
     }
 
     private NodeText prettyPrintingTextNode(Node node) {
-        NodeText nodeText = new NodeText(this);
-        if (node instanceof FieldDeclaration) {
-            FieldDeclaration fieldDeclaration = (FieldDeclaration)node;
-            nodeText.addList(fieldDeclaration.getAnnotations(), "\n", true);
-            printModifiers(nodeText, fieldDeclaration.getModifiers());
-            nodeText.addChild(fieldDeclaration.getElementType());
-            //nodeText.addList(fieldDeclaration.getAr(), "", true);
-            //nodeText.addString(" ");
-            nodeText.addList(fieldDeclaration.getVariables(), ", ", false);
-            nodeText.addString(";\n");
-            return nodeText;
-        }
+//        NodeText nodeText = new NodeText(this);
+//        if (node instanceof FieldDeclaration) {
+//            FieldDeclaration fieldDeclaration = (FieldDeclaration)node;
+//            nodeText.addList(fieldDeclaration.getAnnotations(), "\n", true);
+//            printModifiers(nodeText, fieldDeclaration.getModifiers());
+//            nodeText.addChild(fieldDeclaration.getElementType());
+//            //nodeText.addList(fieldDeclaration.getAr(), "", true);
+//            //nodeText.addString(" ");
+//            nodeText.addList(fieldDeclaration.getVariables(), ", ", false);
+//            nodeText.addString(";\n");
+//            return nodeText;
+//        }
         throw new UnsupportedOperationException(node.getClass().getCanonicalName());
     }
 
@@ -231,54 +170,56 @@ public class LexicalPreservingPrinter {
     }
 
     private Inserter insertAfterChild(Node childToFollow, String separatorBefore) {
-        return (parent, child) -> {
-            NodeText nodeText = getOrCreateNodeText(parent);
-            if (childToFollow == null) {
-                nodeText.addElement(0, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
-                return;
-            }
-            for (int i=0; i< nodeText.numberOfElements();i++) {
-                NodeTextElement element = nodeText.getTextElement(i);
-                if (element instanceof ChildNodeTextElement) {
-                    ChildNodeTextElement childElement = (ChildNodeTextElement)element;
-                    if (childElement.getChild() == childToFollow) {
-                        nodeText.addString(i+1, separatorBefore);
-                        nodeText.addElement(i+2, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
-                        return;
-                    }
-                }
-            }
-            throw new IllegalArgumentException();
-        };
+        throw new UnsupportedOperationException();
+//        return (parent, child) -> {
+//            NodeText nodeText = getOrCreateNodeText(parent);
+//            if (childToFollow == null) {
+//                nodeText.addElement(0, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
+//                return;
+//            }
+//            for (int i=0; i< nodeText.numberOfElements();i++) {
+//                NodeTextElement element = nodeText.getTextElement(i);
+//                if (element instanceof ChildNodeTextElement) {
+//                    ChildNodeTextElement childElement = (ChildNodeTextElement)element;
+//                    if (childElement.getChild() == childToFollow) {
+//                        nodeText.addString(i+1, separatorBefore);
+//                        nodeText.addElement(i+2, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
+//                        return;
+//                    }
+//                }
+//            }
+//            throw new IllegalArgumentException();
+//        };
     }
 
     private Inserter insertAfterChild(Method method, String separatorBefore) {
-        return (parent, child) -> {
-            try {
-                NodeText nodeText = getOrCreateNodeText(parent);
-                Node childToFollow = (Node) method.invoke(parent);
-                if (childToFollow == null) {
-                    nodeText.addElement(0, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
-                    return;
-                }
-                for (int i=0; i< nodeText.numberOfElements();i++) {
-                    NodeTextElement element = nodeText.getTextElement(i);
-                    if (element instanceof ChildNodeTextElement) {
-                        ChildNodeTextElement childElement = (ChildNodeTextElement)element;
-                        if (childElement.getChild() == childToFollow) {
-                            nodeText.addString(i+1, separatorBefore);
-                            nodeText.addElement(i+2, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
-                            return;
-                        }
-                    }
-                }
-                throw new IllegalArgumentException();
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            } catch (InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
-        };
+        throw new UnsupportedOperationException();
+//        return (parent, child) -> {
+//            try {
+//                NodeText nodeText = getOrCreateNodeText(parent);
+//                Node childToFollow = (Node) method.invoke(parent);
+//                if (childToFollow == null) {
+//                    nodeText.addElement(0, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
+//                    return;
+//                }
+//                for (int i=0; i< nodeText.numberOfElements();i++) {
+//                    NodeTextElement element = nodeText.getTextElement(i);
+//                    if (element instanceof ChildNodeTextElement) {
+//                        ChildNodeTextElement childElement = (ChildNodeTextElement)element;
+//                        if (childElement.getChild() == childToFollow) {
+//                            nodeText.addString(i+1, separatorBefore);
+//                            nodeText.addElement(i+2, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
+//                            return;
+//                        }
+//                    }
+//                }
+//                throw new IllegalArgumentException();
+//            } catch (IllegalAccessException e) {
+//                throw new RuntimeException(e);
+//            } catch (InvocationTargetException e) {
+//                throw new RuntimeException(e);
+//            }
+//        };
     }
 
     private enum InsertionMode {
@@ -287,42 +228,35 @@ public class LexicalPreservingPrinter {
     }
 
     private Inserter insertAfter(final String subString, InsertionMode insertionMode) {
-        return (parent, child) -> {
-            NodeText nodeText = textForNodes.get(parent);
-            for (int i=0; i< nodeText.numberOfElements();i++) {
-                NodeTextElement element = nodeText.getTextElement(i);
-                if (element instanceof StringNodeTextElement) {
-                    StringNodeTextElement stringElement = (StringNodeTextElement)element;
-                    int index = stringElement.getText().indexOf(subString);
-                    if (index != -1) {
-                        int end = index + subString.length();
-                        String textBefore = stringElement.getText().substring(0, end);
-                        if (insertionMode == InsertionMode.ON_ITS_OWN_LINE) {
-                            // TODO calculate correct indentation
-                            textBefore += "\n    ";
-                        }
-                        String textAfter = stringElement.getText().substring(end);
-                        if (textAfter.isEmpty()) {
-                            nodeText.addElement(i+1, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
-                        } else {
-                            nodeText.replaceElement(i, new StringNodeTextElement(textBefore));
-                            nodeText.addElement(i+1, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
-                            nodeText.addElement(i+2, new StringNodeTextElement(textAfter));
-                        }
-                        return;
-                    }
-                }
-            }
-            throw new IllegalArgumentException();
-        };
-    }
-
-    private static int nodeLevel(Node node) {
-        if (node.getParentNode().isPresent()) {
-            return 1 + nodeLevel(node.getParentNode().get());
-        } else {
-            return 0;
-        }
+        throw new UnsupportedOperationException();
+//        return (parent, child) -> {
+//            NodeText nodeText = textForNodes.get(parent);
+//            for (int i=0; i< nodeText.numberOfElements();i++) {
+//                NodeTextElement element = nodeText.getTextElement(i);
+//                if (element instanceof StringNodeTextElement) {
+//                    StringNodeTextElement stringElement = (StringNodeTextElement)element;
+//                    int index = stringElement.getText().indexOf(subString);
+//                    if (index != -1) {
+//                        int end = index + subString.length();
+//                        String textBefore = stringElement.getText().substring(0, end);
+//                        if (insertionMode == InsertionMode.ON_ITS_OWN_LINE) {
+//                            // TODO calculate correct indentation
+//                            textBefore += "\n    ";
+//                        }
+//                        String textAfter = stringElement.getText().substring(end);
+//                        if (textAfter.isEmpty()) {
+//                            nodeText.addElement(i+1, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
+//                        } else {
+//                            nodeText.replaceElement(i, new StringNodeTextElement(textBefore));
+//                            nodeText.addElement(i+1, new ChildNodeTextElement(LexicalPreservingPrinter.this, child));
+//                            nodeText.addElement(i+2, new StringNodeTextElement(textAfter));
+//                        }
+//                        return;
+//                    }
+//                }
+//            }
+//            throw new IllegalArgumentException();
+//        };
     }
 
     public static <T extends Node> LexicalPreservingPrinter setup(ParseResult<T> parseResult) {
@@ -337,14 +271,8 @@ public class LexicalPreservingPrinter {
         List<Node> nodesDepthFirst = new LinkedList<>();
         root.onSubStreeDepthFirst(n -> nodesDepthFirst.add(n));
 
-        nodesDepthFirst.forEach(n ->
-                System.out.println(n.getClass().getSimpleName()+ " "+n.getRange().get().toString()));
-
         for (JavaToken token : documentTokens) {
             Optional<Node> maybeOwner = nodesDepthFirst.stream().filter(n -> n.getRange().get().contains(token.getRange())).findFirst();
-            if (!maybeOwner.isPresent()) {
-                System.out.println("TOKEN " + token+ " "+token.getRange());
-            }
             Node owner = maybeOwner.get();
             if (!tokensByNode.containsKey(owner)) {
                 tokensByNode.put(owner, new LinkedList<>());
@@ -352,13 +280,24 @@ public class LexicalPreservingPrinter {
             tokensByNode.get(owner).add(token);
         }
 
-        //root.registerForSubtree(observer);
-        //root.onSubStree(n -> lpp.registerTokens(n, tokensByNode.get(n)));
+        root.registerForSubtree(observer);
+        root.onSubStree(n -> lpp.registerInitialText(n, tokensByNode.get(n)));
         return lpp;
     }
 
-    private void registerTokens(Node node, List<JavaToken> nodeTokens) {
-
+    private void registerInitialText(Node node, List<JavaToken> nodeTokens) {
+        if (nodeTokens == null) {
+            nodeTokens = Collections.emptyList();
+        }
+        List<Pair<Range, TextElement>> elements = new LinkedList<>();
+        for (Node child : node.getChildNodes()) {
+            elements.add(new Pair<>(child.getRange().get(), new ChildTextElement(this, child)));
+        }
+        for (JavaToken token : nodeTokens) {
+            elements.add(new Pair<>(token.getRange(), new TokenTextElement(token)));
+        }
+        elements.sort((e1, e2) -> e1.a.begin.compareTo(e2.a.begin));
+        textForNodes.put(node, new NodeText(this, elements.stream().map(p -> p.b).collect(Collectors.toList())));
     }
 
     private static AstObserver createObserver(LexicalPreservingPrinter lpp) {
@@ -368,37 +307,38 @@ public class LexicalPreservingPrinter {
                 if (oldValue != null && oldValue.equals(newValue)) {
                     return;
                 }
-                if (oldValue instanceof Node && newValue instanceof Node) {
-                    lpp.getTextForNode(observedNode).replaceChild((Node)oldValue, (Node)newValue);
-                    return;
-                }
-                if (oldValue == null && newValue instanceof Node) {
-                    if (property == ObservableProperty.INITIALIZER) {
-                        lpp.getOrCreateNodeText(observedNode).addString(" = ");
-                        lpp.getOrCreateNodeText(observedNode).addChild((Node)newValue);
-                        return;
-                    }
-                    throw new UnsupportedOperationException("Set property " + property);
-                }
-                if (oldValue instanceof Node && newValue == null) {
-                    if (property == ObservableProperty.INITIALIZER) {
-                        lpp.getOrCreateNodeText(observedNode).removeTextBetween("=", (Node)oldValue);
-                        lpp.getOrCreateNodeText(observedNode).removeElementsForChild((Node)oldValue);
-                        return;
-                    }
-                    throw new UnsupportedOperationException("Unset property " + property);
-                }
-                if ((oldValue instanceof EnumSet) && ObservableProperty.MODIFIERS == property){
-                    EnumSet<Modifier> oldEnumSet = (EnumSet<Modifier>)oldValue;
-                    EnumSet<Modifier> newEnumSet = (EnumSet<Modifier>)newValue;
-                    for (Modifier removedModifier : oldEnumSet.stream().filter(e -> !newEnumSet.contains(e)).collect(Collectors.toList())) {
-                        lpp.getOrCreateNodeText(observedNode).removeString(removedModifier.name().toLowerCase());
-                    }
-                    for (Modifier addedModifier : newEnumSet.stream().filter(e -> !oldEnumSet.contains(e)).collect(Collectors.toList())) {
-                        lpp.getOrCreateNodeText(observedNode).addAtBeginningString(addedModifier.name().toLowerCase() + " ");
-                    }
-                    return;
-                }
+                if (true) throw new UnsupportedOperationException();
+//                if (oldValue instanceof Node && newValue instanceof Node) {
+//                    lpp.getTextForNode(observedNode).replaceChild((Node)oldValue, (Node)newValue);
+//                    return;
+//                }
+//                if (oldValue == null && newValue instanceof Node) {
+//                    if (property == ObservableProperty.INITIALIZER) {
+//                        lpp.getOrCreateNodeText(observedNode).addString(" = ");
+//                        lpp.getOrCreateNodeText(observedNode).addChild((Node)newValue);
+//                        return;
+//                    }
+//                    throw new UnsupportedOperationException("Set property " + property);
+//                }
+//                if (oldValue instanceof Node && newValue == null) {
+//                    if (property == ObservableProperty.INITIALIZER) {
+//                        lpp.getOrCreateNodeText(observedNode).removeTextBetween("=", (Node)oldValue);
+//                        lpp.getOrCreateNodeText(observedNode).removeElementsForChild((Node)oldValue);
+//                        return;
+//                    }
+//                    throw new UnsupportedOperationException("Unset property " + property);
+//                }
+//                if ((oldValue instanceof EnumSet) && ObservableProperty.MODIFIERS == property){
+//                    EnumSet<Modifier> oldEnumSet = (EnumSet<Modifier>)oldValue;
+//                    EnumSet<Modifier> newEnumSet = (EnumSet<Modifier>)newValue;
+//                    for (Modifier removedModifier : oldEnumSet.stream().filter(e -> !newEnumSet.contains(e)).collect(Collectors.toList())) {
+//                        lpp.getOrCreateNodeText(observedNode).removeString(removedModifier.name().toLowerCase());
+//                    }
+//                    for (Modifier addedModifier : newEnumSet.stream().filter(e -> !oldEnumSet.contains(e)).collect(Collectors.toList())) {
+//                        lpp.getOrCreateNodeText(observedNode).addAtBeginningString(addedModifier.name().toLowerCase() + " ");
+//                    }
+//                    return;
+//                }
                 if (property == ObservableProperty.RANGE) {
                     return;
                 }
