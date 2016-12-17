@@ -535,7 +535,7 @@ public abstract class Node implements Cloneable, HasParentNode<Node>, Visitable 
     }
 
     public void onSubStreeDepthFirst(ActionOnNode action) {
-        this.getChildNodes().forEach(c -> c.onSubStree(action));
+        this.getChildNodes().forEach(c -> c.onSubStreeDepthFirst(action));
         action.execute(this);
     }
 

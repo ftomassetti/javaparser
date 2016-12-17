@@ -1,5 +1,7 @@
 package com.github.javaparser.printer.lexicalpreservation;
 
+import com.github.javaparser.JavaToken;
+import com.github.javaparser.ParseResult;
 import com.github.javaparser.Position;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
@@ -46,13 +48,13 @@ public class LexicalPreservingPrinter {
         }
     }
 
-    public void registerText(Node node, String documentCode) {
+    private void registerText(Node node, String documentCode) {
         String text = getRangeFromDocument(node.getRange().get(), documentCode);
         NodeText nodeText = putPlaceholders(documentCode, node.getRange().get(), text, new ArrayList<>(node.getChildNodes()));
         textForNodes.put(node, nodeText);
     }
 
-    public NodeText getTextForNode(Node node) {
+    private NodeText getTextForNode(Node node) {
         return textForNodes.get(node);
     }
 
@@ -118,7 +120,7 @@ public class LexicalPreservingPrinter {
         return indexOfLineStart + column - 1;
     }
 
-    public void updateTextBecauseOfRemovedChild(NodeList nodeList, int index, Optional<Node> parentNode, Node child) {
+    private void updateTextBecauseOfRemovedChild(NodeList nodeList, int index, Optional<Node> parentNode, Node child) {
         if (!parentNode.isPresent()) {
             return;
         }
@@ -140,7 +142,7 @@ public class LexicalPreservingPrinter {
         }
     }
 
-    public void updateTextBecauseOfAddedChild(NodeList nodeList, int index, Optional<Node> parentNode, Node child) {
+    private void updateTextBecauseOfAddedChild(NodeList nodeList, int index, Optional<Node> parentNode, Node child) {
         if (!parentNode.isPresent()) {
             return;
         }
@@ -315,12 +317,48 @@ public class LexicalPreservingPrinter {
         };
     }
 
-    public static LexicalPreservingPrinter setup(CompilationUnit cu, String code) {
+    private static int nodeLevel(Node node) {
+        if (node.getParentNode().isPresent()) {
+            return 1 + nodeLevel(node.getParentNode().get());
+        } else {
+            return 0;
+        }
+    }
+
+    public static <T extends Node> LexicalPreservingPrinter setup(ParseResult<T> parseResult) {
         LexicalPreservingPrinter lpp = new LexicalPreservingPrinter();
         AstObserver observer = createObserver(lpp);
-        cu.registerForSubtree(observer);
-        cu.onSubStree(node -> lpp.registerText(node, code));
+        Node root = parseResult.getResult().get();
+
+        List<JavaToken> documentTokens = parseResult.getTokens().get();
+        Map<Node, List<JavaToken>> tokensByNode = new HashMap<>();
+
+        // Take all nodes and sort them to get the leaves first
+        List<Node> nodesDepthFirst = new LinkedList<>();
+        root.onSubStreeDepthFirst(n -> nodesDepthFirst.add(n));
+
+        nodesDepthFirst.forEach(n ->
+                System.out.println(n.getClass().getSimpleName()+ " "+n.getRange().get().toString()));
+
+        for (JavaToken token : documentTokens) {
+            Optional<Node> maybeOwner = nodesDepthFirst.stream().filter(n -> n.getRange().get().contains(token.getRange())).findFirst();
+            if (!maybeOwner.isPresent()) {
+                System.out.println("TOKEN " + token+ " "+token.getRange());
+            }
+            Node owner = maybeOwner.get();
+            if (!tokensByNode.containsKey(owner)) {
+                tokensByNode.put(owner, new LinkedList<>());
+            }
+            tokensByNode.get(owner).add(token);
+        }
+
+        //root.registerForSubtree(observer);
+        //root.onSubStree(n -> lpp.registerTokens(n, tokensByNode.get(n)));
         return lpp;
+    }
+
+    private void registerTokens(Node node, List<JavaToken> nodeTokens) {
+
     }
 
     private static AstObserver createObserver(LexicalPreservingPrinter lpp) {
