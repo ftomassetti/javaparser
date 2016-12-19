@@ -31,6 +31,13 @@ import java.util.Queue;
  */
 public abstract class TreeVisitor {
 
+    public void visitLeavesFirst(Node node) {
+        for (Node child : node.getChildNodes()) {
+            visitLeavesFirst(child);
+        }
+        process(node);
+    }
+
     /**
      * https://en.wikipedia.org/wiki/Depth-first_search
      *
