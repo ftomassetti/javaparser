@@ -21,8 +21,10 @@
 
 package com.github.javaparser.ast.observer;
 
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.utils.Utils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -131,4 +133,12 @@ public enum ObservableProperty {
         return sb.toString();
     }
 
+    public Node singleValueFor(Node node) {
+        String getterName = "get" + capitalize(camelCaseName());
+        try {
+            return (Node)node.getClass().getMethod(getterName).invoke(node);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException("Unable to get single value for " + this.name() + " from " + node, e);
+        }
+    }
 }
