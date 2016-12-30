@@ -24,7 +24,11 @@ package com.github.javaparser.utils;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.*;
+<<<<<<< 5425d36e5047104b7a060b34b7259ebf6578dbd7
 import java.util.stream.Collectors;
+=======
+import java.util.function.Function;
+>>>>>>> introducing QualifiedProperty
 
 /**
  * Any kind of utility.
@@ -98,7 +102,7 @@ public class Utils {
         Collections.addAll(list, array);
         return list;
     }
-
+    
     /**
      * Transform a string to the camel case conversion.
      * <p>
@@ -113,16 +117,6 @@ public class Utils {
         return sb.toString();
     }
 
-    private static String capitalize(String original) {
-        if (original.length() < 1) {
-            throw new IllegalArgumentException("This string is empty");
-        } else if (original.length() == 1) {
-            return original.toUpperCase();
-        } else {
-            return original.substring(0, 1).toUpperCase() + original.substring(1);
-        }
-    }
-
     /**
      * Return the next word of the string, in other words it stops when a space is encountered.
      */
@@ -132,5 +126,25 @@ public class Utils {
             index++;
         }
         return string.substring(0, index);
+    }
+
+    public static String capitalize(String s) {
+        return stringTransformer(s, it -> it.toUpperCase());
+    }
+
+    public static String uncapitalize(String s) {
+        return stringTransformer(s, it -> it.toLowerCase());
+    }
+
+    private static String stringTransformer(String s, Function<String, String> transformation) {
+        if (s.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+        StringBuffer sb = new StringBuffer();
+        sb.append(transformation.apply(s.substring(0, 1)));
+        if (s.length() > 1) {
+            sb.append(s.substring(1));
+        }
+        return sb.toString();
     }
 }

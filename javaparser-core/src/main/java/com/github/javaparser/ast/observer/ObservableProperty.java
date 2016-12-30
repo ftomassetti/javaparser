@@ -21,6 +21,13 @@
 
 package com.github.javaparser.ast.observer;
 
+import com.github.javaparser.utils.Utils;
+
+import java.util.Arrays;
+import java.util.Optional;
+
+import static com.github.javaparser.utils.Utils.capitalize;
+
 /**
  * Properties considered by the AstObserver
  */
@@ -102,5 +109,26 @@ public enum ObservableProperty {
     VARIABLE,
     VARIABLES,
     ELEMENT_TYPE,
-    VAR_ARGS
+    VAR_ARGS;
+
+    public static ObservableProperty fromCamelCaseName(String camelCaseName) {
+        Optional<ObservableProperty> observableProperty = Arrays.stream(values()).filter(v ->
+                v.camelCaseName().equals(camelCaseName)).findFirst();
+        if (observableProperty.isPresent()) {
+            return observableProperty.get();
+        } else {
+            throw new IllegalArgumentException("No property found with the given camel case name: " + camelCaseName);
+        }
+    }
+
+    public String camelCaseName() {
+        String[] parts = this.name().split("_");
+        StringBuffer sb = new StringBuffer();
+        sb.append(parts[0].toLowerCase());
+        for (int i=1;i<parts.length;i++) {
+            sb.append(capitalize(parts[i].toLowerCase()));
+        }
+        return sb.toString();
+    }
+
 }
