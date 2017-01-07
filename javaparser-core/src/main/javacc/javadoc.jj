@@ -1,0 +1,93 @@
+/*
+ * Copyright (C) 2007-2010 Júlio Vilmar Gesser.
+ * Copyright (C) 2011, 2013-2016 The JavaParser Team.
+ *
+ * This file is part of JavaParser.
+ * 
+ * JavaParser can be used either under the terms of
+ * a) the GNU Lesser General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * b) the terms of the Apache License 
+ *
+ * You should have received a copy of both licenses in LICENCE.LGPL and
+ * LICENCE.APACHE. Please refer to those files for details.
+ *
+ * JavaParser is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ */
+
+options {
+  LOOKAHEAD=1;
+  STATIC=false;
+  JAVA_UNICODE_ESCAPE=true;
+  COMMON_TOKEN_ACTION=true;
+  JDK_VERSION = "1.8";
+  TOKEN_FACTORY = "ASTParser.GTToken";
+  JAVA_TEMPLATE_TYPE = "modern";
+}
+
+PARSER_BEGIN(JavadocParser)
+/*
+ *
+ * This file is part of Java 1.8 parser and Abstract Syntax Tree.
+ *
+ * Java 1.8 parser and Abstract Syntax Tree is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Java 1.8 parser and Abstract Syntax Tree.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.github.javaparser.javadoc;
+
+/**
+ * <p>This class was generated automatically by javacc, do not edit.</p>
+ */
+final class JavadocParser {
+
+
+}
+
+PARSER_END(JavadocParser)
+
+TOKEN_MGR_DECLS :
+{
+    private void CommonTokenAction(Token token) {
+        System.out.println("Getting a token: " + token);
+    }
+}
+
+SPECIAL_TOKEN :
+{
+  " "
+| "\t"
+}
+
+TOKEN :
+{
+  < PARAM: "@param" >
+| < RETURN: "@return" >
+| < WORD: (~["\n","\r"," ","\t"])+ >
+}
+
+Javadoc Javadoc() :
+{
+    Line summary;
+}
+{
+    summary = Line()
+    <EOF>
+}
+
+Line Line() :
+{
+    List<Word> words = new LinkedList<Word>();
+    Word word;
+}
+{
+    ( word = <WORD> {words.append(word);})*
+}
