@@ -445,4 +445,8 @@ public final class CompilationUnit extends Node {
     public CompilationUnit setPackageDeclaration(String s) {
         return setPackageDeclaration(new PackageDeclaration(Name.parse(assertNotNull(s))));
     }
+
+    public void removePackageDeclaration() {
+        setPackageDeclaration((PackageDeclaration)null);
+    }
 }
