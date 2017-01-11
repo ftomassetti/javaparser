@@ -24,11 +24,7 @@ package com.github.javaparser.utils;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.*;
-<<<<<<< 5425d36e5047104b7a060b34b7259ebf6578dbd7
-import java.util.stream.Collectors;
-=======
 import java.util.function.Function;
->>>>>>> introducing QualifiedProperty
 
 /**
  * Any kind of utility.
@@ -102,7 +98,7 @@ public class Utils {
         Collections.addAll(list, array);
         return list;
     }
-    
+
     /**
      * Transform a string to the camel case conversion.
      * <p>
