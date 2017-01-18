@@ -27,22 +27,26 @@ import com.github.javaparser.utils.Utils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+
+import static com.github.javaparser.ast.observer.ObservableProperty.Type.MULTIPLE_NODES;
+import static com.github.javaparser.ast.observer.ObservableProperty.Type.MULTIPLE_PROPERTIES;
+import static com.github.javaparser.ast.observer.ObservableProperty.Type.SINGLE_PROPERTY;
 
 /**
  * Properties considered by the AstObserver
  */
 public enum ObservableProperty {
-    ANNOTATIONS(true),
+    ANNOTATIONS(MULTIPLE_NODES),
     ANONYMOUS_CLASS_BODY,
-    ARGUMENTS(true),
+    ARGUMENTS(MULTIPLE_NODES),
+    IS_ASTERISK,
     BLOCK,
     BODY,
-    CATCH_CLAUSES(true),
+    CATCH_CLAUSES(MULTIPLE_NODES),
     CHECK,
     CLASS_BODY,
+    CLASS_DECLARATION,
     CLASS_EXPR,
     COMMENT,
     COMMENTED_NODE,
@@ -55,13 +59,14 @@ public enum ObservableProperty {
     ELEMENTS,
     ELSE_EXPR,
     ELSE_STMT,
+    ENCLOSING_PARAMETERS,
     ENTRIES,
     EXPRESSION,
-    EXTENDED_TYPES(true),
+    EXTENDED_TYPES(MULTIPLE_NODES),
     FIELD,
     FINALLY_BLOCK,
     IDENTIFIER,
-    IMPLEMENTED_TYPES(true),
+    IMPLEMENTED_TYPES(MULTIPLE_NODES),
     IMPORTS,
     INDEX,
     INITIALIZER,
@@ -74,7 +79,7 @@ public enum ObservableProperty {
     LEVELS,
     MEMBERS,
     MEMBER_VALUE,
-    MODIFIERS,
+    MODIFIERS(MULTIPLE_PROPERTIES),
     MESSAGE,
     NAME,
     OPERATOR,
@@ -82,14 +87,12 @@ public enum ObservableProperty {
     PAIRS,
     PARAMETER,
     PARAMETERS,
-    ENCLOSING_PARAMETERS,
     QUALIFIER,
     RANGE,
     RESOURCES,
     RIGHT,
     SCOPE,
     SELECTOR,
-    IS_ASTERISK,
     IS_STATIC,
     STATIC_MEMBER,
     STATEMENT,
@@ -98,34 +101,56 @@ public enum ObservableProperty {
     TARGET,
     THEN_EXPR,
     THEN_STMT,
-    THROWN_TYPES(true),
+    THROWN_TYPES(MULTIPLE_NODES),
     TRY_BLOCK,
-    TYPE,
+    TYPE(SINGLE_PROPERTY),
     TYPES,
-    TYPE_ARGUMENTS(true),
+    TYPE_ARGUMENTS(MULTIPLE_NODES),
     TYPE_BOUND,
-    CLASS_DECLARATION,
-    TYPE_PARAMETERS(true),
+    TYPE_PARAMETERS(MULTIPLE_NODES),
     UPDATE,
     VALUE,
     VALUES,
     VARIABLE,
-    VARIABLES,
+    VARIABLES(MULTIPLE_NODES),
     ELEMENT_TYPE,
-    VAR_ARGS(true);
+    VAR_ARGS(MULTIPLE_NODES);
 
-    private boolean multiple;
+    enum Type {
+        SINGLE_PROPERTY(false, false),
+        SINGLE_NODE(false, true),
+        MULTIPLE_PROPERTIES(true, false),
+        MULTIPLE_NODES(true, true);
 
-    ObservableProperty(boolean multiple) {
-        this.multiple = multiple;
+        private boolean multiple;
+        private boolean node;
+
+        Type(boolean multiple, boolean node) {
+            this.multiple = multiple;
+            this.node = node;
+        }
+    }
+
+    private Type type;
+
+    ObservableProperty(Type type) {
+        this.type = type;
     }
 
     ObservableProperty() {
-        this(false);
+        this(Type.SINGLE_NODE);
+    }
+
+    public boolean isAboutNodes() {
+        return type.node;
+    }
+
+    public boolean isAboutValues() {
+        return !isAboutNodes();
     }
 
     public boolean isMultiple() {
-        return multiple;
+        return type.multiple;
     }
 
     public boolean isSingle() {
@@ -136,7 +161,7 @@ public enum ObservableProperty {
         return Utils.toCamelCase(name());
     }
 
-    public Node singleValueFor(Node node) {
+    public Node singlePropertyFor(Node node) {
         String getterName = "get" + Utils.capitalize(camelCaseName());
         try {
             Object result = node.getClass().getMethod(getterName).invoke(node);
@@ -145,13 +170,37 @@ public enum ObservableProperty {
             }
             if (result instanceof Node) {
                 return (Node)result;
-            } else {
+            } else if (result instanceof Optional){
                 Optional<Node> opt = (Optional<Node>)result;
                 if (opt.isPresent()) {
                     return opt.get();
                 } else {
                     return null;
                 }
+            } else {
+                throw new RuntimeException(String.format("Property %s returned %s (%s)", this.name(), result.toString(), result.getClass().getCanonicalName()));
+            }
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException("Unable to get single value for " + this.name() + " from " + node, e);
+        }
+    }
+
+    public Object singleValueFor(Node node) {
+        String getterName = "get" + Utils.capitalize(camelCaseName());
+        try {
+            Object result = node.getClass().getMethod(getterName).invoke(node);
+            if (result == null) {
+                return null;
+            }
+           if (result instanceof Optional){
+                Optional<Node> opt = (Optional<Node>)result;
+                if (opt.isPresent()) {
+                    return opt.get();
+                } else {
+                    return null;
+                }
+            } else {
+                return result;
             }
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException("Unable to get single value for " + this.name() + " from " + node, e);
