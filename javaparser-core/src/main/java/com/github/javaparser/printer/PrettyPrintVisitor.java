@@ -856,7 +856,6 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
         }
         printOrphanCommentsEnding(n);
         printer.print("}");
-
     }
 
     @Override
