@@ -116,7 +116,7 @@ public enum ObservableProperty {
     ELEMENT_TYPE,
     VAR_ARGS(MULTIPLE_REFERENCE),
     MAXIMUM_COMMON_TYPE(),
-    DIAMOND_OPERATOR;
+    USING_DIAMOND_OPERATOR;
 
     enum Type {
         SINGLE_ATTRIBUTE(false, false),
@@ -187,8 +187,24 @@ public enum ObservableProperty {
         }
     }
 
+    private boolean hasMethod(Node node, String name) {
+        try {
+            node.getClass().getMethod(name);
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+    }
+
     public Object singleValueFor(Node node) {
         String getterName = "get" + Utils.capitalize(camelCaseName());
+        if (!hasMethod(node, getterName)) {
+            if (camelCaseName().startsWith("is")) {
+                getterName = camelCaseName();
+            } else {
+                getterName = "is" + Utils.capitalize(camelCaseName());
+            }
+        }
         try {
             Object result = node.getClass().getMethod(getterName).invoke(node);
             if (result == null) {
@@ -205,7 +221,7 @@ public enum ObservableProperty {
                 return result;
             }
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException("Unable to get single value for " + this.name() + " from " + node, e);
+            throw new RuntimeException("Unable to get single value for " + this.name() + " from " + node + " (class: "+ node.getClass().getSimpleName()+")", e);
         }
     }
 
@@ -248,6 +264,15 @@ public enum ObservableProperty {
         String getterName = "get" + Utils.capitalize(camelCaseName());
         try {
             return (String)node.getClass().getMethod(getterName).invoke(node);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException("Unable to get single value for " + this.name() + " from " + node, e);
+        }
+    }
+
+    public boolean isNull(Node node) {
+        String getterName = "get" + Utils.capitalize(camelCaseName());
+        try {
+            return null != node.getClass().getMethod(getterName).invoke(node);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException("Unable to get single value for " + this.name() + " from " + node, e);
         }
