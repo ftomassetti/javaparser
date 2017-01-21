@@ -25,6 +25,7 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.observer.ObservableProperty;
 import com.github.javaparser.ast.visitor.GenericVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitor;
+import com.github.javaparser.printer.Printable;
 
 /**
  * An assignment expression. It supports the operators that are found the the AssignExpr.Operator enum.
@@ -35,7 +36,7 @@ import com.github.javaparser.ast.visitor.VoidVisitor;
  */
 public final class AssignExpr extends Expression {
 
-    public enum Operator {
+    public enum Operator implements Printable {
         ASSIGN("="),
         PLUS("+="),
         MINUS("-="),
