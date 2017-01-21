@@ -245,7 +245,7 @@ public final class MethodDeclaration extends BodyDeclaration<MethodDeclaration> 
 
     @Override
     public MethodDeclaration setThrownExceptions(final NodeList<ReferenceType> thrownExceptions) {
-        notifyPropertyChange(ObservableProperty.THROWN_TYPES, this.thrownExceptions, thrownExceptions);
+        notifyPropertyChange(ObservableProperty.THROWN_EXCEPTIONS, this.thrownExceptions, thrownExceptions);
         this.thrownExceptions = assertNotNull(thrownExceptions);
         setAsParentNodeOf(this.thrownExceptions);
         return this;

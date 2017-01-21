@@ -101,7 +101,7 @@ public enum ObservableProperty {
     TARGET,
     THEN_EXPR,
     THEN_STMT,
-    THROWN_TYPES(MULTIPLE_REFERENCE),
+    THROWN_EXCEPTIONS(MULTIPLE_REFERENCE),
     TRY_BLOCK,
     TYPE(SINGLE_ATTRIBUTE),
     TYPES,
@@ -116,7 +116,8 @@ public enum ObservableProperty {
     ELEMENT_TYPE,
     VAR_ARGS(MULTIPLE_REFERENCE),
     MAXIMUM_COMMON_TYPE(),
-    USING_DIAMOND_OPERATOR;
+    USING_DIAMOND_OPERATOR,
+    IS_GENERIC;
 
     enum Type {
         SINGLE_ATTRIBUTE(false, false),

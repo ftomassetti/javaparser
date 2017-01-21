@@ -183,7 +183,7 @@ public final class ConstructorDeclaration extends BodyDeclaration<ConstructorDec
 
     @Override
     public ConstructorDeclaration setThrownExceptions(NodeList<ReferenceType> thrownExceptions) {
-        notifyPropertyChange(ObservableProperty.THROWN_TYPES, this.thrownExceptions, thrownExceptions);
+        notifyPropertyChange(ObservableProperty.THROWN_EXCEPTIONS, this.thrownExceptions, thrownExceptions);
         this.thrownExceptions = assertNotNull(thrownExceptions);
         setAsParentNodeOf(this.thrownExceptions);
         return this;
