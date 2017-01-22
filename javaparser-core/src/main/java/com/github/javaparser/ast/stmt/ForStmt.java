@@ -30,6 +30,8 @@ import com.github.javaparser.ast.observer.ObservableProperty;
 import com.github.javaparser.ast.visitor.GenericVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitor;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 import static com.github.javaparser.utils.Utils.assertNotNull;
@@ -134,5 +136,13 @@ public final class ForStmt extends Statement implements NodeWithBody<ForStmt> {
         this.update = assertNotNull(update);
         setAsParentNodeOf(this.update);
         return this;
+    }
+
+    @Override
+    public List<NodeList<?>> getNodeLists() {
+        List<NodeList<?>> res = new LinkedList<>(super.getNodeLists());
+        res.add(initialization);
+        res.add(update);
+        return res;
     }
 }

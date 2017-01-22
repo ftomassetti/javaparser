@@ -70,6 +70,7 @@ public enum ObservableProperty {
     IMPORTS,
     INDEX,
     INITIALIZER,
+    INITIALIZATION,
     INNER,
     IS_INTERFACE,
     ITERABLE,
