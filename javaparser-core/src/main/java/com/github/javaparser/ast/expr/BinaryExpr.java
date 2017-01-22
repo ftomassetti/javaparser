@@ -25,6 +25,7 @@ import com.github.javaparser.Range;
 import com.github.javaparser.ast.observer.ObservableProperty;
 import com.github.javaparser.ast.visitor.GenericVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitor;
+import com.github.javaparser.printer.Printable;
 
 /**
  * An expression with an expression on the left, an expression on the right, and an operator in the middle.
@@ -36,7 +37,7 @@ import com.github.javaparser.ast.visitor.VoidVisitor;
  */
 public final class BinaryExpr extends Expression {
 
-    public enum Operator {
+    public enum Operator implements Printable {
         OR("||"),
         AND("&&"),
         BINARY_OR("|"),
