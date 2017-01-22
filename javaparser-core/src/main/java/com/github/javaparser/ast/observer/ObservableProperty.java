@@ -120,7 +120,9 @@ public enum ObservableProperty {
     USING_DIAMOND_OPERATOR,
     IS_GENERIC,
     IS_DEFAULT,
-    SUPER_TYPES;
+    SUPER_TYPES,
+    IS_POSTFIX,
+    IS_PREFIX;
 
     enum Type {
         SINGLE_ATTRIBUTE(false, false),
@@ -138,13 +140,20 @@ public enum ObservableProperty {
     }
 
     private Type type;
+    private boolean derived;
 
     ObservableProperty(Type type) {
         this.type = type;
+        this.derived = false;
+    }
+
+    ObservableProperty(Type type, boolean derived) {
+        this.type = type;
+        this.derived = derived;
     }
 
     ObservableProperty() {
-        this(Type.SINGLE_REFERENCE);
+        this(Type.SINGLE_REFERENCE, false);
     }
 
     public boolean isAboutNodes() {

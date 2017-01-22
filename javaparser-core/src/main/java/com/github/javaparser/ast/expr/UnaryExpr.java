@@ -26,6 +26,7 @@ import com.github.javaparser.ast.nodeTypes.NodeWithExpression;
 import com.github.javaparser.ast.observer.ObservableProperty;
 import com.github.javaparser.ast.visitor.GenericVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitor;
+import com.github.javaparser.printer.Printable;
 
 /**
  * An expression where an operator is applied to a single expression.
@@ -40,7 +41,7 @@ import com.github.javaparser.ast.visitor.VoidVisitor;
 public final class UnaryExpr extends Expression implements
         NodeWithExpression<UnaryExpr> {
 
-    public enum Operator {
+    public enum Operator implements Printable {
         PLUS("+", false),
         MINUS("-", false),
         PREFIX_INCREMENT("++", false),
@@ -120,5 +121,13 @@ public final class UnaryExpr extends Expression implements
         notifyPropertyChange(ObservableProperty.OPERATOR, this.operator, op);
         this.operator = op;
         return this;
+    }
+
+    public boolean isPostfix() {
+        return operator.isPostfix();
+    }
+
+    public boolean isPrefix() {
+        return !isPostfix();
     }
 }
