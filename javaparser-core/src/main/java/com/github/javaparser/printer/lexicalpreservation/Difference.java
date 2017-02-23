@@ -290,7 +290,8 @@ public class Difference {
         if (csmElement instanceof LexicalDifferenceCalculator.CsmChild) {
             return new ChildTextElement(lpp, ((LexicalDifferenceCalculator.CsmChild) csmElement).getChild());
         } else if (csmElement instanceof CsmToken) {
-            return new TokenTextElement(((CsmToken) csmElement).getTokenType(), ((CsmToken) csmElement).getContent(null));
+            return new TokenTextElement(((CsmToken) csmElement).getTokenType(), ((CsmToken) csmElement).getContent(null)
+            );
         } else {
             throw new UnsupportedOperationException(csmElement.getClass().getSimpleName());
         }
