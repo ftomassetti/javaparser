@@ -1,0 +1,6 @@
+#!/bin/sh
+mvn clean
+mvn clean install
+patch -p0 < ASTParser.patch
+patch -p0 < ASTParserTokenManager.patch
+mvn source:jar install

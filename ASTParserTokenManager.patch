@@ -1,0 +1,61 @@
+--- ./javaparser-core/target/generated-sources/javacc/com/github/javaparser/ASTParserTokenManager.java.orig	2017-02-23 11:56:25.765571378 +0100
++++ ./javaparser-core/target/generated-sources/javacc/com/github/javaparser/ASTParserTokenManager.java	2017-02-23 12:12:04.585610215 +0100
+@@ -2344,11 +2344,12 @@
+    final int endColumn;
+    String im = jjstrLiteralImages[jjmatchedKind];
+    curTokenImage = (im == null) ? input_stream.GetImage() : im;
++   final String originalImage = input_stream.GetOptionalOriginalImage();
+    beginLine = input_stream.getBeginLine();
+    beginColumn = input_stream.getBeginColumn();
+    endLine = input_stream.getEndLine();
+    endColumn = input_stream.getEndColumn();
+-   t = ASTParser.GTToken.newToken(jjmatchedKind, curTokenImage);
++   t = GTToken.newToken(jjmatchedKind, curTokenImage, originalImage != null ? originalImage : curTokenImage);
+ 
+    t.beginLine = beginLine;
+    t.endLine = endLine;
+@@ -2561,22 +2562,22 @@
+ }
+ 
+     /** Constructor. */
+-    public ASTParserTokenManager(JavaCharStream stream){
++    public ASTParserTokenManager(JavaCharStream2 stream){
+ 
+-      if (JavaCharStream.staticFlag)
++      if (JavaCharStream2.staticFlag)
+             throw new RuntimeException("ERROR: Cannot use a static CharStream class with a non-static lexical analyzer.");
+ 
+     input_stream = stream;
+   }
+ 
+   /** Constructor. */
+-  public ASTParserTokenManager (JavaCharStream stream, int lexState){
++  public ASTParserTokenManager(JavaCharStream2 stream, int lexState){
+     ReInit(stream);
+     SwitchTo(lexState);
+   }
+ 
+   /** Reinitialise parser. */
+-  public void ReInit(JavaCharStream stream)
++  public void ReInit(JavaCharStream2 stream)
+   {
+ 	
+     jjmatchedPos = jjnewStateCnt = 0;
+@@ -2594,7 +2595,7 @@
+   }
+ 
+   /** Reinitialise parser. */
+-  public void ReInit( JavaCharStream stream, int lexState)
++  public void ReInit( JavaCharStream2 stream, int lexState)
+   {
+   
+     ReInit( stream);
+@@ -2639,7 +2640,7 @@
+ static final long[] jjtoMore = {
+    0x1300000000L, 0x0L, 0x0L, 
+ };
+-    protected JavaCharStream  input_stream;
++    protected JavaCharStream2  input_stream;
+ 
+     private final int[] jjrounds = new int[130];
+     private final int[] jjstateSet = new int[2 * 130];

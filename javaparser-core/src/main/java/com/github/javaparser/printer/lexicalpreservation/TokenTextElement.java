@@ -37,12 +37,13 @@ class TokenTextElement extends TextElement {
     }
 
     TokenTextElement(JavaToken token) {
-        this(token.getKind(), token.getText());
+        // TODO: check if always OK to use originalText or if we need both
+        this(token.getKind(), /*token.getText()*/ token.originalText);
     }
 
     TokenTextElement(int tokenKind, String text) {
         this.tokenKind = tokenKind;
-        this.text = text;
+        this.text = tokenKind == ASTParserConstants.GT ? ">" : text;
     }
 
     TokenTextElement(int tokenKind) {
