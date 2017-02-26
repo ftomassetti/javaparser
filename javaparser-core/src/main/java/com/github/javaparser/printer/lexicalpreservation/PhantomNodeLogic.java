@@ -22,8 +22,6 @@
 package com.github.javaparser.printer.lexicalpreservation;
 
 import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.observer.AstObserver;
-import com.github.javaparser.ast.observer.AstObserverAdapter;
 import com.github.javaparser.ast.type.UnknownType;
 
 import java.util.IdentityHashMap;
@@ -32,19 +30,9 @@ import java.util.IdentityHashMap;
  * We want to recognize and ignore "phantom" nodes, like the fake type of variable in FieldDeclaration
  */
 class PhantomNodeLogic {
+    private IdentityHashMap<Node, Boolean> isPhantomNodeCache = new IdentityHashMap<>();
 
-    private static final int LEVELS_TO_EXPLORE = 3;
-
-    private static IdentityHashMap<Node, Boolean> isPhantomNodeCache = new IdentityHashMap<>();
-
-    private static AstObserver cacheCleaner = new AstObserverAdapter() {
-        @Override
-        public void parentChange(Node observedNode, Node previousParent, Node newParent) {
-            isPhantomNodeCache.remove(observedNode);
-        }
-    };
-
-    static boolean isPhantomNode(Node node) {
+    boolean isPhantomNode(Node node) {
         boolean res;
         if (isPhantomNodeCache.containsKey(node)) {
             res = isPhantomNodeCache.get(node);
@@ -53,19 +41,18 @@ class PhantomNodeLogic {
                 return true;
             }
             res = (node.getParentNode().isPresent() && !node.getParentNode().get().getRange().get().contains(
-                    node.getRange().get()) || inPhantomNode(node, LEVELS_TO_EXPLORE));
+                    node.getRange().get()) || inPhantomNode(node));
             isPhantomNodeCache.put(node, res);
-            node.register(cacheCleaner);
         }
         return res;
     }
 
     /**
-     * A node contained in a phantom node is also a phantom node. We limit how many levels up we check just for performance reasons.
+     * A node contained in a phantom node is also a phantom node.
      */
-    private static boolean inPhantomNode(Node node, int levels) {
+    private boolean inPhantomNode(Node node) {
         return node.getParentNode().isPresent() &&
                 (isPhantomNode(node.getParentNode().get())
-                        || inPhantomNode(node.getParentNode().get(), levels - 1));
+                        || inPhantomNode(node.getParentNode().get()));
     }
 }
