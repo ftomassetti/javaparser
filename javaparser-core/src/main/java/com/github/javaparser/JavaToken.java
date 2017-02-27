@@ -29,16 +29,19 @@ public class JavaToken {
     public final Range range;
     public final int kind;
     public final String text;
+    public final String originalText;
 
     public JavaToken(Range range, int kind, String text) {
         this.range = range;
         this.kind = kind;
         this.text = text;
+        this.originalText = text;
     }
 
     public JavaToken(Token token) {
         Range range = Range.range(token.beginLine, token.beginColumn, token.endLine, token.endColumn);
         String text = token.image;
+        String originalText = (token instanceof ASTParser.GTToken) ? ((ASTParser.GTToken) token).originalImage : text;
 
         // You could be puzzled by the following lines
         //
@@ -74,14 +77,15 @@ public class JavaToken {
 
         if (token.kind == ASTParserConstants.GT) {
             range = Range.range(token.beginLine, token.beginColumn, token.endLine, token.beginColumn);
-            text = ">";
+            originalText = text = ">";
         } else if (token.kind == ASTParserConstants.RSIGNEDSHIFT) {
             range = Range.range(token.beginLine, token.beginColumn, token.endLine, token.beginColumn + 1);
-            text = ">>";
+            originalText = text = ">>";
         }
         this.range = range;
         this.kind = token.kind;
         this.text = text;
+        this.originalText = originalText;
     }
 
     public Range getRange() {

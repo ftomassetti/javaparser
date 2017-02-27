@@ -13,6 +13,7 @@ import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.UnionType;
 import com.github.javaparser.utils.Utils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -432,6 +433,30 @@ public class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest 
         UnionType unionType = (UnionType)catchClause.getParameter().getType();
 
         assertEquals("Exception | AssertionError", lpp.print(unionType));
+    }
+
+    @Test
+    public void printLowerCaseUnicodeEscape() {
+        String code = "class \\u004a {}";
+        considerCode(code);
+
+        assertEquals("class \\u004a {}", lpp.print(cu));
+    }
+
+    @Test
+    public void printUpperCaseUnicodeEscape() {
+        String code = "class \\u004A {}";
+        considerCode(code);
+
+        assertEquals("class \\u004A {}", lpp.print(cu));
+    }
+
+    @Test
+    public void printMixedCaseUnicodeEscape() {
+        String code = "class \\u00Cc {}";
+        considerCode(code);
+
+        assertEquals("class \\u00Cc {}", lpp.print(cu));
     }
 
     @Test

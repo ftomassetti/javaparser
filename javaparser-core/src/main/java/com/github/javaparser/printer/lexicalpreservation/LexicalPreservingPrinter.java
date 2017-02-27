@@ -57,6 +57,11 @@ import static com.github.javaparser.utils.Utils.decapitalize;
 public class LexicalPreservingPrinter {
 
     //
+    // external helper logic
+    //
+    private final PhantomNodeLogic phantomNodeLogic = new PhantomNodeLogic();
+
+    //
     // Factory methods
     //
 
@@ -189,7 +194,7 @@ public class LexicalPreservingPrinter {
             @Override
             public void process(Node node) {
                 // we do not consider "phantom" nodes here, like the fake type of variable in FieldDeclaration
-                if (!PhantomNodeLogic.isPhantomNode(node)) {
+                if (!phantomNodeLogic.isPhantomNode(node)) {
                     nodesDepthFirst.add(node);
                 }
             }
@@ -210,7 +215,7 @@ public class LexicalPreservingPrinter {
         new TreeVisitor() {
             @Override
             public void process(Node node) {
-                if (!PhantomNodeLogic.isPhantomNode(node)) {
+                if (!phantomNodeLogic.isPhantomNode(node)) {
                     LexicalPreservingPrinter.this.storeInitialTextForOneNode(node, tokensByNode.get(node));
                 }
             }
@@ -223,7 +228,7 @@ public class LexicalPreservingPrinter {
         }
         List<Pair<Range, TextElement>> elements = new LinkedList<>();
         for (Node child : node.getChildNodes()) {
-            if (!PhantomNodeLogic.isPhantomNode(child)) {
+            if (!phantomNodeLogic.isPhantomNode(child)) {
                 elements.add(new Pair<>(child.getRange().get(), new ChildTextElement(this, child)));
             }
         }
