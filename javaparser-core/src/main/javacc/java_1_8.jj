@@ -25,8 +25,9 @@ options {
   JAVA_UNICODE_ESCAPE=true;
   COMMON_TOKEN_ACTION=true;
   JDK_VERSION = "1.8";
-  TOKEN_FACTORY = "ASTParser.GTToken";
+  TOKEN_FACTORY = "ASTParser.GTToken.newToken(jjmatchedKind, curTokenImage, ((JavaParserCharStream) input_stream).GetOptionalOriginalImage()); //";
   JAVA_TEMPLATE_TYPE = "modern";
+  USER_CHAR_STREAM = true;
 }
 
 PARSER_BEGIN(ASTParser)
@@ -69,7 +70,7 @@ final class ASTParser {
     List<Problem> problems = new ArrayList<Problem>();
 
     void reset(Provider provider) {
-        ReInit(provider);
+        ReInit(new JavaParserCharStream(provider));
         problems = new ArrayList<Problem>();
         token_source.reset();
     }
@@ -210,14 +211,16 @@ final class ASTParser {
 
     static final class GTToken extends Token {
         int realKind = ASTParserConstants.GT;
+        final String originalImage;
 
-        GTToken(int kind, String image) {
+        GTToken(int kind, String image, String originalImage) {
             this.kind = kind;
             this.image = image;
+            this.originalImage = originalImage != null ? originalImage : image;
         }
 
-        public static Token newToken(int kind, String image) {
-            return new GTToken(kind, image);
+        public static Token newToken(int kind, String image, String originalImage) {
+            return new GTToken(kind, image, originalImage);
         }
     }
 
@@ -260,7 +263,7 @@ final class ASTParser {
     }
     
     public void setTabSize(int size) {
-        jj_input_stream.setTabSize(size);
+        token_source.input_stream.setTabSize(size);
     }
 }
 

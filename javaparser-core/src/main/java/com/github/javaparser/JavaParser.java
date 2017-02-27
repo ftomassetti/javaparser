@@ -74,7 +74,7 @@ public final class JavaParser {
 
     private ASTParser getParserForProvider(Provider provider) {
         if (astParser == null) {
-            astParser = new ASTParser(provider);
+            astParser = new ASTParser(new JavaParserCharStream(provider));
         } else {
             astParser.reset(provider);
         }
