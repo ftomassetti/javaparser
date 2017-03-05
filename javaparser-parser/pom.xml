@@ -6,9 +6,17 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>javaparser-core</artifactId>
+    <artifactId>javaparser-parser</artifactId>
     <packaging>jar</packaging>
-    <description>The core parser functionality. This may be all you need.</description>
+    <description>The parser</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>javaparser-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
     <licenses>
         <license>
@@ -30,6 +38,29 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>javacc-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>javacc</id>
+                        <goals>
+                            <goal>javacc</goal>
+                        </goals>
+                        <configuration>
+                            <grammarEncoding>${project.build.sourceEncoding}</grammarEncoding>
+                            <jdkVersion>${java.version}</jdkVersion>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.java.dev.javacc</groupId>
+                        <artifactId>javacc</artifactId>
+                        <version>6.1.2</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>animal-sniffer-maven-plugin</artifactId>

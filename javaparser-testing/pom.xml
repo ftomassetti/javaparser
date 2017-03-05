@@ -81,6 +81,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>javaparser-parser</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
