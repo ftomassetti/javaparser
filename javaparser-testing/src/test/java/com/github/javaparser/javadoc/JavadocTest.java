@@ -21,7 +21,6 @@
 
 package com.github.javaparser.javadoc;
 
-import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.javadoc.description.JavadocDescription;
 import org.junit.Test;

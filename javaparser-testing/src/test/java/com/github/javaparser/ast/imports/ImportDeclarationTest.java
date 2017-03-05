@@ -21,7 +21,6 @@
 
 package com.github.javaparser.ast.imports;
 
-import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.ImportDeclaration;
 import org.junit.Test;
 

@@ -20,7 +20,6 @@
  */
 package com.github.javaparser.ast.comments;
 
-import com.github.javaparser.JavaParser;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.AllFieldsConstructor;
 import com.github.javaparser.ast.visitor.GenericVisitor;
@@ -61,9 +60,9 @@ public final class JavadocComment extends Comment {
         v.visit(this, arg);
     }
 
-    public Javadoc parse() {
-        return JavaParser.parseJavadoc(getContent());
-    }
+//    public Javadoc parse() {
+//        return JavaParser.parseJavadoc(getContent());
+//    }
 
     @Override
     public boolean remove(Node node) {

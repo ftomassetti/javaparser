@@ -21,7 +21,6 @@
 
 package com.github.javaparser.wiki_samples.removenode;
 
-import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.VariableDeclarator;

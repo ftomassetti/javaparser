@@ -1,6 +1,5 @@
 package com.github.javaparser.ast.visitor;
 
-import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import org.junit.Test;
 

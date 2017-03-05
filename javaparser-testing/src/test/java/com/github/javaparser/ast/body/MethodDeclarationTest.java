@@ -1,6 +1,5 @@
 package com.github.javaparser.ast.body;
 
-import com.github.javaparser.JavaParser;
 import org.junit.Test;
 
 public class MethodDeclarationTest {

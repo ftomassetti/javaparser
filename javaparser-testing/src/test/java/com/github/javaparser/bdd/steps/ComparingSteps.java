@@ -21,7 +21,6 @@
 
 package com.github.javaparser.bdd.steps;
 
-import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;

@@ -1,6 +1,5 @@
 package com.github.javaparser.manual;
 
-import com.github.javaparser.JavaParser;
 import com.github.javaparser.Problem;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.github.javaparser.utils.Log;

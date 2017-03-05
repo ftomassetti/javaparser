@@ -1,6 +1,5 @@
 package com.github.javaparser.ast.expr;
 
-import com.github.javaparser.JavaParser;
 import org.junit.Test;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;

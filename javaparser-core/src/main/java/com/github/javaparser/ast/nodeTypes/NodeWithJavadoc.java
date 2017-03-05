@@ -48,14 +48,14 @@ public interface NodeWithJavadoc<N extends Node> {
                 .map(comment -> (JavadocComment) comment);
     }
 
-    /**
-     * Gets the Javadoc for this node. You can set the Javadoc by calling setJavadocComment passing a Javadoc.
-     *
-     * @return The Javadoc for this node wrapped in an optional as it may be absent.
-     */
-    default Optional<Javadoc> getJavadoc() {
-        return getJavadocComment().map(JavadocComment::parse);
-    }
+//    /**
+//     * Gets the Javadoc for this node. You can set the Javadoc by calling setJavadocComment passing a Javadoc.
+//     *
+//     * @return The Javadoc for this node wrapped in an optional as it may be absent.
+//     */
+//    default Optional<Javadoc> getJavadoc() {
+//        return getJavadocComment().map(JavadocComment::parse);
+//    }
 
     /**
      * Use this to store additional information to this node.

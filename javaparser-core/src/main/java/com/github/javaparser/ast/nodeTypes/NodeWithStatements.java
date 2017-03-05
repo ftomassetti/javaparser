@@ -21,7 +21,6 @@
 
 package com.github.javaparser.ast.nodeTypes;
 
-import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
@@ -29,7 +28,7 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 
-import static com.github.javaparser.JavaParser.*;
+//import static com.github.javaparser.JavaParser.*;
 
 /**
  * A node that contains a list of statements.
@@ -65,12 +64,12 @@ public interface NodeWithStatements<N extends Node> {
         return addStatement(new ExpressionStmt(expr));
     }
 
-    /**
-     * It will use {@link JavaParser#parseStatement(String)} inside, so it should end with a semi column
-     */
-    default N addStatement(String statement) {
-        return addStatement(parseStatement(statement));
-    }
+//    /**
+//     * It will use {@link JavaParser#parseStatement(String)} inside, so it should end with a semi column
+//     */
+//    default N addStatement(String statement) {
+//        return addStatement(parseStatement(statement));
+//    }
 
     default N addStatement(int index, final Expression expr) {
         Statement stmt = new ExpressionStmt(expr);

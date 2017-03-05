@@ -1,6 +1,5 @@
 package japa.bdd.samples;
 
-import com.github.javaparser.JavaParser;
 import japa.parser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
 import org.junit.Ignore;

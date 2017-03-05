@@ -20,7 +20,6 @@
  */
 package com.github.javaparser.ast;
 
-import com.github.javaparser.JavaParser;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -42,7 +41,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import static com.github.javaparser.JavaParser.parseName;
 import static com.github.javaparser.utils.Utils.assertNotNull;
 
 /**
@@ -232,70 +230,70 @@ public final class CompilationUnit extends Node {
         return this;
     }
 
-    /**
-     * sets the package declaration of this compilation unit
-     *
-     * @param name the name of the package
-     * @return this, the {@link CompilationUnit}
-     */
-    public CompilationUnit setPackageDeclaration(String name) {
-        setPackageDeclaration(new PackageDeclaration(parseName(name)));
-        return this;
-    }
+//    /**
+//     * sets the package declaration of this compilation unit
+//     *
+//     * @param name the name of the package
+//     * @return this, the {@link CompilationUnit}
+//     */
+//    public CompilationUnit setPackageDeclaration(String name) {
+//        setPackageDeclaration(new PackageDeclaration(parseName(name)));
+//        return this;
+//    }
+//
+//    /**
+//     * Add an import to the list of {@link ImportDeclaration} of this compilation unit<br>
+//     * shorthand for {@link #addImport(String, boolean, boolean)} with name,false,false
+//     *
+//     * @param name the import name
+//     * @return this, the {@link CompilationUnit}
+//     */
+//    public CompilationUnit addImport(String name) {
+//        return addImport(name, false, false);
+//    }
 
-    /**
-     * Add an import to the list of {@link ImportDeclaration} of this compilation unit<br>
-     * shorthand for {@link #addImport(String, boolean, boolean)} with name,false,false
-     *
-     * @param name the import name
-     * @return this, the {@link CompilationUnit}
-     */
-    public CompilationUnit addImport(String name) {
-        return addImport(name, false, false);
-    }
+//    /**
+//     * Add an import to the list of {@link ImportDeclaration} of this compilation unit<br>
+//     * shorthand for {@link #addImport(String)} with clazz.getName()
+//     *
+//     * @param clazz the class to import
+//     * @return this, the {@link CompilationUnit}
+//     */
+//    public CompilationUnit addImport(Class<?> clazz) {
+//        if (ClassUtils.isPrimitiveOrWrapper(clazz) || clazz.getName().startsWith("java.lang"))
+//            return this;
+//        else if (clazz.isArray() && !ClassUtils.isPrimitiveOrWrapper(clazz.getComponentType()) && !clazz.getComponentType().getName().startsWith("java.lang"))
+//            return addImport(clazz.getComponentType().getName());
+//        return addImport(clazz.getName());
+//    }
 
-    /**
-     * Add an import to the list of {@link ImportDeclaration} of this compilation unit<br>
-     * shorthand for {@link #addImport(String)} with clazz.getName()
-     *
-     * @param clazz the class to import
-     * @return this, the {@link CompilationUnit}
-     */
-    public CompilationUnit addImport(Class<?> clazz) {
-        if (ClassUtils.isPrimitiveOrWrapper(clazz) || clazz.getName().startsWith("java.lang"))
-            return this;
-        else if (clazz.isArray() && !ClassUtils.isPrimitiveOrWrapper(clazz.getComponentType()) && !clazz.getComponentType().getName().startsWith("java.lang"))
-            return addImport(clazz.getComponentType().getName());
-        return addImport(clazz.getName());
-    }
-
-    /**
-     * Add an import to the list of {@link ImportDeclaration} of this compilation unit<br>
-     * <b>This method check if no import with the same name is already in the list</b>
-     *
-     * @param name the import name
-     * @param isStatic is it an "import static"
-     * @param isAsterisk does the import end with ".*"
-     * @return this, the {@link CompilationUnit}
-     */
-    public CompilationUnit addImport(String name, boolean isStatic, boolean isAsterisk) {
-        final StringBuilder i = new StringBuilder("import ");
-        if (isStatic) {
-            i.append("static ");
-        }
-        i.append(name);
-        if (isAsterisk) {
-            i.append(".*");
-        }
-        i.append(";");
-        ImportDeclaration importDeclaration = JavaParser.parseImport(i.toString());
-        if (getImports().stream().anyMatch( im -> im.toString().equals(importDeclaration.toString())))
-            return this;
-        else {
-            getImports().add(importDeclaration);
-            return this;
-        }
-    }
+//    /**
+//     * Add an import to the list of {@link ImportDeclaration} of this compilation unit<br>
+//     * <b>This method check if no import with the same name is already in the list</b>
+//     *
+//     * @param name the import name
+//     * @param isStatic is it an "import static"
+//     * @param isAsterisk does the import end with ".*"
+//     * @return this, the {@link CompilationUnit}
+//     */
+//    public CompilationUnit addImport(String name, boolean isStatic, boolean isAsterisk) {
+//        final StringBuilder i = new StringBuilder("import ");
+//        if (isStatic) {
+//            i.append("static ");
+//        }
+//        i.append(name);
+//        if (isAsterisk) {
+//            i.append(".*");
+//        }
+//        i.append(";");
+//        ImportDeclaration importDeclaration = JavaParser.parseImport(i.toString());
+//        if (getImports().stream().anyMatch( im -> im.toString().equals(importDeclaration.toString())))
+//            return this;
+//        else {
+//            getImports().add(importDeclaration);
+//            return this;
+//        }
+//    }
 
     /**
      * Add a public class to the types of this compilation unit
