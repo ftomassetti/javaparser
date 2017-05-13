@@ -26,6 +26,10 @@ import com.github.javaparser.JavaToken;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.TokenTypes;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 import static com.github.javaparser.utils.Utils.EOL;
 
 class TokenTextElement extends TextElement {
@@ -127,5 +131,12 @@ class TokenTextElement extends TextElement {
     @Override
     public boolean isNewline() {
         return TokenTypes.isEndOfLineCharacter(tokenKind);
+    }
+
+    @Override
+    List<TokenTextElement> expandToTokens() {
+        List<TokenTextElement> res = new LinkedList<>();
+        res.add(this);
+        return res;
     }
 }

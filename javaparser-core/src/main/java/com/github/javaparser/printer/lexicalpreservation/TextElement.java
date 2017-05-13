@@ -24,6 +24,8 @@ package com.github.javaparser.printer.lexicalpreservation;
 import com.github.javaparser.GeneratedJavaParserConstants;
 import com.github.javaparser.ast.Node;
 
+import java.util.List;
+
 public abstract class TextElement implements TextElementMatcher {
 
     abstract String expand();
@@ -54,5 +56,7 @@ public abstract class TextElement implements TextElementMatcher {
     public final boolean isWhiteSpaceOrComment() {
         return isWhiteSpace() || isComment();
     }
+
+    abstract List<TokenTextElement> expandToTokens();
 
 }

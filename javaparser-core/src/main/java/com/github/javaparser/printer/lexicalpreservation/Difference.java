@@ -39,6 +39,10 @@ public class Difference {
         static DifferenceElement kept(CsmElement element) {
             return new Kept(element);
         }
+
+        boolean isAdded();
+        boolean isKept();
+        CsmElement getElement();
     }
 
     private static class Added implements DifferenceElement {
@@ -66,6 +70,21 @@ public class Difference {
         @Override
         public int hashCode() {
             return element.hashCode();
+        }
+
+        @Override
+        public boolean isAdded() {
+            return true;
+        }
+
+        @Override
+        public boolean isKept() {
+            return false;
+        }
+
+        @Override
+        public CsmElement getElement() {
+            return element;
         }
     }
 
@@ -95,6 +114,20 @@ public class Difference {
         public int hashCode() {
             return element.hashCode();
         }
+
+        public boolean isAdded() {
+            return false;
+        }
+
+        @Override
+        public boolean isKept() {
+            return true;
+        }
+
+        @Override
+        public CsmElement getElement() {
+            return element;
+        }
     }
 
     private static class Removed implements DifferenceElement {
@@ -122,6 +155,20 @@ public class Difference {
         @Override
         public int hashCode() {
             return element.hashCode();
+        }
+
+        public boolean isAdded() {
+            return false;
+        }
+
+        @Override
+        public boolean isKept() {
+            return false;
+        }
+
+        @Override
+        public CsmElement getElement() {
+            return element;
         }
     }
 
@@ -231,6 +278,7 @@ public class Difference {
         if (originalIndex < original.elements.size() || afterIndex < after.elements.size()) {
             elements.addAll(calculateImpl(original.sub(originalIndex, original.elements.size()), after.sub(afterIndex, after.elements.size())).elements);
         }
+
         return new Difference(elements);
     }
 

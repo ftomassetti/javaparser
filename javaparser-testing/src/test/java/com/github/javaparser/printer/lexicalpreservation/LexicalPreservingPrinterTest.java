@@ -526,17 +526,15 @@ public class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest 
         CompilationUnit cu = result.a.getResult().get();
 
         cu.getTypes().stream()
-                .forEach(type -> {
-                    type.getMembers().stream()
-                            .forEach(member -> {
-                                if (member instanceof MethodDeclaration) {
-                                    MethodDeclaration methodDeclaration = (MethodDeclaration) member;
-                                    if (!methodDeclaration.getAnnotationByName("Override").isPresent()) {
-                                        methodDeclaration.addAnnotation("Override");
-                                    }
+                .forEach(type -> type.getMembers().stream()
+                        .forEach(member -> {
+                            if (member instanceof MethodDeclaration) {
+                                MethodDeclaration methodDeclaration = (MethodDeclaration) member;
+                                if (!methodDeclaration.getAnnotationByName("Override").isPresent()) {
+                                    methodDeclaration.addAnnotation("Override");
                                 }
-                            });
-                });
+                            }
+                        }));
         assertEquals("public class TestPage extends Page {" + EOL +
                 EOL +
                 "   @Override()" + EOL +

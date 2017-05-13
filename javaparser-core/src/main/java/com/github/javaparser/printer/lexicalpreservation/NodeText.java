@@ -180,6 +180,12 @@ class NodeText {
         return sb.toString();
     }
 
+    List<TokenTextElement> expandToTokens() {
+        List<TokenTextElement> tokens = new LinkedList<>();
+        elements.forEach(el -> tokens.addAll(el.expandToTokens()));
+        return tokens;
+    }
+
     // Visible for testing
     int numberOfElements() {
         return elements.size();

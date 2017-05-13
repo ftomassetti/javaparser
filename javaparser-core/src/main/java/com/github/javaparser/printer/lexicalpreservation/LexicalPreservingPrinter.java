@@ -26,6 +26,7 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.JavadocComment;
+import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.observer.AstObserver;
 import com.github.javaparser.ast.observer.ObservableProperty;
 import com.github.javaparser.ast.observer.PropagatingAstObserver;
@@ -165,9 +166,10 @@ public class LexicalPreservingPrinter {
                             findNodeListName(changedList), changedList, index, nodeAddedOrRemoved)
                             .apply(nodeText, changedList.getParentNodeForChildren());
                 } else if (type == ListChangeType.ADDITION) {
-                    new LexicalDifferenceCalculator().calculateListAdditionDifference(
-                            findNodeListName(changedList), changedList, index, nodeAddedOrRemoved)
-                            .apply(nodeText, changedList.getParentNodeForChildren());
+                    Difference difference = new LexicalDifferenceCalculator().calculateListAdditionDifference(
+                            findNodeListName(changedList), changedList, index, nodeAddedOrRemoved);
+                    ensureNodeTextIsAvailableForAllChildren(changedList.getParentNodeForChildren(), difference);
+                    difference.apply(nodeText, changedList.getParentNodeForChildren());
                 } else {
                     throw new UnsupportedOperationException();
                 }
@@ -176,9 +178,27 @@ public class LexicalPreservingPrinter {
             @Override
             public void concreteListReplacement(NodeList changedList, int index, Node oldValue, Node newValue) {
                 NodeText nodeText = lpp.getTextForNode(changedList.getParentNodeForChildren());
-                new LexicalDifferenceCalculator().calculateListReplacementDifference(
-                        findNodeListName(changedList), changedList, index, oldValue, newValue)
-                        .apply(nodeText, changedList.getParentNodeForChildren());
+                Difference difference = new LexicalDifferenceCalculator().calculateListReplacementDifference(
+                        findNodeListName(changedList), changedList, index, oldValue, newValue);
+                ensureNodeTextIsAvailableForAllChildren(changedList.getParentNodeForChildren(),difference);
+                difference.apply(nodeText, changedList.getParentNodeForChildren());
+            }
+
+            private void ensureNodeTextIsAvailableForAllChildren(Node node, Difference difference) {
+                // At this point we want to ensure that all the new nodes have their NodeText calculated
+                // and it has the right indentation
+                for (int i=0;i<difference.getElements().size();i++) {
+                    Difference.DifferenceElement el = difference.getElements().get(i);
+                    if (el.isAdded() && el.getElement() instanceof LexicalDifferenceCalculator.CsmChild) {
+                        LexicalDifferenceCalculator.CsmChild child = (LexicalDifferenceCalculator.CsmChild) el.getElement();
+                        if (lpp.getTextForNode(child.getChild()) == null) {
+                            List<TokenTextElement> preceedingTokens = lpp.preceedingTokens(node, difference.getElements().subList(0, i));
+                            List<TokenTextElement> indentation = lpp.indentationFor(preceedingTokens);
+                            // Just count the number of left brackets preceeding this element
+                            throw new RuntimeException("SSS " + child.getChild().getClass().getCanonicalName());
+                        }
+                    }
+                }
             }
         };
     }
@@ -275,12 +295,11 @@ public class LexicalPreservingPrinter {
      * Print a Node into a Writer, preserving the lexical information.
      */
     public void print(Node node, Writer writer) throws IOException {
-        if (textForNodes.containsKey(node)) {
-            final NodeText text = textForNodes.get(node);
-            writer.append(text.expand());
-        } else {
-            writer.append(node.toString());
+        if (!textForNodes.containsKey(node) && !(node instanceof SimpleName)) {
+            throw new RuntimeException("We do not know the indentation for the node here: " + node);
         }
+        final NodeText text = getOrCreateNodeText(node);
+        writer.append(text.expand());
     }
 
     //
