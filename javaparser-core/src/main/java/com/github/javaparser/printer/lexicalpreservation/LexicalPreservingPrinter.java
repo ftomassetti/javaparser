@@ -159,11 +159,15 @@ public class LexicalPreservingPrinter {
 
             @Override
             public void concreteListChange(NodeList changedList, ListChangeType type, int index, Node nodeAddedOrRemoved) {
-                NodeText nodeText = lpp.getTextForNode(changedList.getParentNodeForChildren());
+                NodeText nodeText = lpp.getOrCreateNodeText(changedList.getParentNodeForChildren());
                 if (type == ListChangeType.REMOVAL) {
-                    new LexicalDifferenceCalculator().calculateListRemovalDifference(findNodeListName(changedList), changedList, index, nodeAddedOrRemoved).apply(nodeText, changedList.getParentNodeForChildren());
+                    new LexicalDifferenceCalculator().calculateListRemovalDifference(
+                            findNodeListName(changedList), changedList, index, nodeAddedOrRemoved)
+                            .apply(nodeText, changedList.getParentNodeForChildren());
                 } else if (type == ListChangeType.ADDITION) {
-                    new LexicalDifferenceCalculator().calculateListAdditionDifference(findNodeListName(changedList),changedList, index, nodeAddedOrRemoved).apply(nodeText, changedList.getParentNodeForChildren());
+                    new LexicalDifferenceCalculator().calculateListAdditionDifference(
+                            findNodeListName(changedList), changedList, index, nodeAddedOrRemoved)
+                            .apply(nodeText, changedList.getParentNodeForChildren());
                 } else {
                     throw new UnsupportedOperationException();
                 }
@@ -172,7 +176,9 @@ public class LexicalPreservingPrinter {
             @Override
             public void concreteListReplacement(NodeList changedList, int index, Node oldValue, Node newValue) {
                 NodeText nodeText = lpp.getTextForNode(changedList.getParentNodeForChildren());
-                new LexicalDifferenceCalculator().calculateListReplacementDifference(findNodeListName(changedList), changedList, index, oldValue, newValue).apply(nodeText, changedList.getParentNodeForChildren());
+                new LexicalDifferenceCalculator().calculateListReplacementDifference(
+                        findNodeListName(changedList), changedList, index, oldValue, newValue)
+                        .apply(nodeText, changedList.getParentNodeForChildren());
             }
         };
     }
@@ -286,8 +292,29 @@ public class LexicalPreservingPrinter {
             NodeText nodeText = new NodeText(this);
             PrimitiveType primitiveType = (PrimitiveType)node;
             switch (primitiveType.getType()) {
+                case BOOLEAN:
+                    nodeText.addToken(GeneratedJavaParserConstants.BOOLEAN, node.toString());
+                    break;
+                case CHAR:
+                    nodeText.addToken(GeneratedJavaParserConstants.CHAR, node.toString());
+                    break;
+                case BYTE:
+                    nodeText.addToken(GeneratedJavaParserConstants.BYTE, node.toString());
+                    break;
+                case SHORT:
+                    nodeText.addToken(GeneratedJavaParserConstants.SHORT, node.toString());
+                    break;
                 case INT:
                     nodeText.addToken(GeneratedJavaParserConstants.INT, node.toString());
+                    break;
+                case LONG:
+                    nodeText.addToken(GeneratedJavaParserConstants.LONG, node.toString());
+                    break;
+                case FLOAT:
+                    nodeText.addToken(GeneratedJavaParserConstants.FLOAT, node.toString());
+                    break;
+                case DOUBLE:
+                    nodeText.addToken(GeneratedJavaParserConstants.DOUBLE, node.toString());
                     break;
                 default:
                     throw new IllegalArgumentException();

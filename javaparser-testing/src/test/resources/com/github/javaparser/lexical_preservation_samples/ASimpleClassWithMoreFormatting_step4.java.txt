@@ -24,6 +24,7 @@ MyRenamedClass
         return aField;
     }
 
-    public void setAField() {
+    public void setAField(boolean aField) {
+        this.aField = aField;
     }
 }

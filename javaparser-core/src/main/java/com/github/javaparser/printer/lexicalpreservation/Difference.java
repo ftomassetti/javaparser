@@ -373,10 +373,10 @@ public class Difference {
      * to the difference (adding and removing the elements provided).
      */
     void apply(NodeText nodeText, Node node) {
-        List<TokenTextElement> indentation = nodeText.getLexicalPreservingPrinter().findIndentation(node);
         if (nodeText == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("NodeText should not be null");
         }
+        List<TokenTextElement> indentation = nodeText.getLexicalPreservingPrinter().findIndentation(node);
         int diffIndex = 0;
         int nodeTextIndex = 0;
         do {

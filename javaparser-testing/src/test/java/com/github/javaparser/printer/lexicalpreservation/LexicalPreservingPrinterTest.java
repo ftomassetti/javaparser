@@ -560,14 +560,16 @@ public class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest 
         MethodDeclaration setter = cu
                 .getClassByName("MyRenamedClass").get()
                 .addMethod("setAField", Modifier.PUBLIC);
+        assertEquals(readExample("ASimpleClassWithMoreFormatting_step2"), lpp.print(cu));
         setter.addParameter("boolean", "aField");
+        assertEquals(readExample("ASimpleClassWithMoreFormatting_step3"), lpp.print(cu));
         setter.getBody().get().getStatements().add(new ExpressionStmt(
                 new AssignExpr(
                         new FieldAccessExpr(new ThisExpr(),"aField"),
                         new NameExpr("aField"),
                         AssignExpr.Operator.ASSIGN
                 )));
-        assertEquals(readExample("ASimpleClassWithMoreFormatting_step2"), lpp.print(cu));
+        assertEquals(readExample("ASimpleClassWithMoreFormatting_step4"), lpp.print(cu));
     }
 
 }
