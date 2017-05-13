@@ -220,6 +220,7 @@ public class LexicalPreservingPrinter {
         for (Iterator<TokenTextElement> it = tokensPreceeding(node); it.hasNext(); ) {
             tokens.add(it.next());
         }
+        Collections.reverse(tokens);
         differenceElements.forEach(de -> {
             if (de.isAdded() || de.isKept()) {
                 if (de.getElement() instanceof CsmToken) {

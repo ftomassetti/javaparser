@@ -382,6 +382,9 @@ public class Difference {
         if (nodeTextIndex > 0 && nodeText.getElements().get(nodeTextIndex - 1).isToken(LBRACE)) {
             return true;
         }
+        if (nodeTextIndex >= 2 && nodeText.getElements().get(nodeTextIndex - 2).isToken(LBRACE) && nodeText.getElements().get(nodeTextIndex - 1).isNewline()) {
+            return true;
+        }
         if (nodeTextIndex > 0 && nodeText.getElements().get(nodeTextIndex - 1).isWhiteSpace() && !nodeText.getElements().get(nodeTextIndex - 1).isNewline()) {
             return isAfterLBrace(nodeText, nodeTextIndex - 1);
         }
@@ -466,8 +469,13 @@ public class Difference {
                     TextElement textElement = toTextElement(nodeText.getLexicalPreservingPrinter(), ((Added) diffEl).element);
                     boolean used = false;
                     if (nodeTextIndex > 0 && nodeText.getElements().get(nodeTextIndex - 1).isNewline()) {
+                        boolean afterBrace = isAfterLBrace(nodeText, nodeTextIndex);
                         for (TextElement e : processIndentation(indentation, nodeText.getElements().subList(0, nodeTextIndex - 1))) {
                             nodeText.addElement(nodeTextIndex++, e);
+                        }
+                        if (afterBrace && !isAReplacement(diffIndex)) {
+                            indentationBlock().forEach(e -> nodeText.addElement(e));
+                            nodeTextIndex += indentationBlock().size();
                         }
                     } else if (isAfterLBrace(nodeText, nodeTextIndex) && !isAReplacement(diffIndex)) {
                         if (textElement.isNewline()) {
