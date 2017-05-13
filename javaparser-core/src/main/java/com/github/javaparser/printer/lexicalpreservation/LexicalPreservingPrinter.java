@@ -192,15 +192,65 @@ public class LexicalPreservingPrinter {
                     if (el.isAdded() && el.getElement() instanceof LexicalDifferenceCalculator.CsmChild) {
                         LexicalDifferenceCalculator.CsmChild child = (LexicalDifferenceCalculator.CsmChild) el.getElement();
                         if (lpp.getTextForNode(child.getChild()) == null) {
-                            List<TokenTextElement> preceedingTokens = lpp.preceedingTokens(node, difference.getElements().subList(0, i));
-                            List<TokenTextElement> indentation = lpp.indentationFor(preceedingTokens);
-                            // Just count the number of left brackets preceeding this element
-                            throw new RuntimeException("SSS " + child.getChild().getClass().getCanonicalName());
+
+                            // The indentation of the node should be calculated considering the preceeding elements
+                            List<TokenTextElement> tokensPreceeding = lpp.tokensPreceeding(node, difference.getElements().subList(0, i - 1));
+
+                            List<TokenTextElement> indentation = lpp.calculateIndentation(tokensPreceeding);
+                            lpp.createNodeText(child.getChild(), indentation);
                         }
                     }
                 }
             }
         };
+    }
+
+    private void createNodeText(Node node, List<TokenTextElement> indentation) {
+        if (this.textForNodes.containsKey(node)) {
+            throw new IllegalStateException("NodeText already present for " + node);
+        }
+        node.getChildNodes().forEach(child -> createNodeText(child, indentation));
+
+        NodeText nodeText = prettyPrintingTextNode(node, indentation);
+        textForNodes.put(node, nodeText);
+    }
+
+    private List<TokenTextElement> tokensPreceeding(Node node, List<Difference.DifferenceElement> differenceElements) {
+        List<TokenTextElement> tokens = new LinkedList<>();
+        for (Iterator<TokenTextElement> it = tokensPreceeding(node); it.hasNext(); ) {
+            tokens.add(it.next());
+        }
+        differenceElements.forEach(de -> {
+            if (de.isAdded() || de.isKept()) {
+                if (de.getElement() instanceof CsmToken) {
+                    CsmToken csmToken = (CsmToken) de.getElement();
+                    tokens.add(new TokenTextElement(csmToken.getTokenType(), csmToken.getContent(null)));
+                } else if (de.getElement() instanceof LexicalDifferenceCalculator.CsmChild) {
+                    LexicalDifferenceCalculator.CsmChild csmChild = (LexicalDifferenceCalculator.CsmChild) de.getElement();
+                    tokens.addAll(getTextForNode(csmChild.getChild()).expandToTokens());
+                } else {
+                    throw new RuntimeException(de.getElement().getClass().getCanonicalName());
+                }
+            }
+        });
+        return tokens;
+    }
+
+    private List<TokenTextElement> calculateIndentation(List<TokenTextElement> tokensPreceeding) {
+        while (!tokensPreceeding.isEmpty() && tokensPreceeding.get(tokensPreceeding.size() - 1).isNewline()) {
+            tokensPreceeding = tokensPreceeding.subList(0, tokensPreceeding.size() - 1);
+        }
+        int startLastLine = 0;
+        for (int i=tokensPreceeding.size() - 1; i>=0 && startLastLine == 0;i--) {
+            if (tokensPreceeding.get(i).isNewline()) {
+                startLastLine = i+1;
+            }
+        }
+        int endIndentation = startLastLine;
+        while (tokensPreceeding.size() > endIndentation && tokensPreceeding.get(endIndentation).isSpaceOrTab()) {
+            endIndentation++;
+        }
+        return tokensPreceeding.subList(startLastLine, endIndentation);
     }
 
     private void storeInitialText(ParseResult<? extends Node> parseResult) {
@@ -296,7 +346,7 @@ public class LexicalPreservingPrinter {
      */
     public void print(Node node, Writer writer) throws IOException {
         if (!textForNodes.containsKey(node) && !(node instanceof SimpleName)) {
-            throw new RuntimeException("We do not know the indentation for the node here: " + node);
+            throw new RuntimeException("We do not know the indentation for the node here: " + node+ " (class: "+node.getClass().getCanonicalName()+")");
         }
         final NodeText text = getOrCreateNodeText(node);
         writer.append(text.expand());
@@ -307,6 +357,10 @@ public class LexicalPreservingPrinter {
     //
 
     private NodeText prettyPrintingTextNode(Node node) {
+        return prettyPrintingTextNode(node, null);
+    }
+
+    private NodeText prettyPrintingTextNode(Node node, List<TokenTextElement> indentation) {
         if (node instanceof PrimitiveType) {
             NodeText nodeText = new NodeText(this);
             PrimitiveType primitiveType = (PrimitiveType)node;
@@ -346,17 +400,24 @@ public class LexicalPreservingPrinter {
             return nodeText;
         }
 
-        return interpret(node, ConcreteSyntaxModel.forClass(node.getClass()));
+        return interpret(node, ConcreteSyntaxModel.forClass(node.getClass()), indentation);
     }
 
     private NodeText interpret(Node node, CsmElement csm) {
-        LexicalDifferenceCalculator.CalculatedSyntaxModel calculatedSyntaxModel = new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csm, node);
+        return interpret(node, csm, null);
+    }
+
+    private NodeText interpret(Node node, CsmElement csm, List<TokenTextElement> indentation) {
+        LexicalDifferenceCalculator.CalculatedSyntaxModel calculatedSyntaxModel = new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csm, node, indentation != null);
         NodeText nodeText = new NodeText(this);
         for (CsmElement element : calculatedSyntaxModel.elements) {
             if (element instanceof LexicalDifferenceCalculator.CsmChild) {
                 nodeText.addChild(((LexicalDifferenceCalculator.CsmChild) element).getChild());
             } else if (element instanceof CsmToken){
                 nodeText.addToken(((CsmToken) element).getTokenType(), ((CsmToken) element).getContent(node));
+                if (TokenTypes.isEndOfLineCharacter(((CsmToken) element).getTokenType())) {
+                    indentation.forEach(el -> nodeText.addElement(el));
+                }
             } else {
                 throw new UnsupportedOperationException(element.getClass().getSimpleName());
             }

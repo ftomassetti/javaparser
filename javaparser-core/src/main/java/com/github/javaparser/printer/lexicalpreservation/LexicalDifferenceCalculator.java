@@ -8,6 +8,7 @@ import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.observer.ObservableProperty;
 import com.github.javaparser.printer.ConcreteSyntaxModel;
+import com.github.javaparser.printer.Printable;
 import com.github.javaparser.printer.SourcePrinter;
 import com.github.javaparser.printer.concretesyntaxmodel.*;
 import com.github.javaparser.printer.lexicalpreservation.changes.*;
@@ -119,16 +120,28 @@ class LexicalDifferenceCalculator {
 
     // Visible for testing
     CalculatedSyntaxModel calculatedSyntaxModelForNode(CsmElement csm, Node node) {
+        return calculatedSyntaxModelForNode(csm, node, false);
+    }
+
+    CalculatedSyntaxModel calculatedSyntaxModelForNode(CsmElement csm, Node node, boolean consideringIndentation) {
         List<CsmElement> elements = new LinkedList<>();
-        calculatedSyntaxModelForNode(csm, node, elements, new NoChange());
+        calculatedSyntaxModelForNode(csm, node, elements, new NoChange(), consideringIndentation);
         return new CalculatedSyntaxModel(elements);
     }
 
     CalculatedSyntaxModel calculatedSyntaxModelForNode(Node node) {
-        return calculatedSyntaxModelForNode(ConcreteSyntaxModel.forClass(node.getClass()), node);
+        return calculatedSyntaxModelForNode(node, false);
+    }
+
+    CalculatedSyntaxModel calculatedSyntaxModelForNode(Node node, boolean consideringIndentation) {
+        return calculatedSyntaxModelForNode(ConcreteSyntaxModel.forClass(node.getClass()), node, consideringIndentation);
     }
 
     private void calculatedSyntaxModelForNode(CsmElement csm, Node node, List<CsmElement> elements, Change change) {
+        calculatedSyntaxModelForNode(csm, node, elements, change, false);
+    }
+
+    private void calculatedSyntaxModelForNode(CsmElement csm, Node node, List<CsmElement> elements, Change change, boolean consideringIndentation) {
         if (csm instanceof CsmSequence) {
             CsmSequence csmSequence = (CsmSequence) csm;
             csmSequence.getElements().forEach(e -> calculatedSyntaxModelForNode(e, node, elements, change));
@@ -203,13 +216,21 @@ class LexicalDifferenceCalculator {
                 calculatedSyntaxModelForNode(csmConditional.getElseElement(), node, elements, change);
             }
         } else if (csm instanceof CsmIndent) {
-            //elements.add(csm);
+            if (consideringIndentation) {
+                elements.add(csm);
+            }
         } else if (csm instanceof CsmUnindent) {
-            //elements.add(csm);
+            if (consideringIndentation) {
+                elements.add(csm);
+            }
         } else if (csm instanceof CsmAttribute) {
             CsmAttribute csmAttribute = (CsmAttribute)csm;
             Object value = change.getValue(csmAttribute.getProperty(), node);
-            elements.add(new CsmToken(csmAttribute.getTokenType(value.toString()), value.toString()));
+            String text = value.toString();
+            if (value instanceof Printable) {
+                text = ((Printable)value).asString();
+            }
+            elements.add(new CsmToken(csmAttribute.getTokenType(value.toString()), text));
         } else {
             throw new UnsupportedOperationException(csm.getClass().getSimpleName());
         }

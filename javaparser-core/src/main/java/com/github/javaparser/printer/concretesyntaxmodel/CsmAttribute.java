@@ -54,6 +54,9 @@ public class CsmAttribute implements CsmElement {
                 }
             }
         }
+        if (property == ObservableProperty.OPERATOR && text.equals("ASSIGN")) {
+            return GeneratedJavaParserConstants.ASSIGN;
+        }
         throw new UnsupportedOperationException(property.name()+ " " + text);
     }
 }

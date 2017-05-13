@@ -23,7 +23,7 @@ MyRenamedClass
     {
         return aField;
     }
-
+    
     public void setAField(boolean aField) {
     }
 }
