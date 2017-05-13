@@ -167,8 +167,17 @@ class LexicalDifferenceCalculator {
         } else if (csm instanceof CsmList) {
             CsmList csmList = (CsmList) csm;
             if (csmList.getProperty().isAboutNodes()) {
-                NodeList nodeList = (NodeList)change.getValue(csmList.getProperty(), node);
-                if (!nodeList.isEmpty()) {
+                Object valueRaw = change.getValue(csmList.getProperty(), node);
+                NodeList nodeList = null;
+                if (valueRaw instanceof Optional) {
+                    Optional optionalRaw = (Optional)valueRaw;
+                    if (optionalRaw.isPresent()) {
+                        nodeList = (NodeList) optionalRaw.get();
+                    }
+                } else {
+                    nodeList = (NodeList) change.getValue(csmList.getProperty(), node);
+                }
+                if (nodeList!=null && !nodeList.isEmpty()) {
                     calculatedSyntaxModelForNode(csmList.getPreceeding(), node, elements, change);
                     for (int i = 0; i < nodeList.size(); i++) {
                         if (i != 0) {
@@ -230,7 +239,7 @@ class LexicalDifferenceCalculator {
             if (value instanceof Printable) {
                 text = ((Printable)value).asString();
             }
-            elements.add(new CsmToken(csmAttribute.getTokenType(value.toString()), text));
+            elements.add(new CsmToken(csmAttribute.getTokenType(node, value.toString()), text));
         } else {
             throw new UnsupportedOperationException(csm.getClass().getSimpleName());
         }

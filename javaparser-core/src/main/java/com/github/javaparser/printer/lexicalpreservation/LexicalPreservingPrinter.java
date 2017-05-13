@@ -194,7 +194,7 @@ public class LexicalPreservingPrinter {
                         if (lpp.getTextForNode(child.getChild()) == null) {
 
                             // The indentation of the node should be calculated considering the preceeding elements
-                            List<TokenTextElement> tokensPreceeding = lpp.tokensPreceeding(node, difference.getElements().subList(0, i - 1));
+                            List<TokenTextElement> tokensPreceeding = lpp.tokensPreceeding(node, difference.getElements().subList(0, Math.max(0, i - 1)));
 
                             List<TokenTextElement> indentation = lpp.calculateIndentation(tokensPreceeding);
                             lpp.createNodeText(child.getChild(), indentation);
@@ -346,9 +346,9 @@ public class LexicalPreservingPrinter {
      * Print a Node into a Writer, preserving the lexical information.
      */
     public void print(Node node, Writer writer) throws IOException {
-        if (!textForNodes.containsKey(node) && !(node instanceof SimpleName)) {
-            throw new RuntimeException("We do not know the indentation for the node here: " + node+ " (class: "+node.getClass().getCanonicalName()+")");
-        }
+        //if (!textForNodes.containsKey(node) && !(node instanceof SimpleName)) {
+        //    //throw new RuntimeException("We do not know the indentation for the node here: " + node+ " (class: "+node.getClass().getCanonicalName()+")");
+        //}
         final NodeText text = getOrCreateNodeText(node);
         writer.append(text.expand());
     }

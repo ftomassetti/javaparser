@@ -23,6 +23,7 @@ package com.github.javaparser.printer.concretesyntaxmodel;
 
 import com.github.javaparser.GeneratedJavaParserConstants;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.expr.IntegerLiteralExpr;
 import com.github.javaparser.ast.observer.ObservableProperty;
 import com.github.javaparser.printer.SourcePrinter;
 
@@ -43,7 +44,7 @@ public class CsmAttribute implements CsmElement {
         printer.print(PrintingHelper.printToString(value));
     }
 
-    public int getTokenType(String text) {
+    public int getTokenType(Node node, String text) {
         if (property == ObservableProperty.IDENTIFIER) {
             return GeneratedJavaParserConstants.IDENTIFIER;
         }
@@ -54,9 +55,20 @@ public class CsmAttribute implements CsmElement {
                 }
             }
         }
-        if (property == ObservableProperty.OPERATOR && text.equals("ASSIGN")) {
-            return GeneratedJavaParserConstants.ASSIGN;
+        if (property == ObservableProperty.OPERATOR) {
+            switch (text) {
+                case "ASSIGN":
+                    return GeneratedJavaParserConstants.ASSIGN;
+                case "PLUS":
+                    return GeneratedJavaParserConstants.PLUS;
+            }
+
         }
-        throw new UnsupportedOperationException(property.name()+ " " + text);
+        if (property == ObservableProperty.VALUE) {
+            if (node instanceof IntegerLiteralExpr) {
+                return GeneratedJavaParserConstants.INTEGER_LITERAL;
+            }
+        }
+        throw new UnsupportedOperationException(property.name()+ " " + text+ " " + node.getClass().getCanonicalName());
     }
 }
