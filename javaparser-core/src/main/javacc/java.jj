@@ -68,6 +68,15 @@ import static com.github.javaparser.ast.type.ArrayType.*;
  * <p>This class was generated automatically by javacc, do not edit.</p>
  */
 final class GeneratedJavaParser {
+
+    /**
+     * Constructor needed to make the language templetable
+     */
+     public GeneratedJavaParser(Provider stream, GeneratedJavaParserTokenManager token_source) {
+         this(stream);
+         this.token_source = token_source;
+     }
+
     List<Problem> problems = new ArrayList<Problem>();
 
     void reset(Provider provider) {
