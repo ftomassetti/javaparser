@@ -50,7 +50,7 @@ import static com.github.javaparser.utils.Utils.isNullOrEmpty;
  */
 public class PrettyPrintVisitor implements VoidVisitor<Void> {
     protected final PrettyPrinterConfiguration configuration;
-    protected final SourcePrinter printer;
+    public final SourcePrinter printer;
 
     public PrettyPrintVisitor(PrettyPrinterConfiguration prettyPrinterConfiguration) {
         configuration = prettyPrinterConfiguration;

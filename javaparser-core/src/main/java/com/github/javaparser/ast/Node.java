@@ -268,7 +268,7 @@ public abstract class Node implements Cloneable, HasParentNode<Node>, Visitable,
      * @return the String representation of this node
      */
     @Override
-    public final String toString() {
+    public String toString() {
         return toStringPrinter.print(this);
     }
 

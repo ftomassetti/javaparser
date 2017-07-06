@@ -2,6 +2,9 @@ package com.github.javaparser;
 
 import com.github.javaparser.GeneratedJavaParser.CustomToken;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.visitor.GenericVisitor;
+import com.github.javaparser.ast.visitor.VoidVisitor;
+import com.github.javaparser.printer.PrettyPrintVisitor;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -67,6 +70,28 @@ public class Experiment {
 
     }
 
+    public static Expression generateMockExpression() {
+        return new Expression() {
+            @Override
+            public <R, A> R accept(GenericVisitor<R, A> v, A arg) {
+                throw new UnsupportedOperationException(v.getClass().getCanonicalName());
+            }
+
+            @Override
+            public <A> void accept(VoidVisitor<A> v, A arg) {
+                if (v instanceof PrettyPrintVisitor) {
+                    PrettyPrintVisitor prettyPrintVisitor = (PrettyPrintVisitor)v;
+                    ((PrettyPrintVisitor) v).printer.print(this.toString());
+                }
+            }
+
+            @Override
+            public String toString() {
+                return "<EXPRESSION PLACEHOLDER>";
+            }
+        };
+    }
+
     public static void main(String[] args) throws ParseException {
         // This part demonstrates that I can parse using as source a list of tokens that I could build manually
         MemorizedTokensProvider tokensProvider = new MemorizedTokensProvider(createToken(INTEGER_LITERAL, "1"),
@@ -91,8 +116,33 @@ public class Experiment {
         tokensProvider = new MemorizedTokensProvider(createToken(INTEGER_LITERAL, "1"),
                 createToken(PLUS, "+"),
                 createToken(FAKE_TOKEN, "Expression"));
-        generatedJavaParser = new GeneratedJavaParser(tokensProvider);
+        generatedJavaParser = new GeneratedJavaParser(tokensProvider) {
+
+            private boolean nextIsFakeToken() {
+                int tokenKind = (jj_ntk==-1)?jj_ntk_f():jj_ntk;
+                return tokenKind == FAKE_TOKEN;
+                //return token.kind == FAKE_TOKEN;
+            }
+            @Override
+            public Expression Expression() throws ParseException {
+                if (nextIsFakeToken() && token.next.image.equals("Expression")) {
+                    jj_consume_token(FAKE_TOKEN);
+                    return generateMockExpression();
+                }
+                return super.Expression();
+            }
+
+            @Override
+            public Expression UnaryExpression() throws ParseException {
+                if (nextIsFakeToken() && token.next.image.equals("Expression")) {
+                    jj_consume_token(FAKE_TOKEN);
+                    return generateMockExpression();
+                }
+                return super.UnaryExpression();
+            }
+        };
         expression = generatedJavaParser.Expression();
+
         System.out.println("Expression: " + expression);
     }
 }
