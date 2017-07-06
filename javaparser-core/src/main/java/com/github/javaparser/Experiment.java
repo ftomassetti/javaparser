@@ -56,6 +56,17 @@ public class Experiment {
         return new MemorizedTokensProvider(tokens);
     }
 
+    private static int FAKE_TOKEN = 999;
+
+    static class TemplatableGeneratedJavaParser extends GeneratedJavaParser {
+
+        public TemplatableGeneratedJavaParser(Provider stream) {
+            super(stream);
+        }
+
+
+    }
+
     public static void main(String[] args) throws ParseException {
         // This part demonstrates that I can parse using as source a list of tokens that I could build manually
         MemorizedTokensProvider tokensProvider = new MemorizedTokensProvider(createToken(INTEGER_LITERAL, "1"),
@@ -73,5 +84,15 @@ public class Experiment {
 
         // Now I can build a MemorizedTokensProvider either by recognizing tokens from a string or building them
         // programmatically. In a template a do that: "1 + `INTEGER_LITERAL:myInt`"
+
+        // "1 + `EXPRESSION:myRightExpr`"
+        // TODO: I would like to override the "Expression" method of the parser, however it is final
+        // I could do awful things using reflecton & javassist... because I am an horrible, horrible person
+        tokensProvider = new MemorizedTokensProvider(createToken(INTEGER_LITERAL, "1"),
+                createToken(PLUS, "+"),
+                createToken(FAKE_TOKEN, "Expression"));
+        generatedJavaParser = new GeneratedJavaParser(tokensProvider);
+        expression = generatedJavaParser.Expression();
+        System.out.println("Expression: " + expression);
     }
 }
