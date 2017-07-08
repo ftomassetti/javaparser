@@ -16,7 +16,7 @@ import static com.github.javaparser.utils.CodeGenerationUtils.f;
  */
 public class PrettyPrintVisitorGenerator extends VisitorGenerator {
     public PrettyPrintVisitorGenerator(SourceRoot sourceRoot) {
-        super(sourceRoot, "com.github.javaparser.printer", "PrettyPrinterVisitor_REMOVEME", "void", "Void", false);
+        super(sourceRoot, "com.github.javaparser.printer", "PrettyPrintVisitor_REMOVEME", "void", "Void", true);
     }
 
     @Override
