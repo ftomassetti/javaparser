@@ -30,6 +30,7 @@ import com.github.javaparser.ast.modules.*;
 import com.github.javaparser.ast.observer.ObservableProperty;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.*;
+import com.github.javaparser.metamodel.BaseNodeMetaModel;
 import com.github.javaparser.metamodel.JavaParserMetaModel;
 import com.github.javaparser.printer.concretesyntaxmodel.CsmConditional;
 import com.github.javaparser.printer.concretesyntaxmodel.CsmElement;
@@ -49,7 +50,7 @@ import static com.github.javaparser.utils.Utils.EOL;
  * code.
  */
 public class ConcreteSyntaxModel {
-
+    
     private static Map<Class, CsmElement> concreteSyntaxModelByClass = new HashMap<>();
     private static Optional<String> initializationError;
 

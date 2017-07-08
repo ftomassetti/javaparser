@@ -226,446 +226,1005 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(AnnotationDeclaration n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@386f9a54
+    void visit(AnnotationDeclaration n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("@");
+        printer.print("interface");
+        printer.print(" ");
+        n.getName().accept(this, arg);
+        printer.print(" ");
+        printer.print("{");
+        printer.print("\n");
+        printer.print("}");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(AnnotationMemberDeclaration n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@2d2380a
+    void visit(AnnotationMemberDeclaration n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getType().accept(this, arg);
+        printer.print(" ");
+        n.getName().accept(this, arg);
+        printer.print("(");
+        printer.print(")");
+        printer.print(";");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ArrayAccessExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@37cac7d8
+    void visit(ArrayAccessExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getName().accept(this, arg);
+        printer.print("[");
+        n.getIndex().accept(this, arg);
+        printer.print("]");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ArrayCreationExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@39dc4692
+    void visit(ArrayCreationExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("new");
+        printer.print(" ");
+        n.getElementType().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ArrayCreationLevel n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@7da5c6c7
+    void visit(ArrayCreationLevel n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("[");
+        if (n.getDimension().isPresent()) {
+            n.getDimension().get().accept(this, arg);
+        }
+        printer.print("]");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ArrayInitializerExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@6ea4a311
+    void visit(ArrayInitializerExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("{");
+        printer.print("}");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ArrayType n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@f314d1a
+    void visit(ArrayType n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getComponentType().accept(this, arg);
+        printer.print("[");
+        printer.print("]");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(AssertStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@540262b8
+    void visit(AssertStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("assert");
+        printer.print(" ");
+        n.getCheck().accept(this, arg);
+        printer.print(";");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(AssignExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@7420501
+    void visit(AssignExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getTarget().accept(this, arg);
+        printer.print(" ");
+        printer.print(" ");
+        n.getValue().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(BinaryExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@4c3582d3
+    void visit(BinaryExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getLeft().accept(this, arg);
+        printer.print(" ");
+        printer.print(" ");
+        n.getRight().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(BlockComment n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(BlockStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@49694fd2
+    void visit(BlockStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("{");
+        printer.print("\n");
+        printer.print("}");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(BooleanLiteralExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@e39f3e5
+    void visit(BooleanLiteralExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(BreakStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@19c4952e
+    void visit(BreakStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("break");
+        printer.print(";");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(CastExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@7907bfdf
+    void visit(CastExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("(");
+        n.getType().accept(this, arg);
+        printer.print(")");
+        printer.print(" ");
+        n.getExpression().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(CatchClause n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@7a1378f2
+    void visit(CatchClause n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print(" ");
+        printer.print("catch");
+        printer.print(" ");
+        printer.print("(");
+        n.getParameter().accept(this, arg);
+        printer.print(")");
+        printer.print(" ");
+        n.getBody().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(CharLiteralExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@3b740a8e
+    void visit(CharLiteralExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ClassExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@6a4952b
+    void visit(ClassExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getType().accept(this, arg);
+        printer.print(".");
+        printer.print("class");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ClassOrInterfaceDeclaration n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@42192b67
+    void visit(ClassOrInterfaceDeclaration n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print(" ");
+        n.getName().accept(this, arg);
+        printer.print(" ");
+        printer.print("{");
+        printer.print("\n");
+        printer.print("}");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ClassOrInterfaceType n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@232c1f3e
+    void visit(ClassOrInterfaceType n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getName().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(CompilationUnit n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@381751af
+    void visit(CompilationUnit n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        if (n.getPackageDeclaration().isPresent()) {
+            n.getPackageDeclaration().get().accept(this, arg);
+        }
+        if (n.getModule().isPresent()) {
+            n.getModule().get().accept(this, arg);
+        }
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ConditionalExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@1a38864b
+    void visit(ConditionalExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getCondition().accept(this, arg);
+        printer.print(" ");
+        printer.print("?");
+        printer.print(" ");
+        n.getThenExpr().accept(this, arg);
+        printer.print(" ");
+        printer.print(":");
+        printer.print(" ");
+        n.getElseExpr().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ConstructorDeclaration n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@11f1c478
+    void visit(ConstructorDeclaration n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getName().accept(this, arg);
+        printer.print("(");
+        printer.print(")");
+        printer.print(" ");
+        n.getBody().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ContinueStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@52e7fc97
+    void visit(ContinueStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("continue");
+        printer.print(";");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(DoStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@507f554d
+    void visit(DoStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("do");
+        printer.print(" ");
+        n.getBody().accept(this, arg);
+        printer.print(" ");
+        printer.print("while");
+        printer.print(" ");
+        printer.print("(");
+        n.getCondition().accept(this, arg);
+        printer.print(")");
+        printer.print(";");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(DoubleLiteralExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@e2b9bd7
+    void visit(DoubleLiteralExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(EmptyStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@11665c6e
+    void visit(EmptyStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print(";");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(EnclosedExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@7c881991
+    void visit(EnclosedExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("(");
+        if (n.getInner().isPresent()) {
+            n.getInner().get().accept(this, arg);
+        }
+        printer.print(")");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(EnumConstantDeclaration n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@5677ee70
+    void visit(EnumConstantDeclaration n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getName().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(EnumDeclaration n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@450224a
+    void visit(EnumDeclaration n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("enum");
+        printer.print(" ");
+        n.getName().accept(this, arg);
+        printer.print(" ");
+        printer.print("{");
+        printer.print("\n");
+        printer.print("\n");
+        printer.print("}");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ExplicitConstructorInvocationStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@27f68b82
+    void visit(ExplicitConstructorInvocationStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("(");
+        printer.print(")");
+        printer.print(";");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ExpressionStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@1b0e5a7c
+    void visit(ExpressionStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getExpression().accept(this, arg);
+        printer.print(";");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(FieldAccessExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@72632303
+    void visit(FieldAccessExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getScope().accept(this, arg);
+        printer.print(".");
+        n.getName().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(FieldDeclaration n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@77a40d77
+    void visit(FieldDeclaration n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print(" ");
+        printer.print(";");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ForStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@649d329a
+    void visit(ForStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("for");
+        printer.print(" ");
+        printer.print("(");
+        printer.print(";");
+        printer.print(" ");
+        if (n.getCompare().isPresent()) {
+            n.getCompare().get().accept(this, arg);
+        }
+        printer.print(";");
+        printer.print(" ");
+        printer.print(")");
+        printer.print(" ");
+        n.getBody().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ForeachStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@da949cf
+    void visit(ForeachStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("for");
+        printer.print(" ");
+        printer.print("(");
+        n.getVariable().accept(this, arg);
+        printer.print(" ");
+        printer.print(":");
+        printer.print(" ");
+        n.getIterable().accept(this, arg);
+        printer.print(")");
+        printer.print(" ");
+        n.getBody().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(IfStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@66390842
+    void visit(IfStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("if");
+        printer.print(" ");
+        printer.print("(");
+        n.getCondition().accept(this, arg);
+        printer.print(")");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ImportDeclaration n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@31a16e47
+    void visit(ImportDeclaration n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("import");
+        printer.print(" ");
+        n.getName().accept(this, arg);
+        printer.print(";");
+        printer.print("\n");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(InitializerDeclaration n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@3ca5930b
+    void visit(InitializerDeclaration n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getBody().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(InstanceOfExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@7b055261
+    void visit(InstanceOfExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getExpression().accept(this, arg);
+        printer.print(" ");
+        printer.print("instanceof");
+        printer.print(" ");
+        n.getType().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(IntegerLiteralExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@55502e5b
+    void visit(IntegerLiteralExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(IntersectionType n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@6f39b1e0
+    void visit(IntersectionType n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(JavadocComment n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(LabeledStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@7f944ac7
+    void visit(LabeledStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getLabel().accept(this, arg);
+        printer.print(":");
+        printer.print(" ");
+        n.getStatement().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(LambdaExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@2ed3990e
+    void visit(LambdaExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print(" ");
+        printer.print("->");
+        printer.print(" ");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(LineComment n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(LocalClassDeclarationStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@7aa54879
+    void visit(LocalClassDeclarationStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getClassDeclaration().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(LongLiteralExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@58b1407c
+    void visit(LongLiteralExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(MarkerAnnotationExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@52eebdf
+    void visit(MarkerAnnotationExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("@");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(MemberValuePair n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@3787099d
+    void visit(MemberValuePair n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getName().accept(this, arg);
+        printer.print(" ");
+        printer.print("=");
+        printer.print(" ");
+        n.getValue().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(MethodCallExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@67316994
+    void visit(MethodCallExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getName().accept(this, arg);
+        printer.print("(");
+        printer.print(")");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(MethodDeclaration n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@35d177ae
+    void visit(MethodDeclaration n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getType().accept(this, arg);
+        printer.print(" ");
+        n.getName().accept(this, arg);
+        printer.print("(");
+        printer.print(")");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(MethodReferenceExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@475312d8
+    void visit(MethodReferenceExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getScope().accept(this, arg);
+        printer.print("::");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ModuleDeclaration n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@4897204e
+    void visit(ModuleDeclaration n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("module");
+        printer.print(" ");
+        n.getName().accept(this, arg);
+        printer.print(" ");
+        printer.print("{");
+        printer.print("\n");
+        printer.print("}");
+        printer.print("\n");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ModuleExportsStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@24068d01
+    void visit(ModuleExportsStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("exports");
+        printer.print(" ");
+        n.getName().accept(this, arg);
+        printer.print(";");
+        printer.print("\n");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ModuleOpensStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@1ad4e228
+    void visit(ModuleOpensStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("opens");
+        printer.print(" ");
+        n.getName().accept(this, arg);
+        printer.print(";");
+        printer.print("\n");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ModuleProvidesStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@454ee678
+    void visit(ModuleProvidesStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("provides");
+        printer.print(" ");
+        n.getType().accept(this, arg);
+        printer.print(";");
+        printer.print("\n");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ModuleRequiresStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@34aa3bcf
+    void visit(ModuleRequiresStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("requires");
+        printer.print(" ");
+        n.getName().accept(this, arg);
+        printer.print(";");
+        printer.print("\n");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ModuleUsesStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@24d4c6de
+    void visit(ModuleUsesStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("uses");
+        printer.print(" ");
+        n.getType().accept(this, arg);
+        printer.print(";");
+        printer.print("\n");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(NameExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@192cb5ce
+    void visit(NameExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getName().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(Name n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@2be3fdb5
+    void visit(Name n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(NormalAnnotationExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@4e72cf45
+    void visit(NormalAnnotationExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("@");
+        n.getName().accept(this, arg);
+        printer.print("(");
+        printer.print(")");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(NullLiteralExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@4c920263
+    void visit(NullLiteralExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("null");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ObjectCreationExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@30ec5cfa
+    void visit(ObjectCreationExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("new");
+        printer.print(" ");
+        n.getType().accept(this, arg);
+        printer.print("(");
+        printer.print(")");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(PackageDeclaration n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@4d60107
+    void visit(PackageDeclaration n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("package");
+        printer.print(" ");
+        n.getName().accept(this, arg);
+        printer.print(";");
+        printer.print("\n");
+        printer.print("\n");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(Parameter n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@5c86ee3f
+    void visit(Parameter n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getType().accept(this, arg);
+        printer.print(" ");
+        n.getName().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(PrimitiveType n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@5b7ed6
+    void visit(PrimitiveType n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ReturnStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@5202f9ab
+    void visit(ReturnStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("return");
+        printer.print(";");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(SimpleName n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmAttribute@666814d5
+    void visit(SimpleName n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(SingleMemberAnnotationExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@df4e931
+    void visit(SingleMemberAnnotationExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("@");
+        n.getName().accept(this, arg);
+        printer.print("(");
+        n.getMemberValue().accept(this, arg);
+        printer.print(")");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(StringLiteralExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@56829b97
+    void visit(StringLiteralExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(SuperExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@1308ff4d
+    void visit(SuperExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("super");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(SwitchEntryStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@35608f45
+    void visit(SwitchEntryStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("\n");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(SwitchStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@1ff745b9
+    void visit(SwitchStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("switch");
+        printer.print("(");
+        n.getSelector().accept(this, arg);
+        printer.print(")");
+        printer.print(" ");
+        printer.print("{");
+        printer.print("\n");
+        printer.print("}");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(SynchronizedStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@5deb2bf3
+    void visit(SynchronizedStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("synchronized");
+        printer.print(" ");
+        printer.print("(");
+        n.getExpression().accept(this, arg);
+        printer.print(")");
+        printer.print(" ");
+        n.getBody().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ThisExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@94d5594
+    void visit(ThisExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("this");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ThrowStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@38e6f95f
+    void visit(ThrowStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("throw");
+        printer.print(" ");
+        n.getExpression().accept(this, arg);
+        printer.print(";");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(TryStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@1d19a977
+    void visit(TryStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("try");
+        printer.print(" ");
+        if (n.getTryBlock().isPresent()) {
+            n.getTryBlock().get().accept(this, arg);
+        }
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(TypeExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@1929ad94
+    void visit(TypeExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getType().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(TypeParameter n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@7a2baad0
+    void visit(TypeParameter n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getName().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(UnaryExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@750888cb
+    void visit(UnaryExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getExpression().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(UnionType n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@258ac50c
+    void visit(UnionType n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(UnknownType n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmNone@711b9924
+    void visit(UnknownType n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(UnparsableStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@5641c0fd
+    void visit(UnparsableStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print(";");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(VariableDeclarationExpr n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@673e542e
+    void visit(VariableDeclarationExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getMaximumCommonType().accept(this, arg);
+        printer.print(" ");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(VariableDeclarator n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@146f5f60
+    void visit(VariableDeclarator n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getName().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(VoidType n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@39102670
+    void visit(VoidType n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("void");
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(WhileStmt n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@610e4f87
+    void visit(WhileStmt n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("while");
+        printer.print(" ");
+        printer.print("(");
+        n.getCondition().accept(this, arg);
+        printer.print(")");
+        printer.print(" ");
+        n.getBody().accept(this, arg);
+        printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(WildcardType n, Void arg) {
+    public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@7404f8ac
+    void visit(WildcardType n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("?");
+        printOrphanCommentsEnding(n);
     }
 }
