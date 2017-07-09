@@ -32,6 +32,10 @@ public class CsmString implements CsmElement {
         this.property = property;
     }
 
+    public ObservableProperty getProperty() {
+        return property;
+    }
+
     @Override
     public void prettyPrint(Node node, SourcePrinter printer) {
         printer.print("\"");

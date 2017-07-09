@@ -35,7 +35,7 @@ import static com.github.javaparser.utils.CodeGenerationUtils.f;
  */
 public class PrettyPrintVisitorGenerator extends VisitorGenerator {
     public PrettyPrintVisitorGenerator(SourceRoot sourceRoot) {
-        super(sourceRoot, "com.github.javaparser.printer", "PrettyPrintVisitor_REMOVEME", "void", "Void", true);
+        super(sourceRoot, "com.github.javaparser.printer", "PrettyPrintVisitor", "void", "Void", true);
     }
 
     private Class elementType(ParameterizedType parameterizedType) {
@@ -104,6 +104,9 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
             if (csmElement instanceof CsmSequence) {
                 CsmSequence csmSequence = (CsmSequence) csmElement;
                 csmSequence.getElements().forEach(e -> processCsmElement(node, body, e));
+            } else if (csmElement instanceof CsmMix) {
+                CsmMix csmMix = (CsmMix) csmElement;
+                csmMix.getElements().forEach(e -> processCsmElement(node, body, e));
             } else if (csmElement instanceof CsmToken) {
                 CsmToken csmToken = (CsmToken) csmElement;
                 String content = StringEscapeUtils.escapeJava(csmToken.getContent(null));
@@ -137,6 +140,8 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
             } else if (csmElement instanceof CsmComment) {
                 // nothing to do
             } else if (csmElement instanceof CsmNone) {
+                // nothing to do
+            } else if (csmElement instanceof CsmOrphanCommentsEnding) {
                 // nothing to do
             } else if (csmElement instanceof CsmList) {
                 CsmList csmList = (CsmList) csmElement;
@@ -207,7 +212,7 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
             } else if (csmElement instanceof CsmUnindent) {
                 body.addStatement("printer.unindent();");
             } else if (csmElement instanceof CsmConditional) {
-                CsmConditional csmConditional = (CsmConditional)csmElement;
+                CsmConditional csmConditional = (CsmConditional) csmElement;
                 IfStmt ifStmt = new IfStmt();
                 ifStmt.setCondition(JavaParser.parseExpression(conditionCode(node, csmConditional)));
                 BlockStmt thenStmt = new BlockStmt();
@@ -219,9 +224,16 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
                     ifStmt.setElseStmt(elseStmt);
                 }
                 body.addStatement(ifStmt);
+            } else if (csmElement instanceof CsmChar) {
+                CsmChar csmChar = (CsmChar)csmElement;
+                String getterName = "get" + Utils.capitalize(csmChar.getProperty().camelCaseName());
+                body.addStatement("printer.print(n." + getterName + "());");
+            } else if (csmElement instanceof CsmString) {
+                CsmString csmString = (CsmString)csmElement;
+                String getterName = "get" + Utils.capitalize(csmString.getProperty().camelCaseName());
+                body.addStatement("printer.print(n." + getterName + "());");
             } else {
-                //
-                System.out.println("IGNORING " + csmElement);
+                throw new UnsupportedOperationException(csmElement.toString());
             }
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
