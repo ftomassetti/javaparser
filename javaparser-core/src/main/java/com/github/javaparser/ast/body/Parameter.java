@@ -31,8 +31,10 @@ import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.nodeTypes.NodeWithType;
 import com.github.javaparser.ast.nodeTypes.modifiers.NodeWithFinalModifier;
 import com.github.javaparser.ast.observer.ObservableProperty;
+import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.ast.type.UnknownType;
 import com.github.javaparser.ast.visitor.CloneVisitor;
 import com.github.javaparser.ast.visitor.GenericVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitor;
@@ -273,6 +275,11 @@ public final class Parameter extends Node implements NodeWithType<Parameter, Typ
     @Generated("com.github.javaparser.generator.core.node.GetMetaModelGenerator")
     public ParameterMetaModel getMetaModel() {
         return JavaParserMetaModel.parameterMetaModel;
+    }
+
+    @Generated("com.github.javaparser.generator.core.node.PropertyGenerator")
+    public boolean hasUnknownType() {
+        return type instanceof UnknownType;
     }
 
     @Override
