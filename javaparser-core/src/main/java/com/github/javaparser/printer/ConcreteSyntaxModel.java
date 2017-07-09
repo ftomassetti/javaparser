@@ -50,7 +50,7 @@ import static com.github.javaparser.utils.Utils.EOL;
  * code.
  */
 public class ConcreteSyntaxModel {
-    
+
     private static Map<Class, CsmElement> concreteSyntaxModelByClass = new HashMap<>();
     private static Optional<String> initializationError;
 
@@ -369,7 +369,7 @@ public class ConcreteSyntaxModel {
                 attribute(ObservableProperty.VALUE)
         ));
 
-        concreteSyntaxModelByClass.put(MarkerAnnotationExpr.class, sequence(comment(), token(GeneratedJavaParserConstants.AT), attribute(ObservableProperty.NAME)));
+        concreteSyntaxModelByClass.put(MarkerAnnotationExpr.class, sequence(comment(), token(GeneratedJavaParserConstants.AT), child(ObservableProperty.NAME)));
 
         concreteSyntaxModelByClass.put(MemberValuePair.class, CsmElement.sequence(CsmElement.comment(),
                 CsmElement.child(ObservableProperty.NAME),

@@ -330,6 +330,7 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         printJavaComment(n.getComment(), arg);
         n.getTarget().accept(this, arg);
         printer.print(" ");
+        printer.print(n.getOperator().asString());
         printer.print(" ");
         n.getValue().accept(this, arg);
         printOrphanCommentsEnding(n);
@@ -342,6 +343,7 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         printJavaComment(n.getComment(), arg);
         n.getLeft().accept(this, arg);
         printer.print(" ");
+        printer.print(n.getOperator().asString());
         printer.print(" ");
         n.getRight().accept(this, arg);
         printOrphanCommentsEnding(n);
@@ -370,6 +372,7 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@e39f3e5
     void visit(BooleanLiteralExpr n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        printer.print(String.valueOf(n.getValue()));
         printOrphanCommentsEnding(n);
     }
 
@@ -531,6 +534,7 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@e2b9bd7
     void visit(DoubleLiteralExpr n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        printer.print(n.getValue());
         printOrphanCommentsEnding(n);
     }
 
@@ -716,6 +720,7 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@55502e5b
     void visit(IntegerLiteralExpr n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        printer.print(n.getValue());
         printOrphanCommentsEnding(n);
     }
 
@@ -778,6 +783,7 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@58b1407c
     void visit(LongLiteralExpr n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        printer.print(n.getValue());
         printOrphanCommentsEnding(n);
     }
 
@@ -787,6 +793,7 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     void visit(MarkerAnnotationExpr n, Void arg) {
         printJavaComment(n.getComment(), arg);
         printer.print("@");
+        printer.print(n.getName());
         printOrphanCommentsEnding(n);
     }
 
@@ -834,6 +841,7 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         printJavaComment(n.getComment(), arg);
         n.getScope().accept(this, arg);
         printer.print("::");
+        printer.print(n.getIdentifier());
         printOrphanCommentsEnding(n);
     }
 
@@ -932,6 +940,7 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@2be3fdb5
     void visit(Name n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        printer.print(n.getIdentifier());
         printOrphanCommentsEnding(n);
     }
 
@@ -999,6 +1008,7 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     public //com.github.javaparser.printer.concretesyntaxmodel.CsmSequence@5b7ed6
     void visit(PrimitiveType n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        printer.print(n.getType().asString());
         printOrphanCommentsEnding(n);
     }
 
@@ -1017,6 +1027,7 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     public //com.github.javaparser.printer.concretesyntaxmodel.CsmAttribute@666814d5
     void visit(SimpleName n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        printer.print(n.getIdentifier());
         printOrphanCommentsEnding(n);
     }
 
