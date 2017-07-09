@@ -229,7 +229,7 @@ public class ConcreteSyntaxModel {
                 conditional(ObservableProperty.VAR_ARGS, FLAG, CsmElement.sequence(
                         list(ObservableProperty.VAR_ARGS_ANNOTATIONS, CsmElement.space(), CsmElement.none(), CsmElement.none()),
                         token(GeneratedJavaParserConstants.ELLIPSIS))),
-                space(),
+                CsmElement.conditional(ObservableProperty.UNKNOWN_TYPE, FLAG, CsmElement.none(), CsmElement.space()),
                 child(ObservableProperty.NAME)));
 
         concreteSyntaxModelByClass.put(VariableDeclarator.class, sequence(
