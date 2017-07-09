@@ -138,4 +138,8 @@ public interface CsmElement {
     static CsmElement block(CsmElement content) {
         return sequence(token(GeneratedJavaParserConstants.LBRACE), indent(), content, unindent(), token(GeneratedJavaParserConstants.RBRACE));
     }
+
+    default boolean isNone() {
+        return this instanceof CsmNone;
+    }
 }
