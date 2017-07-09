@@ -68,7 +68,12 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
                 csmSequence.getElements().forEach(e -> processCsmElement(node, body, e));
             } else if (csmElement instanceof CsmToken) {
                 CsmToken csmToken = (CsmToken) csmElement;
-                body.addStatement("printer.print(\"" + StringEscapeUtils.escapeJava(csmToken.getContent(null)) + "\");");
+                String content = StringEscapeUtils.escapeJava(csmToken.getContent(null));
+                if (content.equals("\\n")) {
+                    body.addStatement("printer.println();");
+                } else {
+                    body.addStatement("printer.print(\"" + StringEscapeUtils.escapeJava(csmToken.getContent(null)) + "\");");
+                }
             } else if (csmElement instanceof CsmSingleReference) {
                 CsmSingleReference csmSingleReference = (CsmSingleReference) csmElement;
                 String getterName = "get" + Utils.capitalize(csmSingleReference.getProperty().camelCaseName());
@@ -107,6 +112,9 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
                     } else {
                         ifStmt.setCondition(JavaParser.parseExpression("!n." + getterName + "().isEmpty()"));
                     }
+                    BlockStmt ifBody = new BlockStmt();
+                    processCsmElement(node, ifBody, ((CsmList) csmElement).getPreceeding());
+                    ifStmt.setThenStmt(ifBody);
                     body.addStatement(ifStmt);
                 }
                 ForeachStmt loop = new ForeachStmt();
@@ -131,7 +139,16 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
                 loop.setBody(loopBody);
                 body.addStatement(loop);
                 if (!csmList.getFollowing().isNone()) {
-                    // TODO
+                    IfStmt ifStmt = new IfStmt();
+                    if (option) {
+                        ifStmt.setCondition(JavaParser.parseExpression("n." + getterName + "().isPresent() && !n." + getterName + "().get().isEmpty()"));
+                    } else {
+                        ifStmt.setCondition(JavaParser.parseExpression("!n." + getterName + "().isEmpty()"));
+                    }
+                    BlockStmt ifBody = new BlockStmt();
+                    processCsmElement(node, ifBody, ((CsmList) csmElement).getFollowing());
+                    ifStmt.setThenStmt(ifBody);
+                    body.addStatement(ifStmt);
                 }
             } else {
                 //
