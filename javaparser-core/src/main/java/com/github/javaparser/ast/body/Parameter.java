@@ -38,6 +38,7 @@ import com.github.javaparser.ast.type.UnknownType;
 import com.github.javaparser.ast.visitor.CloneVisitor;
 import com.github.javaparser.ast.visitor.GenericVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitor;
+import com.github.javaparser.metamodel.DerivedProperty;
 import com.github.javaparser.metamodel.JavaParserMetaModel;
 import com.github.javaparser.metamodel.ParameterMetaModel;
 import java.util.Arrays;
@@ -278,6 +279,7 @@ public final class Parameter extends Node implements NodeWithType<Parameter, Typ
     }
 
     @Generated("com.github.javaparser.generator.core.node.PropertyGenerator")
+    @DerivedProperty
     public boolean hasUnknownType() {
         return type instanceof UnknownType;
     }
