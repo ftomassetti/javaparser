@@ -162,7 +162,7 @@ public class ArrayTypeTest {
         Parameter p = parseParameter("int[]@X...a[]");
 
         assertThat(p.getVarArgsAnnotations()).containsExactly(new MarkerAnnotationExpr(parseName("X")));
-        assertEquals("int[][]@X ... a", p.toString());
+        assertEquals("int[][]@X... a", p.toString());
         assertEquals("int[][]@X... a", ConcreteSyntaxModel.genericPrettyPrint(p));
     }
 }
