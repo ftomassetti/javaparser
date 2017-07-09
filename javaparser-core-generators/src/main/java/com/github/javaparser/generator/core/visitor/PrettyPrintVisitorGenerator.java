@@ -117,16 +117,24 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
                     ifStmt.setThenStmt(ifBody);
                     body.addStatement(ifStmt);
                 }
+                String countName = csmList.getProperty().camelCaseName()+"Count";
+                body.addStatement("int " + countName + " = 0;");
                 ForeachStmt loop = new ForeachStmt();
                 String iteratorName = ((CsmList) csmElement).getProperty().camelCaseName()+"Item";
                 ParameterizedType parameterizedType = (ParameterizedType)getter.getGenericReturnType();
                 Class elementType = elementType(parameterizedType);
                 loop.setVariable(new VariableDeclarationExpr(new ClassOrInterfaceType(elementType.getCanonicalName()), iteratorName));
 
-                loop.setIterable(JavaParser.parseExpression("n."+ getterName+"()" + (option?".get()":"")));
+                String getListExpr = "n."+ getterName+"()" + (option?".get()":"");
+                loop.setIterable(JavaParser.parseExpression(getListExpr));
                 BlockStmt loopBody = new BlockStmt();
                 if (!csmList.getSeparatorPre().isNone()) {
-                    // TODO
+                    IfStmt preSepIf = new IfStmt();
+                    preSepIf.setCondition(JavaParser.parseExpression(countName + " != 0"));
+                    BlockStmt preSepBody = new BlockStmt();
+                    processCsmElement(node, preSepBody, ((CsmList) csmElement).getSeparatorPre());
+                    preSepIf.setThenStmt(preSepBody);
+                    loopBody.addStatement(preSepIf);
                 }
                 if (Node.class.isAssignableFrom(elementType)) {
                     loopBody.addStatement(iteratorName + ".accept(this, arg);");
@@ -134,8 +142,14 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
                     loopBody.addStatement("printer.print(" + iteratorName + ".asString());");
                 }
                 if (!csmList.getSeparatorPost().isNone()) {
-                    // TODO
+                    IfStmt postSepIf = new IfStmt();
+                    postSepIf.setCondition(JavaParser.parseExpression(countName + " != "+getListExpr+ ".size() - 1"));
+                    BlockStmt postSepBody = new BlockStmt();
+                    processCsmElement(node, postSepBody, ((CsmList) csmElement).getSeparatorPost());
+                    postSepIf.setThenStmt(postSepBody);
+                    loopBody.addStatement(postSepIf);
                 }
+                loopBody.addStatement(countName + "++;");
                 loop.setBody(loopBody);
                 body.addStatement(loop);
                 if (!csmList.getFollowing().isNone()) {

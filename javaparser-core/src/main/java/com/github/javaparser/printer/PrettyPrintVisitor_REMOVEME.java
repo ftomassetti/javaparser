@@ -228,14 +228,21 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(AnnotationDeclaration n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.println();
         }
+        int modifiersCount = 0;
         for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
             printer.print(modifiersItem.asString());
+            if (modifiersCount != n.getModifiers().size() - 1) {
+                printer.print(" ");
+            }
+            modifiersCount++;
         }
         if (!n.getModifiers().isEmpty()) {
             printer.print(" ");
@@ -247,8 +254,13 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         printer.print(" ");
         printer.print("{");
         printer.println();
+        int membersCount = 0;
         for (com.github.javaparser.ast.body.BodyDeclaration membersItem : n.getMembers()) {
+            if (membersCount != 0) {
+                printer.println();
+            }
             membersItem.accept(this, arg);
+            membersCount++;
         }
         if (!n.getMembers().isEmpty()) {
             printer.println();
@@ -261,14 +273,21 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(AnnotationMemberDeclaration n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.println();
         }
+        int modifiersCount = 0;
         for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
             printer.print(modifiersItem.asString());
+            if (modifiersCount != n.getModifiers().size() - 1) {
+                printer.print(" ");
+            }
+            modifiersCount++;
         }
         if (!n.getModifiers().isEmpty()) {
             printer.print(" ");
@@ -300,8 +319,10 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         printer.print("new");
         printer.print(" ");
         n.getElementType().accept(this, arg);
+        int levelsCount = 0;
         for (com.github.javaparser.ast.ArrayCreationLevel levelsItem : n.getLevels()) {
             levelsItem.accept(this, arg);
+            levelsCount++;
         }
         printOrphanCommentsEnding(n);
     }
@@ -310,8 +331,13 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(ArrayCreationLevel n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.println();
@@ -332,8 +358,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         if (!n.getValues().isEmpty()) {
             printer.print(" ");
         }
+        int valuesCount = 0;
         for (com.github.javaparser.ast.expr.Expression valuesItem : n.getValues()) {
             valuesItem.accept(this, arg);
+            if (valuesCount != n.getValues().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            valuesCount++;
         }
         if (!n.getValues().isEmpty()) {
             printer.print(" ");
@@ -347,8 +379,10 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     public void visit(ArrayType n, Void arg) {
         printJavaComment(n.getComment(), arg);
         n.getComponentType().accept(this, arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            annotationsCount++;
         }
         printer.print("[");
         printer.print("]");
@@ -405,8 +439,13 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         printer.println();
         if (!n.getStatements().isEmpty()) {
         }
+        int statementsCount = 0;
         for (com.github.javaparser.ast.stmt.Statement statementsItem : n.getStatements()) {
             statementsItem.accept(this, arg);
+            if (statementsCount != n.getStatements().size() - 1) {
+                printer.println();
+            }
+            statementsCount++;
         }
         if (!n.getStatements().isEmpty()) {
             printer.println();
@@ -480,14 +519,24 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(ClassOrInterfaceDeclaration n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.println();
+            }
+            annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.println();
         }
+        int modifiersCount = 0;
         for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
             printer.print(modifiersItem.asString());
+            if (modifiersCount != n.getModifiers().size() - 1) {
+                printer.print(" ");
+            }
+            modifiersCount++;
         }
         if (!n.getModifiers().isEmpty()) {
             printer.print(" ");
@@ -497,8 +546,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         if (!n.getTypeParameters().isEmpty()) {
             printer.print("<");
         }
+        int typeParametersCount = 0;
         for (com.github.javaparser.ast.type.TypeParameter typeParametersItem : n.getTypeParameters()) {
             typeParametersItem.accept(this, arg);
+            if (typeParametersCount != n.getTypeParameters().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            typeParametersCount++;
         }
         if (!n.getTypeParameters().isEmpty()) {
             printer.print(">");
@@ -508,16 +563,28 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
             printer.print("extends");
             printer.print(" ");
         }
+        int extendedTypesCount = 0;
         for (com.github.javaparser.ast.type.ClassOrInterfaceType extendedTypesItem : n.getExtendedTypes()) {
             extendedTypesItem.accept(this, arg);
+            if (extendedTypesCount != n.getExtendedTypes().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            extendedTypesCount++;
         }
         if (!n.getImplementedTypes().isEmpty()) {
             printer.print(" ");
             printer.print("implements");
             printer.print(" ");
         }
+        int implementedTypesCount = 0;
         for (com.github.javaparser.ast.type.ClassOrInterfaceType implementedTypesItem : n.getImplementedTypes()) {
             implementedTypesItem.accept(this, arg);
+            if (implementedTypesCount != n.getImplementedTypes().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            implementedTypesCount++;
         }
         printer.print(" ");
         printer.print("{");
@@ -525,8 +592,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         if (!n.getMembers().isEmpty()) {
             printer.println();
         }
+        int membersCount = 0;
         for (com.github.javaparser.ast.body.BodyDeclaration membersItem : n.getMembers()) {
             membersItem.accept(this, arg);
+            if (membersCount != n.getMembers().size() - 1) {
+                printer.println();
+                printer.println();
+            }
+            membersCount++;
         }
         if (!n.getMembers().isEmpty()) {
             printer.println();
@@ -539,8 +612,13 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(ClassOrInterfaceType n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
         }
         n.getName().accept(this, arg);
         printOrphanCommentsEnding(n);
@@ -553,14 +631,24 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         if (n.getPackageDeclaration().isPresent()) {
             n.getPackageDeclaration().get().accept(this, arg);
         }
+        int importsCount = 0;
         for (com.github.javaparser.ast.ImportDeclaration importsItem : n.getImports()) {
             importsItem.accept(this, arg);
+            importsCount++;
         }
         if (!n.getImports().isEmpty()) {
             printer.println();
         }
+        int typesCount = 0;
         for (com.github.javaparser.ast.body.TypeDeclaration typesItem : n.getTypes()) {
+            if (typesCount != 0) {
+                printer.println();
+            }
             typesItem.accept(this, arg);
+            if (typesCount != n.getTypes().size() - 1) {
+                printer.println();
+            }
+            typesCount++;
         }
         if (!n.getTypes().isEmpty()) {
             printer.println();
@@ -591,14 +679,21 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(ConstructorDeclaration n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.println();
         }
+        int modifiersCount = 0;
         for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
             printer.print(modifiersItem.asString());
+            if (modifiersCount != n.getModifiers().size() - 1) {
+                printer.print(" ");
+            }
+            modifiersCount++;
         }
         if (!n.getModifiers().isEmpty()) {
             printer.print(" ");
@@ -606,8 +701,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         if (!n.getTypeParameters().isEmpty()) {
             printer.print("<");
         }
+        int typeParametersCount = 0;
         for (com.github.javaparser.ast.type.TypeParameter typeParametersItem : n.getTypeParameters()) {
             typeParametersItem.accept(this, arg);
+            if (typeParametersCount != n.getTypeParameters().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            typeParametersCount++;
         }
         if (!n.getTypeParameters().isEmpty()) {
             printer.print(">");
@@ -615,8 +716,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         }
         n.getName().accept(this, arg);
         printer.print("(");
+        int parametersCount = 0;
         for (com.github.javaparser.ast.body.Parameter parametersItem : n.getParameters()) {
             parametersItem.accept(this, arg);
+            if (parametersCount != n.getParameters().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            parametersCount++;
         }
         printer.print(")");
         if (!n.getThrownExceptions().isEmpty()) {
@@ -624,8 +731,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
             printer.print("throws");
             printer.print(" ");
         }
+        int thrownExceptionsCount = 0;
         for (com.github.javaparser.ast.type.ReferenceType thrownExceptionsItem : n.getThrownExceptions()) {
             thrownExceptionsItem.accept(this, arg);
+            if (thrownExceptionsCount != n.getThrownExceptions().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            thrownExceptionsCount++;
         }
         printer.print(" ");
         n.getBody().accept(this, arg);
@@ -690,8 +803,10 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(EnumConstantDeclaration n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.println();
@@ -700,8 +815,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         if (!n.getArguments().isEmpty()) {
             printer.print("(");
         }
+        int argumentsCount = 0;
         for (com.github.javaparser.ast.expr.Expression argumentsItem : n.getArguments()) {
             argumentsItem.accept(this, arg);
+            if (argumentsCount != n.getArguments().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            argumentsCount++;
         }
         if (!n.getArguments().isEmpty()) {
             printer.print(")");
@@ -713,14 +834,24 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(EnumDeclaration n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.println();
         }
+        int modifiersCount = 0;
         for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
             printer.print(modifiersItem.asString());
+            if (modifiersCount != n.getModifiers().size() - 1) {
+                printer.print(" ");
+            }
+            modifiersCount++;
         }
         if (!n.getModifiers().isEmpty()) {
             printer.print(" ");
@@ -733,15 +864,27 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
             printer.print("implements");
             printer.print(" ");
         }
+        int implementedTypesCount = 0;
         for (com.github.javaparser.ast.type.ClassOrInterfaceType implementedTypesItem : n.getImplementedTypes()) {
             implementedTypesItem.accept(this, arg);
+            if (implementedTypesCount != n.getImplementedTypes().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            implementedTypesCount++;
         }
         printer.print(" ");
         printer.print("{");
         printer.println();
         printer.println();
+        int entriesCount = 0;
         for (com.github.javaparser.ast.body.EnumConstantDeclaration entriesItem : n.getEntries()) {
             entriesItem.accept(this, arg);
+            if (entriesCount != n.getEntries().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            entriesCount++;
         }
         printer.print("}");
         printOrphanCommentsEnding(n);
@@ -752,8 +895,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     public void visit(ExplicitConstructorInvocationStmt n, Void arg) {
         printJavaComment(n.getComment(), arg);
         printer.print("(");
+        int argumentsCount = 0;
         for (com.github.javaparser.ast.expr.Expression argumentsItem : n.getArguments()) {
             argumentsItem.accept(this, arg);
+            if (argumentsCount != n.getArguments().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            argumentsCount++;
         }
         printer.print(")");
         printer.print(";");
@@ -783,21 +932,37 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(FieldDeclaration n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.println();
         }
+        int modifiersCount = 0;
         for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
             printer.print(modifiersItem.asString());
+            if (modifiersCount != n.getModifiers().size() - 1) {
+                printer.print(" ");
+            }
+            modifiersCount++;
         }
         if (!n.getModifiers().isEmpty()) {
             printer.print(" ");
         }
         printer.print(" ");
+        int variablesCount = 0;
         for (com.github.javaparser.ast.body.VariableDeclarator variablesItem : n.getVariables()) {
             variablesItem.accept(this, arg);
+            if (variablesCount != n.getVariables().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            variablesCount++;
         }
         printer.print(";");
         printOrphanCommentsEnding(n);
@@ -810,8 +975,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         printer.print("for");
         printer.print(" ");
         printer.print("(");
+        int initializationCount = 0;
         for (com.github.javaparser.ast.expr.Expression initializationItem : n.getInitialization()) {
             initializationItem.accept(this, arg);
+            if (initializationCount != n.getInitialization().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            initializationCount++;
         }
         printer.print(";");
         printer.print(" ");
@@ -820,8 +991,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         }
         printer.print(";");
         printer.print(" ");
+        int updateCount = 0;
         for (com.github.javaparser.ast.expr.Expression updateItem : n.getUpdate()) {
             updateItem.accept(this, arg);
+            if (updateCount != n.getUpdate().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            updateCount++;
         }
         printer.print(")");
         printer.print(" ");
@@ -903,14 +1080,26 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(IntersectionType n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.println();
         }
+        int elementsCount = 0;
         for (com.github.javaparser.ast.type.ReferenceType elementsItem : n.getElements()) {
             elementsItem.accept(this, arg);
+            if (elementsCount != n.getElements().size() - 1) {
+                printer.print(" ");
+                printer.print("&");
+                printer.print(" ");
+            }
+            elementsCount++;
         }
         printOrphanCommentsEnding(n);
     }
@@ -937,8 +1126,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(LambdaExpr n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int parametersCount = 0;
         for (com.github.javaparser.ast.body.Parameter parametersItem : n.getParameters()) {
             parametersItem.accept(this, arg);
+            if (parametersCount != n.getParameters().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            parametersCount++;
         }
         printer.print(" ");
         printer.print("->");
@@ -997,16 +1192,28 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
             printer.print("<");
         }
+        int typeArgumentsCount = 0;
         for (com.github.javaparser.ast.type.Type typeArgumentsItem : n.getTypeArguments().get()) {
             typeArgumentsItem.accept(this, arg);
+            if (typeArgumentsCount != n.getTypeArguments().get().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            typeArgumentsCount++;
         }
         if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
             printer.print(">");
         }
         n.getName().accept(this, arg);
         printer.print("(");
+        int argumentsCount = 0;
         for (com.github.javaparser.ast.expr.Expression argumentsItem : n.getArguments()) {
             argumentsItem.accept(this, arg);
+            if (argumentsCount != n.getArguments().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            argumentsCount++;
         }
         printer.print(")");
         printOrphanCommentsEnding(n);
@@ -1019,8 +1226,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         if (!n.getTypeParameters().isEmpty()) {
             printer.print("<");
         }
+        int typeParametersCount = 0;
         for (com.github.javaparser.ast.type.TypeParameter typeParametersItem : n.getTypeParameters()) {
             typeParametersItem.accept(this, arg);
+            if (typeParametersCount != n.getTypeParameters().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            typeParametersCount++;
         }
         if (!n.getTypeParameters().isEmpty()) {
             printer.print(">");
@@ -1030,8 +1243,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         printer.print(" ");
         n.getName().accept(this, arg);
         printer.print("(");
+        int parametersCount = 0;
         for (com.github.javaparser.ast.body.Parameter parametersItem : n.getParameters()) {
             parametersItem.accept(this, arg);
+            if (parametersCount != n.getParameters().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            parametersCount++;
         }
         printer.print(")");
         if (!n.getThrownExceptions().isEmpty()) {
@@ -1039,8 +1258,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
             printer.print("throws");
             printer.print(" ");
         }
+        int thrownExceptionsCount = 0;
         for (com.github.javaparser.ast.type.ReferenceType thrownExceptionsItem : n.getThrownExceptions()) {
             thrownExceptionsItem.accept(this, arg);
+            if (thrownExceptionsCount != n.getThrownExceptions().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            thrownExceptionsCount++;
         }
         printOrphanCommentsEnding(n);
     }
@@ -1054,8 +1279,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
             printer.print("<");
         }
+        int typeArgumentsCount = 0;
         for (com.github.javaparser.ast.type.Type typeArgumentsItem : n.getTypeArguments().get()) {
             typeArgumentsItem.accept(this, arg);
+            if (typeArgumentsCount != n.getTypeArguments().get().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            typeArgumentsCount++;
         }
         if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
             printer.print(">");
@@ -1068,8 +1299,13 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(ModuleDeclaration n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.println();
@@ -1080,8 +1316,10 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         printer.print(" ");
         printer.print("{");
         printer.println();
+        int moduleStmtsCount = 0;
         for (com.github.javaparser.ast.modules.ModuleStmt moduleStmtsItem : n.getModuleStmts()) {
             moduleStmtsItem.accept(this, arg);
+            moduleStmtsCount++;
         }
         printer.print("}");
         printer.println();
@@ -1100,8 +1338,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
             printer.print("to");
             printer.print(" ");
         }
+        int moduleNamesCount = 0;
         for (com.github.javaparser.ast.expr.Name moduleNamesItem : n.getModuleNames()) {
             moduleNamesItem.accept(this, arg);
+            if (moduleNamesCount != n.getModuleNames().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            moduleNamesCount++;
         }
         printer.print(";");
         printer.println();
@@ -1120,8 +1364,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
             printer.print("to");
             printer.print(" ");
         }
+        int moduleNamesCount = 0;
         for (com.github.javaparser.ast.expr.Name moduleNamesItem : n.getModuleNames()) {
             moduleNamesItem.accept(this, arg);
+            if (moduleNamesCount != n.getModuleNames().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            moduleNamesCount++;
         }
         printer.print(";");
         printer.println();
@@ -1140,8 +1390,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
             printer.print("with");
             printer.print(" ");
         }
+        int withTypesCount = 0;
         for (com.github.javaparser.ast.type.Type withTypesItem : n.getWithTypes()) {
             withTypesItem.accept(this, arg);
+            if (withTypesCount != n.getWithTypes().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            withTypesCount++;
         }
         printer.print(";");
         printer.println();
@@ -1154,8 +1410,13 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         printJavaComment(n.getComment(), arg);
         printer.print("requires");
         printer.print(" ");
+        int modifiersCount = 0;
         for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
             printer.print(modifiersItem.asString());
+            if (modifiersCount != n.getModifiers().size() - 1) {
+                printer.print(" ");
+            }
+            modifiersCount++;
         }
         if (!n.getModifiers().isEmpty()) {
             printer.print(" ");
@@ -1190,8 +1451,13 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(Name n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.print(" ");
@@ -1207,8 +1473,14 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         printer.print("@");
         n.getName().accept(this, arg);
         printer.print("(");
+        int pairsCount = 0;
         for (com.github.javaparser.ast.expr.MemberValuePair pairsItem : n.getPairs()) {
             pairsItem.accept(this, arg);
+            if (pairsCount != n.getPairs().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            pairsCount++;
         }
         printer.print(")");
         printOrphanCommentsEnding(n);
@@ -1231,16 +1503,28 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
             printer.print("<");
         }
+        int typeArgumentsCount = 0;
         for (com.github.javaparser.ast.type.Type typeArgumentsItem : n.getTypeArguments().get()) {
             typeArgumentsItem.accept(this, arg);
+            if (typeArgumentsCount != n.getTypeArguments().get().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            typeArgumentsCount++;
         }
         if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
             printer.print(">");
         }
         n.getType().accept(this, arg);
         printer.print("(");
+        int argumentsCount = 0;
         for (com.github.javaparser.ast.expr.Expression argumentsItem : n.getArguments()) {
             argumentsItem.accept(this, arg);
+            if (argumentsCount != n.getArguments().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            argumentsCount++;
         }
         printer.print(")");
         printOrphanCommentsEnding(n);
@@ -1250,8 +1534,10 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(PackageDeclaration n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            annotationsCount++;
         }
         printer.print("package");
         printer.print(" ");
@@ -1266,14 +1552,24 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(Parameter n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.print(" ");
         }
+        int modifiersCount = 0;
         for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
             printer.print(modifiersItem.asString());
+            if (modifiersCount != n.getModifiers().size() - 1) {
+                printer.print(" ");
+            }
+            modifiersCount++;
         }
         if (!n.getModifiers().isEmpty()) {
             printer.print(" ");
@@ -1288,8 +1584,10 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(PrimitiveType n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            annotationsCount++;
         }
         printer.print(n.getType().asString());
         printOrphanCommentsEnding(n);
@@ -1344,8 +1642,13 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     public void visit(SwitchEntryStmt n, Void arg) {
         printJavaComment(n.getComment(), arg);
         printer.println();
+        int statementsCount = 0;
         for (com.github.javaparser.ast.stmt.Statement statementsItem : n.getStatements()) {
             statementsItem.accept(this, arg);
+            if (statementsCount != n.getStatements().size() - 1) {
+                printer.println();
+            }
+            statementsCount++;
         }
         if (!n.getStatements().isEmpty()) {
             printer.println();
@@ -1366,8 +1669,10 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         printer.println();
         if (!n.getEntries().isEmpty()) {
         }
+        int entriesCount = 0;
         for (com.github.javaparser.ast.stmt.SwitchEntryStmt entriesItem : n.getEntries()) {
             entriesItem.accept(this, arg);
+            entriesCount++;
         }
         if (!n.getEntries().isEmpty()) {
         }
@@ -1417,8 +1722,10 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
         if (n.getTryBlock().isPresent()) {
             n.getTryBlock().get().accept(this, arg);
         }
+        int catchClausesCount = 0;
         for (com.github.javaparser.ast.stmt.CatchClause catchClausesItem : n.getCatchClauses()) {
             catchClausesItem.accept(this, arg);
+            catchClausesCount++;
         }
         printOrphanCommentsEnding(n);
     }
@@ -1435,8 +1742,13 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(TypeParameter n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.println();
@@ -1447,8 +1759,15 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
             printer.print("extends");
             printer.print(" ");
         }
+        int typeBoundCount = 0;
         for (com.github.javaparser.ast.type.ClassOrInterfaceType typeBoundItem : n.getTypeBound()) {
             typeBoundItem.accept(this, arg);
+            if (typeBoundCount != n.getTypeBound().size() - 1) {
+                printer.print(" ");
+                printer.print("&");
+                printer.print(" ");
+            }
+            typeBoundCount++;
         }
         printOrphanCommentsEnding(n);
     }
@@ -1465,14 +1784,26 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(UnionType n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.println();
         }
+        int elementsCount = 0;
         for (com.github.javaparser.ast.type.ReferenceType elementsItem : n.getElements()) {
             elementsItem.accept(this, arg);
+            if (elementsCount != n.getElements().size() - 1) {
+                printer.print(" ");
+                printer.print("|");
+                printer.print(" ");
+            }
+            elementsCount++;
         }
         printOrphanCommentsEnding(n);
     }
@@ -1496,22 +1827,38 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(VariableDeclarationExpr n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.print(" ");
         }
+        int modifiersCount = 0;
         for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
             printer.print(modifiersItem.asString());
+            if (modifiersCount != n.getModifiers().size() - 1) {
+                printer.print(" ");
+            }
+            modifiersCount++;
         }
         if (!n.getModifiers().isEmpty()) {
             printer.print(" ");
         }
         n.getMaximumCommonType().accept(this, arg);
         printer.print(" ");
+        int variablesCount = 0;
         for (com.github.javaparser.ast.body.VariableDeclarator variablesItem : n.getVariables()) {
             variablesItem.accept(this, arg);
+            if (variablesCount != n.getVariables().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            variablesCount++;
         }
         printOrphanCommentsEnding(n);
     }
@@ -1528,8 +1875,13 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(VoidType n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.println();
@@ -1556,8 +1908,13 @@ public abstract class PrettyPrintVisitor_REMOVEME implements VoidVisitor<Void> {
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(WildcardType n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.println();
