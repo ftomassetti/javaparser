@@ -173,187 +173,77 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
         javacomment.ifPresent(c -> c.accept(this, arg));
     }
 
-    private void printOrphanCommentsBeforeThisChildNode(final Node node) {
-        if (node instanceof Comment)
-            return;
-        Node parent = node.getParentNode().orElse(null);
-        if (parent == null)
-            return;
-        List<Node> everything = new LinkedList<>();
-        everything.addAll(parent.getChildNodes());
-        sortByBeginPosition(everything);
-        int positionOfTheChild = -1;
-        for (int i = 0; i < everything.size(); i++) {
-            if (everything.get(i) == node)
-                positionOfTheChild = i;
-        }
-        if (positionOfTheChild == -1) {
-            throw new AssertionError("I am not a child of my parent.");
-        }
-        int positionOfPreviousChild = -1;
-        for (int i = positionOfTheChild - 1; i >= 0 && positionOfPreviousChild == -1; i--) {
-            if (!(everything.get(i) instanceof Comment))
-                positionOfPreviousChild = i;
-        }
-        for (int i = positionOfPreviousChild + 1; i < positionOfTheChild; i++) {
-            Node nodeToPrint = everything.get(i);
-            if (!(nodeToPrint instanceof Comment))
-                throw new RuntimeException("Expected comment, instead " + nodeToPrint.getClass() + ". Position of previous child: " + positionOfPreviousChild + ", position of child " + positionOfTheChild);
-            nodeToPrint.accept(this, null);
-        }
-    }
-
-    private void printOrphanCommentsEnding(final Node node) {
-        List<Node> everything = new LinkedList<>();
-        everything.addAll(node.getChildNodes());
-        sortByBeginPosition(everything);
-        if (everything.isEmpty()) {
-            return;
-        }
-        int commentsAtEnd = 0;
-        boolean findingComments = true;
-        while (findingComments && commentsAtEnd < everything.size()) {
-            Node last = everything.get(everything.size() - 1 - commentsAtEnd);
-            findingComments = (last instanceof Comment);
-            if (findingComments) {
-                commentsAtEnd++;
-            }
-        }
-        for (int i = 0; i < commentsAtEnd; i++) {
-            everything.get(everything.size() - commentsAtEnd + i).accept(this, null);
-        }
-    }
-
-    @Override
-    public void visit(NodeList n, Void arg) {
-        for (Object node : n) {
-            ((Node) node).accept(this, arg);
-        }
-    }
-
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(AnnotationDeclaration n, Void arg) {
+    public void visit(final CompilationUnit n, final Void arg) {
         printJavaComment(n.getComment(), arg);
-        int annotationsCount = 0;
-        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
-            annotationsItem.accept(this, arg);
-            annotationsCount++;
+        if (n.getPackageDeclaration().isPresent()) {
+            n.getPackageDeclaration().get().accept(this, arg);
         }
-        if (!n.getAnnotations().isEmpty()) {
+        int importsCount = 0;
+        for (com.github.javaparser.ast.ImportDeclaration importsItem : n.getImports()) {
+            importsItem.accept(this, arg);
+            importsCount++;
+        }
+        if (!n.getImports().isEmpty()) {
             printer.println();
         }
-        int modifiersCount = 0;
-        for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
-            printer.print(modifiersItem.asString());
-            if (modifiersCount != n.getModifiers().size() - 1) {
-                printer.print(" ");
-            }
-            modifiersCount++;
-        }
-        if (!n.getModifiers().isEmpty()) {
-            printer.print(" ");
-        }
-        printer.print("@");
-        printer.print("interface");
-        printer.print(" ");
-        n.getName().accept(this, arg);
-        printer.print(" ");
-        printer.print("{");
-        printer.println();
-        printer.indent();
-        int membersCount = 0;
-        for (com.github.javaparser.ast.body.BodyDeclaration membersItem : n.getMembers()) {
-            if (membersCount != 0) {
+        int typesCount = 0;
+        for (com.github.javaparser.ast.body.TypeDeclaration typesItem : n.getTypes()) {
+            if (typesCount != 0) {
                 printer.println();
             }
-            membersItem.accept(this, arg);
-            membersCount++;
+            typesItem.accept(this, arg);
+            if (typesCount != n.getTypes().size() - 1) {
+                printer.println();
+            }
+            typesCount++;
         }
-        if (!n.getMembers().isEmpty()) {
+        if (!n.getTypes().isEmpty()) {
             printer.println();
         }
-        printer.unindent();
-        printer.print("}");
+        if (n.getModule().isPresent()) {
+            n.getModule().get().accept(this, arg);
+        }
         printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(AnnotationMemberDeclaration n, Void arg) {
+    public void visit(final PackageDeclaration n, final Void arg) {
         printJavaComment(n.getComment(), arg);
         int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
             annotationsCount++;
         }
-        if (!n.getAnnotations().isEmpty()) {
-            printer.println();
-        }
-        int modifiersCount = 0;
-        for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
-            printer.print(modifiersItem.asString());
-            if (modifiersCount != n.getModifiers().size() - 1) {
-                printer.print(" ");
-            }
-            modifiersCount++;
-        }
-        if (!n.getModifiers().isEmpty()) {
-            printer.print(" ");
-        }
-        n.getType().accept(this, arg);
+        printer.print("package");
         printer.print(" ");
         n.getName().accept(this, arg);
-        printer.print("(");
-        printer.print(")");
-        if (n.getDefaultValue().isPresent()) {
-            printer.print(" ");
-            printer.print("default");
-            printer.print(" ");
-            if (n.getDefaultValue().isPresent()) {
-                n.getDefaultValue().get().accept(this, arg);
-            }
-        }
         printer.print(";");
+        printer.println();
+        printer.println();
         printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ArrayAccessExpr n, Void arg) {
+    public void visit(final NameExpr n, final Void arg) {
         printJavaComment(n.getComment(), arg);
         n.getName().accept(this, arg);
-        printer.print("[");
-        n.getIndex().accept(this, arg);
-        printer.print("]");
         printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ArrayCreationExpr n, Void arg) {
+    public void visit(final Name n, final Void arg) {
         printJavaComment(n.getComment(), arg);
-        printer.print("new");
-        printer.print(" ");
-        n.getElementType().accept(this, arg);
-        int levelsCount = 0;
-        for (com.github.javaparser.ast.ArrayCreationLevel levelsItem : n.getLevels()) {
-            levelsItem.accept(this, arg);
-            levelsCount++;
-        }
-        if (n.getInitializer().isPresent()) {
-            printer.print(" ");
-            if (n.getInitializer().isPresent()) {
-                n.getInitializer().get().accept(this, arg);
+        if (n.getQualifier().isPresent()) {
+            if (n.getQualifier().isPresent()) {
+                n.getQualifier().get().accept(this, arg);
             }
+            printer.print(".");
         }
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ArrayCreationLevel n, Void arg) {
-        printJavaComment(n.getComment(), arg);
         int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
@@ -363,201 +253,23 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
             annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
-            printer.println();
-        }
-        printer.print("[");
-        if (n.getDimension().isPresent()) {
-            n.getDimension().get().accept(this, arg);
-        }
-        printer.print("]");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ArrayInitializerExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("{");
-        if (!n.getValues().isEmpty()) {
             printer.print(" ");
         }
-        int valuesCount = 0;
-        for (com.github.javaparser.ast.expr.Expression valuesItem : n.getValues()) {
-            valuesItem.accept(this, arg);
-            if (valuesCount != n.getValues().size() - 1) {
-                printer.print(",");
-                printer.print(" ");
-            }
-            valuesCount++;
-        }
-        if (!n.getValues().isEmpty()) {
-            printer.print(" ");
-        }
-        printer.print("}");
+        printer.print(n.getIdentifier());
         printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ArrayType n, Void arg) {
+    public void visit(SimpleName n, Void arg) {
         printJavaComment(n.getComment(), arg);
-        n.getComponentType().accept(this, arg);
-        int annotationsCount = 0;
-        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
-            annotationsItem.accept(this, arg);
-            annotationsCount++;
-        }
-        printer.print("[");
-        printer.print("]");
+        printer.print(n.getIdentifier());
         printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(AssertStmt n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("assert");
-        printer.print(" ");
-        n.getCheck().accept(this, arg);
-        if (n.getMessage().isPresent()) {
-            printer.print(" ");
-            printer.print(":");
-            printer.print(" ");
-            if (n.getMessage().isPresent()) {
-                n.getMessage().get().accept(this, arg);
-            }
-        }
-        printer.print(";");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(AssignExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        n.getTarget().accept(this, arg);
-        printer.print(" ");
-        printer.print(n.getOperator().asString());
-        printer.print(" ");
-        n.getValue().accept(this, arg);
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(BinaryExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        n.getLeft().accept(this, arg);
-        printer.print(" ");
-        printer.print(n.getOperator().asString());
-        printer.print(" ");
-        n.getRight().accept(this, arg);
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(BlockComment n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(BlockStmt n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("{");
-        printer.println();
-        if (!n.getStatements().isEmpty()) {
-            printer.indent();
-        }
-        int statementsCount = 0;
-        for (com.github.javaparser.ast.stmt.Statement statementsItem : n.getStatements()) {
-            statementsItem.accept(this, arg);
-            if (statementsCount != n.getStatements().size() - 1) {
-                printer.println();
-            }
-            statementsCount++;
-        }
-        if (!n.getStatements().isEmpty()) {
-            printer.println();
-            printer.unindent();
-        }
-        printer.print("}");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(BooleanLiteralExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print(String.valueOf(n.getValue()));
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(BreakStmt n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("break");
-        if (n.getLabel().isPresent()) {
-            printer.print(" ");
-            if (n.getLabel().isPresent()) {
-                n.getLabel().get().accept(this, arg);
-            }
-        }
-        printer.print(";");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(CastExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("(");
-        n.getType().accept(this, arg);
-        printer.print(")");
-        printer.print(" ");
-        n.getExpression().accept(this, arg);
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(CatchClause n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print(" ");
-        printer.print("catch");
-        printer.print(" ");
-        printer.print("(");
-        n.getParameter().accept(this, arg);
-        printer.print(")");
-        printer.print(" ");
-        n.getBody().accept(this, arg);
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(CharLiteralExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print(n.getValue());
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ClassExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        n.getType().accept(this, arg);
-        printer.print(".");
-        printer.print("class");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ClassOrInterfaceDeclaration n, Void arg) {
+    public void visit(final ClassOrInterfaceDeclaration n, final Void arg) {
         printJavaComment(n.getComment(), arg);
         int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
@@ -657,7 +369,14 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ClassOrInterfaceType n, Void arg) {
+    public void visit(final JavadocComment n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final ClassOrInterfaceType n, final Void arg) {
         printJavaComment(n.getComment(), arg);
         if (n.getScope().isPresent()) {
             if (n.getScope().isPresent()) {
@@ -682,14 +401,15 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
                 printer.print("<");
             }
             int typeArgumentsCount = 0;
-            for (com.github.javaparser.ast.type.Type typeArgumentsItem : n.getTypeArguments().get()) {
-                typeArgumentsItem.accept(this, arg);
-                if (typeArgumentsCount != n.getTypeArguments().get().size() - 1) {
-                    printer.print(",");
-                    printer.print(" ");
+            if (n.getTypeArguments().isPresent())
+                for (com.github.javaparser.ast.type.Type typeArgumentsItem : n.getTypeArguments().get()) {
+                    typeArgumentsItem.accept(this, arg);
+                    if (typeArgumentsCount != n.getTypeArguments().get().size() - 1) {
+                        printer.print(",");
+                        printer.print(" ");
+                    }
+                    typeArgumentsCount++;
                 }
-                typeArgumentsCount++;
-            }
             if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
                 printer.print(">");
             }
@@ -699,42 +419,371 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(CompilationUnit n, Void arg) {
+    public void visit(final TypeParameter n, final Void arg) {
         printJavaComment(n.getComment(), arg);
-        if (n.getPackageDeclaration().isPresent()) {
-            n.getPackageDeclaration().get().accept(this, arg);
+        int annotationsCount = 0;
+        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
+            annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
         }
-        int importsCount = 0;
-        for (com.github.javaparser.ast.ImportDeclaration importsItem : n.getImports()) {
-            importsItem.accept(this, arg);
-            importsCount++;
-        }
-        if (!n.getImports().isEmpty()) {
+        if (!n.getAnnotations().isEmpty()) {
             printer.println();
         }
-        int typesCount = 0;
-        for (com.github.javaparser.ast.body.TypeDeclaration typesItem : n.getTypes()) {
-            if (typesCount != 0) {
-                printer.println();
-            }
-            typesItem.accept(this, arg);
-            if (typesCount != n.getTypes().size() - 1) {
-                printer.println();
-            }
-            typesCount++;
+        n.getName().accept(this, arg);
+        if (!n.getTypeBound().isEmpty()) {
+            printer.print(" ");
+            printer.print("extends");
+            printer.print(" ");
         }
-        if (!n.getTypes().isEmpty()) {
-            printer.println();
-        }
-        if (n.getModule().isPresent()) {
-            n.getModule().get().accept(this, arg);
+        int typeBoundCount = 0;
+        for (com.github.javaparser.ast.type.ClassOrInterfaceType typeBoundItem : n.getTypeBound()) {
+            typeBoundItem.accept(this, arg);
+            if (typeBoundCount != n.getTypeBound().size() - 1) {
+                printer.print(" ");
+                printer.print("&");
+                printer.print(" ");
+            }
+            typeBoundCount++;
         }
         printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ConditionalExpr n, Void arg) {
+    public void visit(final PrimitiveType n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
+        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
+            annotationsItem.accept(this, arg);
+            annotationsCount++;
+        }
+        printer.print(n.getType().asString());
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final ArrayType n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getComponentType().accept(this, arg);
+        int annotationsCount = 0;
+        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
+            annotationsItem.accept(this, arg);
+            annotationsCount++;
+        }
+        printer.print("[");
+        printer.print("]");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final ArrayCreationLevel n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
+        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
+            annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
+        }
+        if (!n.getAnnotations().isEmpty()) {
+            printer.println();
+        }
+        printer.print("[");
+        if (n.getDimension().isPresent()) {
+            n.getDimension().get().accept(this, arg);
+        }
+        printer.print("]");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final IntersectionType n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
+        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
+            annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
+        }
+        if (!n.getAnnotations().isEmpty()) {
+            printer.println();
+        }
+        int elementsCount = 0;
+        for (com.github.javaparser.ast.type.ReferenceType elementsItem : n.getElements()) {
+            elementsItem.accept(this, arg);
+            if (elementsCount != n.getElements().size() - 1) {
+                printer.print(" ");
+                printer.print("&");
+                printer.print(" ");
+            }
+            elementsCount++;
+        }
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final UnionType n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
+        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
+            annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
+        }
+        if (!n.getAnnotations().isEmpty()) {
+            printer.println();
+        }
+        int elementsCount = 0;
+        for (com.github.javaparser.ast.type.ReferenceType elementsItem : n.getElements()) {
+            elementsItem.accept(this, arg);
+            if (elementsCount != n.getElements().size() - 1) {
+                printer.print(" ");
+                printer.print("|");
+                printer.print(" ");
+            }
+            elementsCount++;
+        }
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final WildcardType n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
+        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
+            annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
+        }
+        if (!n.getAnnotations().isEmpty()) {
+            printer.println();
+        }
+        printer.print("?");
+        if (n.getExtendedType().isPresent()) {
+            printer.print(" ");
+            printer.print("extends");
+            printer.print(" ");
+            if (n.getExtendedType().isPresent()) {
+                n.getExtendedType().get().accept(this, arg);
+            }
+        }
+        if (n.getSuperType().isPresent()) {
+            printer.print(" ");
+            printer.print("super");
+            printer.print(" ");
+            if (n.getSuperType().isPresent()) {
+                n.getSuperType().get().accept(this, arg);
+            }
+        }
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final UnknownType n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
+    // Nothing to print
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final FieldDeclaration n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
+        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
+            annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
+        }
+        if (!n.getAnnotations().isEmpty()) {
+            printer.println();
+        }
+        int modifiersCount = 0;
+        for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
+            printer.print(modifiersItem.asString());
+            if (modifiersCount != n.getModifiers().size() - 1) {
+                printer.print(" ");
+            }
+            modifiersCount++;
+        }
+        if (!n.getModifiers().isEmpty()) {
+            printer.print(" ");
+        }
+        if (!n.getVariables().isEmpty()) {
+            n.getMaximumCommonType().accept(this, arg);
+        }
+        printer.print(" ");
+        int variablesCount = 0;
+        for (com.github.javaparser.ast.body.VariableDeclarator variablesItem : n.getVariables()) {
+            variablesItem.accept(this, arg);
+            if (variablesCount != n.getVariables().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            variablesCount++;
+        }
+        printer.print(";");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final VariableDeclarator n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getName().accept(this, arg);
+        if (n.getInitializer().isPresent()) {
+            printer.print(" ");
+            printer.print("=");
+            printer.print(" ");
+            if (n.getInitializer().isPresent()) {
+                n.getInitializer().get().accept(this, arg);
+            }
+        }
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final ArrayInitializerExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("{");
+        if (!n.getValues().isEmpty()) {
+            printer.print(" ");
+        }
+        int valuesCount = 0;
+        for (com.github.javaparser.ast.expr.Expression valuesItem : n.getValues()) {
+            valuesItem.accept(this, arg);
+            if (valuesCount != n.getValues().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            valuesCount++;
+        }
+        if (!n.getValues().isEmpty()) {
+            printer.print(" ");
+        }
+        printer.print("}");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final VoidType n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
+        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
+            annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
+        }
+        if (!n.getAnnotations().isEmpty()) {
+            printer.println();
+        }
+        printer.print("void");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final ArrayAccessExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getName().accept(this, arg);
+        printer.print("[");
+        n.getIndex().accept(this, arg);
+        printer.print("]");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final ArrayCreationExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("new");
+        printer.print(" ");
+        n.getElementType().accept(this, arg);
+        int levelsCount = 0;
+        for (com.github.javaparser.ast.ArrayCreationLevel levelsItem : n.getLevels()) {
+            levelsItem.accept(this, arg);
+            levelsCount++;
+        }
+        if (n.getInitializer().isPresent()) {
+            printer.print(" ");
+            if (n.getInitializer().isPresent()) {
+                n.getInitializer().get().accept(this, arg);
+            }
+        }
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final AssignExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getTarget().accept(this, arg);
+        printer.print(" ");
+        printer.print(n.getOperator().asString());
+        printer.print(" ");
+        n.getValue().accept(this, arg);
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final BinaryExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getLeft().accept(this, arg);
+        printer.print(" ");
+        printer.print(n.getOperator().asString());
+        printer.print(" ");
+        n.getRight().accept(this, arg);
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final CastExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("(");
+        n.getType().accept(this, arg);
+        printer.print(")");
+        printer.print(" ");
+        n.getExpression().accept(this, arg);
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final ClassExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getType().accept(this, arg);
+        printer.print(".");
+        printer.print("class");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final ConditionalExpr n, final Void arg) {
         printJavaComment(n.getComment(), arg);
         n.getCondition().accept(this, arg);
         printer.print(" ");
@@ -750,7 +799,252 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ConstructorDeclaration n, Void arg) {
+    public void visit(final EnclosedExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("(");
+        if (n.getInner().isPresent()) {
+            n.getInner().get().accept(this, arg);
+        }
+        printer.print(")");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final FieldAccessExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getScope().accept(this, arg);
+        printer.print(".");
+        n.getName().accept(this, arg);
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final InstanceOfExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getExpression().accept(this, arg);
+        printer.print(" ");
+        printer.print("instanceof");
+        printer.print(" ");
+        n.getType().accept(this, arg);
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final CharLiteralExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print(n.getValue());
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final DoubleLiteralExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print(n.getValue());
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final IntegerLiteralExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print(n.getValue());
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final LongLiteralExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print(n.getValue());
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final StringLiteralExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print(n.getValue());
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final BooleanLiteralExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print(String.valueOf(n.getValue()));
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final NullLiteralExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("null");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final ThisExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        if (n.getClassExpr().isPresent()) {
+            if (n.getClassExpr().isPresent()) {
+                n.getClassExpr().get().accept(this, arg);
+            }
+            printer.print(".");
+        }
+        printer.print("this");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final SuperExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        if (n.getClassExpr().isPresent()) {
+            if (n.getClassExpr().isPresent()) {
+                n.getClassExpr().get().accept(this, arg);
+            }
+            printer.print(".");
+        }
+        printer.print("super");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final MethodCallExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        if (n.getScope().isPresent()) {
+            if (n.getScope().isPresent()) {
+                n.getScope().get().accept(this, arg);
+            }
+            printer.print(".");
+        }
+        if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
+            printer.print("<");
+        }
+        int typeArgumentsCount = 0;
+        if (n.getTypeArguments().isPresent())
+            for (com.github.javaparser.ast.type.Type typeArgumentsItem : n.getTypeArguments().get()) {
+                typeArgumentsItem.accept(this, arg);
+                if (typeArgumentsCount != n.getTypeArguments().get().size() - 1) {
+                    printer.print(",");
+                    printer.print(" ");
+                }
+                typeArgumentsCount++;
+            }
+        if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
+            printer.print(">");
+        }
+        n.getName().accept(this, arg);
+        printer.print("(");
+        int argumentsCount = 0;
+        for (com.github.javaparser.ast.expr.Expression argumentsItem : n.getArguments()) {
+            argumentsItem.accept(this, arg);
+            if (argumentsCount != n.getArguments().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            argumentsCount++;
+        }
+        printer.print(")");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final ObjectCreationExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        if (n.getScope().isPresent()) {
+            if (n.getScope().isPresent()) {
+                n.getScope().get().accept(this, arg);
+            }
+            printer.print(".");
+        }
+        printer.print("new");
+        printer.print(" ");
+        if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
+            printer.print("<");
+        }
+        int typeArgumentsCount = 0;
+        if (n.getTypeArguments().isPresent())
+            for (com.github.javaparser.ast.type.Type typeArgumentsItem : n.getTypeArguments().get()) {
+                typeArgumentsItem.accept(this, arg);
+                if (typeArgumentsCount != n.getTypeArguments().get().size() - 1) {
+                    printer.print(",");
+                    printer.print(" ");
+                }
+                typeArgumentsCount++;
+            }
+        if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
+            printer.print(">");
+        }
+        if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
+            printer.print(" ");
+        }
+        n.getType().accept(this, arg);
+        printer.print("(");
+        int argumentsCount = 0;
+        for (com.github.javaparser.ast.expr.Expression argumentsItem : n.getArguments()) {
+            argumentsItem.accept(this, arg);
+            if (argumentsCount != n.getArguments().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            argumentsCount++;
+        }
+        printer.print(")");
+        if (n.getAnonymousClassBody().isPresent()) {
+            printer.print(" ");
+            printer.print("{");
+            printer.println();
+            printer.indent();
+            if (n.getAnonymousClassBody().isPresent() && !n.getAnonymousClassBody().get().isEmpty()) {
+                printer.println();
+            }
+            int anonymousClassBodyCount = 0;
+            if (n.getAnonymousClassBody().isPresent())
+                for (com.github.javaparser.ast.body.BodyDeclaration anonymousClassBodyItem : n.getAnonymousClassBody().get()) {
+                    if (anonymousClassBodyCount != 0) {
+                        printer.println();
+                    }
+                    anonymousClassBodyItem.accept(this, arg);
+                    if (anonymousClassBodyCount != n.getAnonymousClassBody().get().size() - 1) {
+                        printer.println();
+                    }
+                    anonymousClassBodyCount++;
+                }
+            if (n.getAnonymousClassBody().isPresent() && !n.getAnonymousClassBody().get().isEmpty()) {
+                printer.println();
+            }
+            printer.unindent();
+            printer.print("}");
+        }
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final UnaryExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        if (n.isPrefix()) {
+            printer.print(n.getOperator().asString());
+        }
+        n.getExpression().accept(this, arg);
+        if (n.isPostfix()) {
+            printer.print(n.getOperator().asString());
+        }
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final ConstructorDeclaration n, final Void arg) {
         printJavaComment(n.getComment(), arg);
         int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
@@ -820,9 +1114,370 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ContinueStmt n, Void arg) {
+    public void visit(final MethodDeclaration n, final Void arg) {
         printJavaComment(n.getComment(), arg);
-        printer.print("continue");
+        int annotationsCount = 0;
+        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
+            annotationsItem.accept(this, arg);
+            annotationsCount++;
+        }
+        if (!n.getAnnotations().isEmpty()) {
+            printer.println();
+        }
+        int modifiersCount = 0;
+        for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
+            printer.print(modifiersItem.asString());
+            if (modifiersCount != n.getModifiers().size() - 1) {
+                printer.print(" ");
+            }
+            modifiersCount++;
+        }
+        if (!n.getModifiers().isEmpty()) {
+            printer.print(" ");
+        }
+        if (!n.getTypeParameters().isEmpty()) {
+            printer.print("<");
+        }
+        int typeParametersCount = 0;
+        for (com.github.javaparser.ast.type.TypeParameter typeParametersItem : n.getTypeParameters()) {
+            typeParametersItem.accept(this, arg);
+            if (typeParametersCount != n.getTypeParameters().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            typeParametersCount++;
+        }
+        if (!n.getTypeParameters().isEmpty()) {
+            printer.print(">");
+            printer.print(" ");
+        }
+        n.getType().accept(this, arg);
+        printer.print(" ");
+        n.getName().accept(this, arg);
+        printer.print("(");
+        int parametersCount = 0;
+        for (com.github.javaparser.ast.body.Parameter parametersItem : n.getParameters()) {
+            parametersItem.accept(this, arg);
+            if (parametersCount != n.getParameters().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            parametersCount++;
+        }
+        printer.print(")");
+        if (!n.getThrownExceptions().isEmpty()) {
+            printer.print(" ");
+            printer.print("throws");
+            printer.print(" ");
+        }
+        int thrownExceptionsCount = 0;
+        for (com.github.javaparser.ast.type.ReferenceType thrownExceptionsItem : n.getThrownExceptions()) {
+            thrownExceptionsItem.accept(this, arg);
+            if (thrownExceptionsCount != n.getThrownExceptions().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            thrownExceptionsCount++;
+        }
+        if (n.getBody().isPresent()) {
+            printer.print(" ");
+            if (n.getBody().isPresent()) {
+                n.getBody().get().accept(this, arg);
+            }
+        } else {
+            printer.print(";");
+        }
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final Parameter n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
+        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
+            annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
+        }
+        if (!n.getAnnotations().isEmpty()) {
+            printer.print(" ");
+        }
+        int modifiersCount = 0;
+        for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
+            printer.print(modifiersItem.asString());
+            if (modifiersCount != n.getModifiers().size() - 1) {
+                printer.print(" ");
+            }
+            modifiersCount++;
+        }
+        if (!n.getModifiers().isEmpty()) {
+            printer.print(" ");
+        }
+        n.getType().accept(this, arg);
+        if (n.isVarArgs()) {
+            int varArgsAnnotationsCount = 0;
+            for (com.github.javaparser.ast.expr.AnnotationExpr varArgsAnnotationsItem : n.getVarArgsAnnotations()) {
+                varArgsAnnotationsItem.accept(this, arg);
+                if (varArgsAnnotationsCount != n.getVarArgsAnnotations().size() - 1) {
+                    printer.print(" ");
+                }
+                varArgsAnnotationsCount++;
+            }
+            printer.print("...");
+        }
+        printer.print(" ");
+        n.getName().accept(this, arg);
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final ExplicitConstructorInvocationStmt n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        if (n.isThis()) {
+            if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
+                printer.print("<");
+            }
+            int typeArgumentsCount = 0;
+            if (n.getTypeArguments().isPresent())
+                for (com.github.javaparser.ast.type.Type typeArgumentsItem : n.getTypeArguments().get()) {
+                    typeArgumentsItem.accept(this, arg);
+                    if (typeArgumentsCount != n.getTypeArguments().get().size() - 1) {
+                        printer.print(",");
+                        printer.print(" ");
+                    }
+                    typeArgumentsCount++;
+                }
+            if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
+                printer.print(">");
+            }
+            printer.print("this");
+        } else {
+            if (n.getExpression().isPresent()) {
+                if (n.getExpression().isPresent()) {
+                    n.getExpression().get().accept(this, arg);
+                }
+                printer.print(".");
+            }
+            if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
+                printer.print("<");
+            }
+            int typeArgumentsCount = 0;
+            if (n.getTypeArguments().isPresent())
+                for (com.github.javaparser.ast.type.Type typeArgumentsItem : n.getTypeArguments().get()) {
+                    typeArgumentsItem.accept(this, arg);
+                    if (typeArgumentsCount != n.getTypeArguments().get().size() - 1) {
+                        printer.print(",");
+                        printer.print(" ");
+                    }
+                    typeArgumentsCount++;
+                }
+            if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
+                printer.print(">");
+            }
+            printer.print("super");
+        }
+        printer.print("(");
+        int argumentsCount = 0;
+        for (com.github.javaparser.ast.expr.Expression argumentsItem : n.getArguments()) {
+            argumentsItem.accept(this, arg);
+            if (argumentsCount != n.getArguments().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            argumentsCount++;
+        }
+        printer.print(")");
+        printer.print(";");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final VariableDeclarationExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
+        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
+            annotationsItem.accept(this, arg);
+            if (annotationsCount != n.getAnnotations().size() - 1) {
+                printer.print(" ");
+            }
+            annotationsCount++;
+        }
+        if (!n.getAnnotations().isEmpty()) {
+            printer.print(" ");
+        }
+        int modifiersCount = 0;
+        for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
+            printer.print(modifiersItem.asString());
+            if (modifiersCount != n.getModifiers().size() - 1) {
+                printer.print(" ");
+            }
+            modifiersCount++;
+        }
+        if (!n.getModifiers().isEmpty()) {
+            printer.print(" ");
+        }
+        n.getMaximumCommonType().accept(this, arg);
+        printer.print(" ");
+        int variablesCount = 0;
+        for (com.github.javaparser.ast.body.VariableDeclarator variablesItem : n.getVariables()) {
+            variablesItem.accept(this, arg);
+            if (variablesCount != n.getVariables().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            variablesCount++;
+        }
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final LocalClassDeclarationStmt n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getClassDeclaration().accept(this, arg);
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final AssertStmt n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("assert");
+        printer.print(" ");
+        n.getCheck().accept(this, arg);
+        if (n.getMessage().isPresent()) {
+            printer.print(" ");
+            printer.print(":");
+            printer.print(" ");
+            if (n.getMessage().isPresent()) {
+                n.getMessage().get().accept(this, arg);
+            }
+        }
+        printer.print(";");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final BlockStmt n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("{");
+        printer.println();
+        if (!n.getStatements().isEmpty()) {
+            printer.indent();
+        }
+        int statementsCount = 0;
+        for (com.github.javaparser.ast.stmt.Statement statementsItem : n.getStatements()) {
+            statementsItem.accept(this, arg);
+            if (statementsCount != n.getStatements().size() - 1) {
+                printer.println();
+            }
+            statementsCount++;
+        }
+        if (!n.getStatements().isEmpty()) {
+            printer.println();
+            printer.unindent();
+        }
+        printer.print("}");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final LabeledStmt n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getLabel().accept(this, arg);
+        printer.print(":");
+        printer.print(" ");
+        n.getStatement().accept(this, arg);
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final EmptyStmt n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print(";");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final ExpressionStmt n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getExpression().accept(this, arg);
+        printer.print(";");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final SwitchStmt n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("switch");
+        printer.print("(");
+        n.getSelector().accept(this, arg);
+        printer.print(")");
+        printer.print(" ");
+        printer.print("{");
+        printer.println();
+        if (!n.getEntries().isEmpty()) {
+            printer.indent();
+        }
+        int entriesCount = 0;
+        for (com.github.javaparser.ast.stmt.SwitchEntryStmt entriesItem : n.getEntries()) {
+            entriesItem.accept(this, arg);
+            entriesCount++;
+        }
+        if (!n.getEntries().isEmpty()) {
+            printer.unindent();
+        }
+        printer.print("}");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final SwitchEntryStmt n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        if (n.getLabel().isPresent()) {
+            printer.print("case");
+            printer.print(" ");
+            if (n.getLabel().isPresent()) {
+                n.getLabel().get().accept(this, arg);
+            }
+            printer.print(":");
+        } else {
+            printer.print("default");
+            printer.print(":");
+        }
+        printer.println();
+        printer.indent();
+        int statementsCount = 0;
+        for (com.github.javaparser.ast.stmt.Statement statementsItem : n.getStatements()) {
+            statementsItem.accept(this, arg);
+            if (statementsCount != n.getStatements().size() - 1) {
+                printer.println();
+            }
+            statementsCount++;
+        }
+        if (!n.getStatements().isEmpty()) {
+            printer.println();
+        }
+        printer.unindent();
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final BreakStmt n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("break");
         if (n.getLabel().isPresent()) {
             printer.print(" ");
             if (n.getLabel().isPresent()) {
@@ -835,107 +1490,22 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(DoStmt n, Void arg) {
+    public void visit(final ReturnStmt n, final Void arg) {
         printJavaComment(n.getComment(), arg);
-        printer.print("do");
-        printer.print(" ");
-        n.getBody().accept(this, arg);
-        printer.print(" ");
-        printer.print("while");
-        printer.print(" ");
-        printer.print("(");
-        n.getCondition().accept(this, arg);
-        printer.print(")");
-        printer.print(";");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(DoubleLiteralExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print(n.getValue());
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(EmptyStmt n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print(";");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(EnclosedExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("(");
-        if (n.getInner().isPresent()) {
-            n.getInner().get().accept(this, arg);
-        }
-        printer.print(")");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(EnumConstantDeclaration n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        int annotationsCount = 0;
-        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
-            annotationsItem.accept(this, arg);
-            annotationsCount++;
-        }
-        if (!n.getAnnotations().isEmpty()) {
-            printer.println();
-        }
-        n.getName().accept(this, arg);
-        if (!n.getArguments().isEmpty()) {
-            printer.print("(");
-        }
-        int argumentsCount = 0;
-        for (com.github.javaparser.ast.expr.Expression argumentsItem : n.getArguments()) {
-            argumentsItem.accept(this, arg);
-            if (argumentsCount != n.getArguments().size() - 1) {
-                printer.print(",");
-                printer.print(" ");
-            }
-            argumentsCount++;
-        }
-        if (!n.getArguments().isEmpty()) {
-            printer.print(")");
-        }
-        if (!n.getClassBody().isEmpty()) {
+        printer.print("return");
+        if (n.getExpression().isPresent()) {
             printer.print(" ");
-            printer.print("{");
-            printer.println();
-            printer.indent();
-            printer.println();
-            int classBodyCount = 0;
-            for (com.github.javaparser.ast.body.BodyDeclaration classBodyItem : n.getClassBody()) {
-                if (classBodyCount != 0) {
-                    printer.println();
-                }
-                classBodyItem.accept(this, arg);
-                if (classBodyCount != n.getClassBody().size() - 1) {
-                    printer.println();
-                }
-                classBodyCount++;
+            if (n.getExpression().isPresent()) {
+                n.getExpression().get().accept(this, arg);
             }
-            if (!n.getClassBody().isEmpty()) {
-                printer.println();
-            }
-            printer.unindent();
-            printer.print("}");
-            printer.println();
         }
+        printer.print(";");
         printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(EnumDeclaration n, Void arg) {
+    public void visit(final EnumDeclaration n, final Void arg) {
         printJavaComment(n.getComment(), arg);
         int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
@@ -1020,50 +1590,20 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ExplicitConstructorInvocationStmt n, Void arg) {
+    public void visit(final EnumConstantDeclaration n, final Void arg) {
         printJavaComment(n.getComment(), arg);
-        if (n.isThis()) {
-            if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
-                printer.print("<");
-            }
-            int typeArgumentsCount = 0;
-            for (com.github.javaparser.ast.type.Type typeArgumentsItem : n.getTypeArguments().get()) {
-                typeArgumentsItem.accept(this, arg);
-                if (typeArgumentsCount != n.getTypeArguments().get().size() - 1) {
-                    printer.print(",");
-                    printer.print(" ");
-                }
-                typeArgumentsCount++;
-            }
-            if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
-                printer.print(">");
-            }
-            printer.print("this");
-        } else {
-            if (n.getExpression().isPresent()) {
-                if (n.getExpression().isPresent()) {
-                    n.getExpression().get().accept(this, arg);
-                }
-                printer.print(".");
-            }
-            if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
-                printer.print("<");
-            }
-            int typeArgumentsCount = 0;
-            for (com.github.javaparser.ast.type.Type typeArgumentsItem : n.getTypeArguments().get()) {
-                typeArgumentsItem.accept(this, arg);
-                if (typeArgumentsCount != n.getTypeArguments().get().size() - 1) {
-                    printer.print(",");
-                    printer.print(" ");
-                }
-                typeArgumentsCount++;
-            }
-            if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
-                printer.print(">");
-            }
-            printer.print("super");
+        int annotationsCount = 0;
+        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
+            annotationsItem.accept(this, arg);
+            annotationsCount++;
         }
-        printer.print("(");
+        if (!n.getAnnotations().isEmpty()) {
+            printer.println();
+        }
+        n.getName().accept(this, arg);
+        if (!n.getArguments().isEmpty()) {
+            printer.print("(");
+        }
         int argumentsCount = 0;
         for (com.github.javaparser.ast.expr.Expression argumentsItem : n.getArguments()) {
             argumentsItem.accept(this, arg);
@@ -1073,132 +1613,51 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
             }
             argumentsCount++;
         }
-        printer.print(")");
-        printer.print(";");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ExpressionStmt n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        n.getExpression().accept(this, arg);
-        printer.print(";");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(FieldAccessExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        n.getScope().accept(this, arg);
-        printer.print(".");
-        n.getName().accept(this, arg);
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(FieldDeclaration n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        int annotationsCount = 0;
-        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
-            annotationsItem.accept(this, arg);
-            if (annotationsCount != n.getAnnotations().size() - 1) {
-                printer.print(" ");
-            }
-            annotationsCount++;
+        if (!n.getArguments().isEmpty()) {
+            printer.print(")");
         }
-        if (!n.getAnnotations().isEmpty()) {
+        if (!n.getClassBody().isEmpty()) {
+            printer.print(" ");
+            printer.print("{");
+            printer.println();
+            printer.indent();
+            printer.println();
+            int classBodyCount = 0;
+            for (com.github.javaparser.ast.body.BodyDeclaration classBodyItem : n.getClassBody()) {
+                if (classBodyCount != 0) {
+                    printer.println();
+                }
+                classBodyItem.accept(this, arg);
+                if (classBodyCount != n.getClassBody().size() - 1) {
+                    printer.println();
+                }
+                classBodyCount++;
+            }
+            if (!n.getClassBody().isEmpty()) {
+                printer.println();
+            }
+            printer.unindent();
+            printer.print("}");
             printer.println();
         }
-        int modifiersCount = 0;
-        for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
-            printer.print(modifiersItem.asString());
-            if (modifiersCount != n.getModifiers().size() - 1) {
-                printer.print(" ");
-            }
-            modifiersCount++;
-        }
-        if (!n.getModifiers().isEmpty()) {
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final InitializerDeclaration n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        if (n.isStatic()) {
+            printer.print("static");
             printer.print(" ");
         }
-        if (!n.getVariables().isEmpty()) {
-            n.getMaximumCommonType().accept(this, arg);
-        }
-        printer.print(" ");
-        int variablesCount = 0;
-        for (com.github.javaparser.ast.body.VariableDeclarator variablesItem : n.getVariables()) {
-            variablesItem.accept(this, arg);
-            if (variablesCount != n.getVariables().size() - 1) {
-                printer.print(",");
-                printer.print(" ");
-            }
-            variablesCount++;
-        }
-        printer.print(";");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ForStmt n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("for");
-        printer.print(" ");
-        printer.print("(");
-        int initializationCount = 0;
-        for (com.github.javaparser.ast.expr.Expression initializationItem : n.getInitialization()) {
-            initializationItem.accept(this, arg);
-            if (initializationCount != n.getInitialization().size() - 1) {
-                printer.print(",");
-                printer.print(" ");
-            }
-            initializationCount++;
-        }
-        printer.print(";");
-        printer.print(" ");
-        if (n.getCompare().isPresent()) {
-            n.getCompare().get().accept(this, arg);
-        }
-        printer.print(";");
-        printer.print(" ");
-        int updateCount = 0;
-        for (com.github.javaparser.ast.expr.Expression updateItem : n.getUpdate()) {
-            updateItem.accept(this, arg);
-            if (updateCount != n.getUpdate().size() - 1) {
-                printer.print(",");
-                printer.print(" ");
-            }
-            updateCount++;
-        }
-        printer.print(")");
-        printer.print(" ");
         n.getBody().accept(this, arg);
         printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ForeachStmt n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("for");
-        printer.print(" ");
-        printer.print("(");
-        n.getVariable().accept(this, arg);
-        printer.print(" ");
-        printer.print(":");
-        printer.print(" ");
-        n.getIterable().accept(this, arg);
-        printer.print(")");
-        printer.print(" ");
-        n.getBody().accept(this, arg);
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(IfStmt n, Void arg) {
+    public void visit(final IfStmt n, final Void arg) {
         printJavaComment(n.getComment(), arg);
         printer.print("if");
         printer.print(" ");
@@ -1241,99 +1700,342 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ImportDeclaration n, Void arg) {
+    public void visit(final WhileStmt n, final Void arg) {
         printJavaComment(n.getComment(), arg);
-        printer.print("import");
+        printer.print("while");
         printer.print(" ");
-        if (n.isStatic()) {
-            printer.print("static");
-            printer.print(" ");
-        }
-        n.getName().accept(this, arg);
-        if (n.isAsterisk()) {
-            printer.print(".");
-            printer.print("*");
-        }
-        printer.print(";");
-        printer.println();
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(InitializerDeclaration n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        if (n.isStatic()) {
-            printer.print("static");
-            printer.print(" ");
-        }
+        printer.print("(");
+        n.getCondition().accept(this, arg);
+        printer.print(")");
+        printer.print(" ");
         n.getBody().accept(this, arg);
         printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(InstanceOfExpr n, Void arg) {
+    public void visit(final ContinueStmt n, final Void arg) {
         printJavaComment(n.getComment(), arg);
+        printer.print("continue");
+        if (n.getLabel().isPresent()) {
+            printer.print(" ");
+            if (n.getLabel().isPresent()) {
+                n.getLabel().get().accept(this, arg);
+            }
+        }
+        printer.print(";");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final DoStmt n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("do");
+        printer.print(" ");
+        n.getBody().accept(this, arg);
+        printer.print(" ");
+        printer.print("while");
+        printer.print(" ");
+        printer.print("(");
+        n.getCondition().accept(this, arg);
+        printer.print(")");
+        printer.print(";");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final ForeachStmt n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("for");
+        printer.print(" ");
+        printer.print("(");
+        n.getVariable().accept(this, arg);
+        printer.print(" ");
+        printer.print(":");
+        printer.print(" ");
+        n.getIterable().accept(this, arg);
+        printer.print(")");
+        printer.print(" ");
+        n.getBody().accept(this, arg);
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final ForStmt n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("for");
+        printer.print(" ");
+        printer.print("(");
+        int initializationCount = 0;
+        for (com.github.javaparser.ast.expr.Expression initializationItem : n.getInitialization()) {
+            initializationItem.accept(this, arg);
+            if (initializationCount != n.getInitialization().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            initializationCount++;
+        }
+        printer.print(";");
+        printer.print(" ");
+        if (n.getCompare().isPresent()) {
+            n.getCompare().get().accept(this, arg);
+        }
+        printer.print(";");
+        printer.print(" ");
+        int updateCount = 0;
+        for (com.github.javaparser.ast.expr.Expression updateItem : n.getUpdate()) {
+            updateItem.accept(this, arg);
+            if (updateCount != n.getUpdate().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            updateCount++;
+        }
+        printer.print(")");
+        printer.print(" ");
+        n.getBody().accept(this, arg);
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final ThrowStmt n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("throw");
+        printer.print(" ");
         n.getExpression().accept(this, arg);
-        printer.print(" ");
-        printer.print("instanceof");
-        printer.print(" ");
-        n.getType().accept(this, arg);
+        printer.print(";");
         printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(IntegerLiteralExpr n, Void arg) {
+    public void visit(final SynchronizedStmt n, final Void arg) {
         printJavaComment(n.getComment(), arg);
-        printer.print(n.getValue());
+        printer.print("synchronized");
+        printer.print(" ");
+        printer.print("(");
+        n.getExpression().accept(this, arg);
+        printer.print(")");
+        printer.print(" ");
+        n.getBody().accept(this, arg);
         printOrphanCommentsEnding(n);
     }
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(IntersectionType n, Void arg) {
+    public void visit(final TryStmt n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("try");
+        printer.print(" ");
+        if (!n.getResources().isEmpty()) {
+            printer.print("(");
+            if (!n.getResources().isEmpty()) {
+                printer.indent();
+            }
+            int resourcesCount = 0;
+            for (com.github.javaparser.ast.expr.VariableDeclarationExpr resourcesItem : n.getResources()) {
+                resourcesItem.accept(this, arg);
+                if (resourcesCount != n.getResources().size() - 1) {
+                    printer.print(";");
+                    printer.println();
+                }
+                resourcesCount++;
+            }
+            if (!n.getResources().isEmpty()) {
+                printer.unindent();
+            }
+            printer.print(")");
+            printer.print(" ");
+        }
+        if (n.getTryBlock().isPresent()) {
+            n.getTryBlock().get().accept(this, arg);
+        }
+        int catchClausesCount = 0;
+        for (com.github.javaparser.ast.stmt.CatchClause catchClausesItem : n.getCatchClauses()) {
+            catchClausesItem.accept(this, arg);
+            catchClausesCount++;
+        }
+        if (n.getFinallyBlock().isPresent()) {
+            printer.print(" ");
+            printer.print("finally");
+            printer.print(" ");
+            if (n.getFinallyBlock().isPresent()) {
+                n.getFinallyBlock().get().accept(this, arg);
+            }
+        }
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final CatchClause n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print(" ");
+        printer.print("catch");
+        printer.print(" ");
+        printer.print("(");
+        n.getParameter().accept(this, arg);
+        printer.print(")");
+        printer.print(" ");
+        n.getBody().accept(this, arg);
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final AnnotationDeclaration n, final Void arg) {
         printJavaComment(n.getComment(), arg);
         int annotationsCount = 0;
         for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
             annotationsItem.accept(this, arg);
-            if (annotationsCount != n.getAnnotations().size() - 1) {
-                printer.print(" ");
-            }
             annotationsCount++;
         }
         if (!n.getAnnotations().isEmpty()) {
             printer.println();
         }
-        int elementsCount = 0;
-        for (com.github.javaparser.ast.type.ReferenceType elementsItem : n.getElements()) {
-            elementsItem.accept(this, arg);
-            if (elementsCount != n.getElements().size() - 1) {
-                printer.print(" ");
-                printer.print("&");
+        int modifiersCount = 0;
+        for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
+            printer.print(modifiersItem.asString());
+            if (modifiersCount != n.getModifiers().size() - 1) {
                 printer.print(" ");
             }
-            elementsCount++;
+            modifiersCount++;
         }
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(JavadocComment n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(LabeledStmt n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        n.getLabel().accept(this, arg);
-        printer.print(":");
+        if (!n.getModifiers().isEmpty()) {
+            printer.print(" ");
+        }
+        printer.print("@");
+        printer.print("interface");
         printer.print(" ");
-        n.getStatement().accept(this, arg);
+        n.getName().accept(this, arg);
+        printer.print(" ");
+        printer.print("{");
+        printer.println();
+        printer.indent();
+        int membersCount = 0;
+        for (com.github.javaparser.ast.body.BodyDeclaration membersItem : n.getMembers()) {
+            if (membersCount != 0) {
+                printer.println();
+            }
+            membersItem.accept(this, arg);
+            membersCount++;
+        }
+        if (!n.getMembers().isEmpty()) {
+            printer.println();
+        }
+        printer.unindent();
+        printer.print("}");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final AnnotationMemberDeclaration n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        int annotationsCount = 0;
+        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
+            annotationsItem.accept(this, arg);
+            annotationsCount++;
+        }
+        if (!n.getAnnotations().isEmpty()) {
+            printer.println();
+        }
+        int modifiersCount = 0;
+        for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
+            printer.print(modifiersItem.asString());
+            if (modifiersCount != n.getModifiers().size() - 1) {
+                printer.print(" ");
+            }
+            modifiersCount++;
+        }
+        if (!n.getModifiers().isEmpty()) {
+            printer.print(" ");
+        }
+        n.getType().accept(this, arg);
+        printer.print(" ");
+        n.getName().accept(this, arg);
+        printer.print("(");
+        printer.print(")");
+        if (n.getDefaultValue().isPresent()) {
+            printer.print(" ");
+            printer.print("default");
+            printer.print(" ");
+            if (n.getDefaultValue().isPresent()) {
+                n.getDefaultValue().get().accept(this, arg);
+            }
+        }
+        printer.print(";");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final MarkerAnnotationExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("@");
+        n.getName().accept(this, arg);
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final SingleMemberAnnotationExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("@");
+        n.getName().accept(this, arg);
+        printer.print("(");
+        n.getMemberValue().accept(this, arg);
+        printer.print(")");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final NormalAnnotationExpr n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("@");
+        n.getName().accept(this, arg);
+        printer.print("(");
+        int pairsCount = 0;
+        for (com.github.javaparser.ast.expr.MemberValuePair pairsItem : n.getPairs()) {
+            pairsItem.accept(this, arg);
+            if (pairsCount != n.getPairs().size() - 1) {
+                printer.print(",");
+                printer.print(" ");
+            }
+            pairsCount++;
+        }
+        printer.print(")");
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final MemberValuePair n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getName().accept(this, arg);
+        printer.print(" ");
+        printer.print("=");
+        printer.print(" ");
+        n.getValue().accept(this, arg);
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final LineComment n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final BlockComment n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
         printOrphanCommentsEnding(n);
     }
 
@@ -1371,168 +2073,6 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(LineComment n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(LocalClassDeclarationStmt n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        n.getClassDeclaration().accept(this, arg);
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(LongLiteralExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print(n.getValue());
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(MarkerAnnotationExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("@");
-        n.getName().accept(this, arg);
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(MemberValuePair n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        n.getName().accept(this, arg);
-        printer.print(" ");
-        printer.print("=");
-        printer.print(" ");
-        n.getValue().accept(this, arg);
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(MethodCallExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        if (n.getScope().isPresent()) {
-            if (n.getScope().isPresent()) {
-                n.getScope().get().accept(this, arg);
-            }
-            printer.print(".");
-        }
-        if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
-            printer.print("<");
-        }
-        int typeArgumentsCount = 0;
-        for (com.github.javaparser.ast.type.Type typeArgumentsItem : n.getTypeArguments().get()) {
-            typeArgumentsItem.accept(this, arg);
-            if (typeArgumentsCount != n.getTypeArguments().get().size() - 1) {
-                printer.print(",");
-                printer.print(" ");
-            }
-            typeArgumentsCount++;
-        }
-        if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
-            printer.print(">");
-        }
-        n.getName().accept(this, arg);
-        printer.print("(");
-        int argumentsCount = 0;
-        for (com.github.javaparser.ast.expr.Expression argumentsItem : n.getArguments()) {
-            argumentsItem.accept(this, arg);
-            if (argumentsCount != n.getArguments().size() - 1) {
-                printer.print(",");
-                printer.print(" ");
-            }
-            argumentsCount++;
-        }
-        printer.print(")");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(MethodDeclaration n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        int annotationsCount = 0;
-        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
-            annotationsItem.accept(this, arg);
-            annotationsCount++;
-        }
-        if (!n.getAnnotations().isEmpty()) {
-            printer.println();
-        }
-        int modifiersCount = 0;
-        for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
-            printer.print(modifiersItem.asString());
-            if (modifiersCount != n.getModifiers().size() - 1) {
-                printer.print(" ");
-            }
-            modifiersCount++;
-        }
-        if (!n.getModifiers().isEmpty()) {
-            printer.print(" ");
-        }
-        if (!n.getTypeParameters().isEmpty()) {
-            printer.print("<");
-        }
-        int typeParametersCount = 0;
-        for (com.github.javaparser.ast.type.TypeParameter typeParametersItem : n.getTypeParameters()) {
-            typeParametersItem.accept(this, arg);
-            if (typeParametersCount != n.getTypeParameters().size() - 1) {
-                printer.print(",");
-                printer.print(" ");
-            }
-            typeParametersCount++;
-        }
-        if (!n.getTypeParameters().isEmpty()) {
-            printer.print(">");
-            printer.print(" ");
-        }
-        n.getType().accept(this, arg);
-        printer.print(" ");
-        n.getName().accept(this, arg);
-        printer.print("(");
-        int parametersCount = 0;
-        for (com.github.javaparser.ast.body.Parameter parametersItem : n.getParameters()) {
-            parametersItem.accept(this, arg);
-            if (parametersCount != n.getParameters().size() - 1) {
-                printer.print(",");
-                printer.print(" ");
-            }
-            parametersCount++;
-        }
-        printer.print(")");
-        if (!n.getThrownExceptions().isEmpty()) {
-            printer.print(" ");
-            printer.print("throws");
-            printer.print(" ");
-        }
-        int thrownExceptionsCount = 0;
-        for (com.github.javaparser.ast.type.ReferenceType thrownExceptionsItem : n.getThrownExceptions()) {
-            thrownExceptionsItem.accept(this, arg);
-            if (thrownExceptionsCount != n.getThrownExceptions().size() - 1) {
-                printer.print(",");
-                printer.print(" ");
-            }
-            thrownExceptionsCount++;
-        }
-        if (n.getBody().isPresent()) {
-            printer.print(" ");
-            if (n.getBody().isPresent()) {
-                n.getBody().get().accept(this, arg);
-            }
-        } else {
-            printer.print(";");
-        }
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(MethodReferenceExpr n, Void arg) {
         printJavaComment(n.getComment(), arg);
         n.getScope().accept(this, arg);
@@ -1541,18 +2081,54 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
             printer.print("<");
         }
         int typeArgumentsCount = 0;
-        for (com.github.javaparser.ast.type.Type typeArgumentsItem : n.getTypeArguments().get()) {
-            typeArgumentsItem.accept(this, arg);
-            if (typeArgumentsCount != n.getTypeArguments().get().size() - 1) {
-                printer.print(",");
-                printer.print(" ");
+        if (n.getTypeArguments().isPresent())
+            for (com.github.javaparser.ast.type.Type typeArgumentsItem : n.getTypeArguments().get()) {
+                typeArgumentsItem.accept(this, arg);
+                if (typeArgumentsCount != n.getTypeArguments().get().size() - 1) {
+                    printer.print(",");
+                    printer.print(" ");
+                }
+                typeArgumentsCount++;
             }
-            typeArgumentsCount++;
-        }
         if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
             printer.print(">");
         }
         printer.print(n.getIdentifier());
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(TypeExpr n, Void arg) {
+        printJavaComment(n.getComment(), arg);
+        n.getType().accept(this, arg);
+        printOrphanCommentsEnding(n);
+    }
+
+    @Override
+    public void visit(NodeList n, Void arg) {
+        for (Object node : n) {
+            ((Node) node).accept(this, arg);
+        }
+    }
+
+    @Override
+    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
+    public void visit(final ImportDeclaration n, final Void arg) {
+        printJavaComment(n.getComment(), arg);
+        printer.print("import");
+        printer.print(" ");
+        if (n.isStatic()) {
+            printer.print("static");
+            printer.print(" ");
+        }
+        n.getName().accept(this, arg);
+        if (n.isAsterisk()) {
+            printer.print(".");
+            printer.print("*");
+        }
+        printer.print(";");
+        printer.println();
         printOrphanCommentsEnding(n);
     }
 
@@ -1595,25 +2171,22 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ModuleExportsStmt n, Void arg) {
+    public void visit(ModuleRequiresStmt n, Void arg) {
         printJavaComment(n.getComment(), arg);
-        printer.print("exports");
+        printer.print("requires");
         printer.print(" ");
-        n.getName().accept(this, arg);
-        if (!n.getModuleNames().isEmpty()) {
-            printer.print(" ");
-            printer.print("to");
-            printer.print(" ");
-        }
-        int moduleNamesCount = 0;
-        for (com.github.javaparser.ast.expr.Name moduleNamesItem : n.getModuleNames()) {
-            moduleNamesItem.accept(this, arg);
-            if (moduleNamesCount != n.getModuleNames().size() - 1) {
-                printer.print(",");
+        int modifiersCount = 0;
+        for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
+            printer.print(modifiersItem.asString());
+            if (modifiersCount != n.getModifiers().size() - 1) {
                 printer.print(" ");
             }
-            moduleNamesCount++;
+            modifiersCount++;
         }
+        if (!n.getModifiers().isEmpty()) {
+            printer.print(" ");
+        }
+        n.getName().accept(this, arg);
         printer.print(";");
         printer.println();
         printOrphanCommentsEnding(n);
@@ -1621,9 +2194,9 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ModuleOpensStmt n, Void arg) {
+    public void visit(ModuleExportsStmt n, Void arg) {
         printJavaComment(n.getComment(), arg);
-        printer.print("opens");
+        printer.print("exports");
         printer.print(" ");
         n.getName().accept(this, arg);
         if (!n.getModuleNames().isEmpty()) {
@@ -1673,29 +2246,6 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ModuleRequiresStmt n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("requires");
-        printer.print(" ");
-        int modifiersCount = 0;
-        for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
-            printer.print(modifiersItem.asString());
-            if (modifiersCount != n.getModifiers().size() - 1) {
-                printer.print(" ");
-            }
-            modifiersCount++;
-        }
-        if (!n.getModifiers().isEmpty()) {
-            printer.print(" ");
-        }
-        n.getName().accept(this, arg);
-        printer.print(";");
-        printer.println();
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
     public void visit(ModuleUsesStmt n, Void arg) {
         printJavaComment(n.getComment(), arg);
         printer.print("uses");
@@ -1708,496 +2258,27 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
 
     @Override
     @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(NameExpr n, Void arg) {
+    public void visit(ModuleOpensStmt n, Void arg) {
         printJavaComment(n.getComment(), arg);
+        printer.print("opens");
+        printer.print(" ");
         n.getName().accept(this, arg);
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(Name n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        if (n.getQualifier().isPresent()) {
-            if (n.getQualifier().isPresent()) {
-                n.getQualifier().get().accept(this, arg);
-            }
-            printer.print(".");
-        }
-        int annotationsCount = 0;
-        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
-            annotationsItem.accept(this, arg);
-            if (annotationsCount != n.getAnnotations().size() - 1) {
-                printer.print(" ");
-            }
-            annotationsCount++;
-        }
-        if (!n.getAnnotations().isEmpty()) {
+        if (!n.getModuleNames().isEmpty()) {
+            printer.print(" ");
+            printer.print("to");
             printer.print(" ");
         }
-        printer.print(n.getIdentifier());
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(NormalAnnotationExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("@");
-        n.getName().accept(this, arg);
-        printer.print("(");
-        int pairsCount = 0;
-        for (com.github.javaparser.ast.expr.MemberValuePair pairsItem : n.getPairs()) {
-            pairsItem.accept(this, arg);
-            if (pairsCount != n.getPairs().size() - 1) {
+        int moduleNamesCount = 0;
+        for (com.github.javaparser.ast.expr.Name moduleNamesItem : n.getModuleNames()) {
+            moduleNamesItem.accept(this, arg);
+            if (moduleNamesCount != n.getModuleNames().size() - 1) {
                 printer.print(",");
                 printer.print(" ");
             }
-            pairsCount++;
-        }
-        printer.print(")");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(NullLiteralExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("null");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ObjectCreationExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        if (n.getScope().isPresent()) {
-            if (n.getScope().isPresent()) {
-                n.getScope().get().accept(this, arg);
-            }
-            printer.print(".");
-        }
-        printer.print("new");
-        printer.print(" ");
-        if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
-            printer.print("<");
-        }
-        int typeArgumentsCount = 0;
-        for (com.github.javaparser.ast.type.Type typeArgumentsItem : n.getTypeArguments().get()) {
-            typeArgumentsItem.accept(this, arg);
-            if (typeArgumentsCount != n.getTypeArguments().get().size() - 1) {
-                printer.print(",");
-                printer.print(" ");
-            }
-            typeArgumentsCount++;
-        }
-        if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
-            printer.print(">");
-        }
-        if (n.getTypeArguments().isPresent() && !n.getTypeArguments().get().isEmpty()) {
-            printer.print(" ");
-        }
-        n.getType().accept(this, arg);
-        printer.print("(");
-        int argumentsCount = 0;
-        for (com.github.javaparser.ast.expr.Expression argumentsItem : n.getArguments()) {
-            argumentsItem.accept(this, arg);
-            if (argumentsCount != n.getArguments().size() - 1) {
-                printer.print(",");
-                printer.print(" ");
-            }
-            argumentsCount++;
-        }
-        printer.print(")");
-        if (n.getAnonymousClassBody().isPresent()) {
-            printer.print(" ");
-            printer.print("{");
-            printer.println();
-            printer.indent();
-            if (n.getAnonymousClassBody().isPresent() && !n.getAnonymousClassBody().get().isEmpty()) {
-                printer.println();
-            }
-            int anonymousClassBodyCount = 0;
-            for (com.github.javaparser.ast.body.BodyDeclaration anonymousClassBodyItem : n.getAnonymousClassBody().get()) {
-                if (anonymousClassBodyCount != 0) {
-                    printer.println();
-                }
-                anonymousClassBodyItem.accept(this, arg);
-                if (anonymousClassBodyCount != n.getAnonymousClassBody().get().size() - 1) {
-                    printer.println();
-                }
-                anonymousClassBodyCount++;
-            }
-            if (n.getAnonymousClassBody().isPresent() && !n.getAnonymousClassBody().get().isEmpty()) {
-                printer.println();
-            }
-            printer.unindent();
-            printer.print("}");
-        }
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(PackageDeclaration n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        int annotationsCount = 0;
-        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
-            annotationsItem.accept(this, arg);
-            annotationsCount++;
-        }
-        printer.print("package");
-        printer.print(" ");
-        n.getName().accept(this, arg);
-        printer.print(";");
-        printer.println();
-        printer.println();
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(Parameter n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        int annotationsCount = 0;
-        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
-            annotationsItem.accept(this, arg);
-            if (annotationsCount != n.getAnnotations().size() - 1) {
-                printer.print(" ");
-            }
-            annotationsCount++;
-        }
-        if (!n.getAnnotations().isEmpty()) {
-            printer.print(" ");
-        }
-        int modifiersCount = 0;
-        for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
-            printer.print(modifiersItem.asString());
-            if (modifiersCount != n.getModifiers().size() - 1) {
-                printer.print(" ");
-            }
-            modifiersCount++;
-        }
-        if (!n.getModifiers().isEmpty()) {
-            printer.print(" ");
-        }
-        n.getType().accept(this, arg);
-        if (n.isVarArgs()) {
-            int varArgsAnnotationsCount = 0;
-            for (com.github.javaparser.ast.expr.AnnotationExpr varArgsAnnotationsItem : n.getVarArgsAnnotations()) {
-                varArgsAnnotationsItem.accept(this, arg);
-                if (varArgsAnnotationsCount != n.getVarArgsAnnotations().size() - 1) {
-                    printer.print(" ");
-                }
-                varArgsAnnotationsCount++;
-            }
-            printer.print("...");
-        }
-        printer.print(" ");
-        n.getName().accept(this, arg);
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(PrimitiveType n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        int annotationsCount = 0;
-        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
-            annotationsItem.accept(this, arg);
-            annotationsCount++;
-        }
-        printer.print(n.getType().asString());
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ReturnStmt n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("return");
-        if (n.getExpression().isPresent()) {
-            printer.print(" ");
-            if (n.getExpression().isPresent()) {
-                n.getExpression().get().accept(this, arg);
-            }
+            moduleNamesCount++;
         }
         printer.print(";");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(SimpleName n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print(n.getIdentifier());
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(SingleMemberAnnotationExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("@");
-        n.getName().accept(this, arg);
-        printer.print("(");
-        n.getMemberValue().accept(this, arg);
-        printer.print(")");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(StringLiteralExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print(n.getValue());
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(SuperExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        if (n.getClassExpr().isPresent()) {
-            if (n.getClassExpr().isPresent()) {
-                n.getClassExpr().get().accept(this, arg);
-            }
-            printer.print(".");
-        }
-        printer.print("super");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(SwitchEntryStmt n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        if (n.getLabel().isPresent()) {
-            printer.print("case");
-            printer.print(" ");
-            if (n.getLabel().isPresent()) {
-                n.getLabel().get().accept(this, arg);
-            }
-            printer.print(":");
-        } else {
-            printer.print("default");
-            printer.print(":");
-        }
         printer.println();
-        printer.indent();
-        int statementsCount = 0;
-        for (com.github.javaparser.ast.stmt.Statement statementsItem : n.getStatements()) {
-            statementsItem.accept(this, arg);
-            if (statementsCount != n.getStatements().size() - 1) {
-                printer.println();
-            }
-            statementsCount++;
-        }
-        if (!n.getStatements().isEmpty()) {
-            printer.println();
-        }
-        printer.unindent();
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(SwitchStmt n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("switch");
-        printer.print("(");
-        n.getSelector().accept(this, arg);
-        printer.print(")");
-        printer.print(" ");
-        printer.print("{");
-        printer.println();
-        if (!n.getEntries().isEmpty()) {
-            printer.indent();
-        }
-        int entriesCount = 0;
-        for (com.github.javaparser.ast.stmt.SwitchEntryStmt entriesItem : n.getEntries()) {
-            entriesItem.accept(this, arg);
-            entriesCount++;
-        }
-        if (!n.getEntries().isEmpty()) {
-            printer.unindent();
-        }
-        printer.print("}");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(SynchronizedStmt n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("synchronized");
-        printer.print(" ");
-        printer.print("(");
-        n.getExpression().accept(this, arg);
-        printer.print(")");
-        printer.print(" ");
-        n.getBody().accept(this, arg);
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ThisExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        if (n.getClassExpr().isPresent()) {
-            if (n.getClassExpr().isPresent()) {
-                n.getClassExpr().get().accept(this, arg);
-            }
-            printer.print(".");
-        }
-        printer.print("this");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(ThrowStmt n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("throw");
-        printer.print(" ");
-        n.getExpression().accept(this, arg);
-        printer.print(";");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(TryStmt n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("try");
-        printer.print(" ");
-        if (!n.getResources().isEmpty()) {
-            printer.print("(");
-            if (!n.getResources().isEmpty()) {
-                printer.indent();
-            }
-            int resourcesCount = 0;
-            for (com.github.javaparser.ast.expr.VariableDeclarationExpr resourcesItem : n.getResources()) {
-                resourcesItem.accept(this, arg);
-                if (resourcesCount != n.getResources().size() - 1) {
-                    printer.print(";");
-                    printer.println();
-                }
-                resourcesCount++;
-            }
-            if (!n.getResources().isEmpty()) {
-                printer.unindent();
-            }
-            printer.print(")");
-            printer.print(" ");
-        }
-        if (n.getTryBlock().isPresent()) {
-            n.getTryBlock().get().accept(this, arg);
-        }
-        int catchClausesCount = 0;
-        for (com.github.javaparser.ast.stmt.CatchClause catchClausesItem : n.getCatchClauses()) {
-            catchClausesItem.accept(this, arg);
-            catchClausesCount++;
-        }
-        if (n.getFinallyBlock().isPresent()) {
-            printer.print(" ");
-            printer.print("finally");
-            printer.print(" ");
-            if (n.getFinallyBlock().isPresent()) {
-                n.getFinallyBlock().get().accept(this, arg);
-            }
-        }
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(TypeExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        n.getType().accept(this, arg);
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(TypeParameter n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        int annotationsCount = 0;
-        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
-            annotationsItem.accept(this, arg);
-            if (annotationsCount != n.getAnnotations().size() - 1) {
-                printer.print(" ");
-            }
-            annotationsCount++;
-        }
-        if (!n.getAnnotations().isEmpty()) {
-            printer.println();
-        }
-        n.getName().accept(this, arg);
-        if (!n.getTypeBound().isEmpty()) {
-            printer.print(" ");
-            printer.print("extends");
-            printer.print(" ");
-        }
-        int typeBoundCount = 0;
-        for (com.github.javaparser.ast.type.ClassOrInterfaceType typeBoundItem : n.getTypeBound()) {
-            typeBoundItem.accept(this, arg);
-            if (typeBoundCount != n.getTypeBound().size() - 1) {
-                printer.print(" ");
-                printer.print("&");
-                printer.print(" ");
-            }
-            typeBoundCount++;
-        }
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(UnaryExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        if (n.isPrefix()) {
-            printer.print(n.getOperator().asString());
-        }
-        n.getExpression().accept(this, arg);
-        if (n.isPostfix()) {
-            printer.print(n.getOperator().asString());
-        }
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(UnionType n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        int annotationsCount = 0;
-        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
-            annotationsItem.accept(this, arg);
-            if (annotationsCount != n.getAnnotations().size() - 1) {
-                printer.print(" ");
-            }
-            annotationsCount++;
-        }
-        if (!n.getAnnotations().isEmpty()) {
-            printer.println();
-        }
-        int elementsCount = 0;
-        for (com.github.javaparser.ast.type.ReferenceType elementsItem : n.getElements()) {
-            elementsItem.accept(this, arg);
-            if (elementsCount != n.getElements().size() - 1) {
-                printer.print(" ");
-                printer.print("|");
-                printer.print(" ");
-            }
-            elementsCount++;
-        }
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(UnknownType n, Void arg) {
-        printJavaComment(n.getComment(), arg);
         printOrphanCommentsEnding(n);
     }
 
@@ -2209,127 +2290,54 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
         printOrphanCommentsEnding(n);
     }
 
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(VariableDeclarationExpr n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        int annotationsCount = 0;
-        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
-            annotationsItem.accept(this, arg);
-            if (annotationsCount != n.getAnnotations().size() - 1) {
-                printer.print(" ");
-            }
-            annotationsCount++;
+    private void printOrphanCommentsBeforeThisChildNode(final Node node) {
+        if (node instanceof Comment)
+            return;
+        Node parent = node.getParentNode().orElse(null);
+        if (parent == null)
+            return;
+        List<Node> everything = new LinkedList<>();
+        everything.addAll(parent.getChildNodes());
+        sortByBeginPosition(everything);
+        int positionOfTheChild = -1;
+        for (int i = 0; i < everything.size(); i++) {
+            if (everything.get(i) == node)
+                positionOfTheChild = i;
         }
-        if (!n.getAnnotations().isEmpty()) {
-            printer.print(" ");
+        if (positionOfTheChild == -1) {
+            throw new AssertionError("I am not a child of my parent.");
         }
-        int modifiersCount = 0;
-        for (com.github.javaparser.ast.Modifier modifiersItem : n.getModifiers()) {
-            printer.print(modifiersItem.asString());
-            if (modifiersCount != n.getModifiers().size() - 1) {
-                printer.print(" ");
-            }
-            modifiersCount++;
+        int positionOfPreviousChild = -1;
+        for (int i = positionOfTheChild - 1; i >= 0 && positionOfPreviousChild == -1; i--) {
+            if (!(everything.get(i) instanceof Comment))
+                positionOfPreviousChild = i;
         }
-        if (!n.getModifiers().isEmpty()) {
-            printer.print(" ");
+        for (int i = positionOfPreviousChild + 1; i < positionOfTheChild; i++) {
+            Node nodeToPrint = everything.get(i);
+            if (!(nodeToPrint instanceof Comment))
+                throw new RuntimeException("Expected comment, instead " + nodeToPrint.getClass() + ". Position of previous child: " + positionOfPreviousChild + ", position of child " + positionOfTheChild);
+            nodeToPrint.accept(this, null);
         }
-        n.getMaximumCommonType().accept(this, arg);
-        printer.print(" ");
-        int variablesCount = 0;
-        for (com.github.javaparser.ast.body.VariableDeclarator variablesItem : n.getVariables()) {
-            variablesItem.accept(this, arg);
-            if (variablesCount != n.getVariables().size() - 1) {
-                printer.print(",");
-                printer.print(" ");
-            }
-            variablesCount++;
-        }
-        printOrphanCommentsEnding(n);
     }
 
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(VariableDeclarator n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        n.getName().accept(this, arg);
-        if (n.getInitializer().isPresent()) {
-            printer.print(" ");
-            printer.print("=");
-            printer.print(" ");
-            if (n.getInitializer().isPresent()) {
-                n.getInitializer().get().accept(this, arg);
+    private void printOrphanCommentsEnding(final Node node) {
+        List<Node> everything = new LinkedList<>();
+        everything.addAll(node.getChildNodes());
+        sortByBeginPosition(everything);
+        if (everything.isEmpty()) {
+            return;
+        }
+        int commentsAtEnd = 0;
+        boolean findingComments = true;
+        while (findingComments && commentsAtEnd < everything.size()) {
+            Node last = everything.get(everything.size() - 1 - commentsAtEnd);
+            findingComments = (last instanceof Comment);
+            if (findingComments) {
+                commentsAtEnd++;
             }
         }
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(VoidType n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        int annotationsCount = 0;
-        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
-            annotationsItem.accept(this, arg);
-            if (annotationsCount != n.getAnnotations().size() - 1) {
-                printer.print(" ");
-            }
-            annotationsCount++;
+        for (int i = 0; i < commentsAtEnd; i++) {
+            everything.get(everything.size() - commentsAtEnd + i).accept(this, null);
         }
-        if (!n.getAnnotations().isEmpty()) {
-            printer.println();
-        }
-        printer.print("void");
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(WhileStmt n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        printer.print("while");
-        printer.print(" ");
-        printer.print("(");
-        n.getCondition().accept(this, arg);
-        printer.print(")");
-        printer.print(" ");
-        n.getBody().accept(this, arg);
-        printOrphanCommentsEnding(n);
-    }
-
-    @Override
-    @Generated("com.github.javaparser.generator.core.visitor.PrettyPrintVisitorGenerator")
-    public void visit(WildcardType n, Void arg) {
-        printJavaComment(n.getComment(), arg);
-        int annotationsCount = 0;
-        for (com.github.javaparser.ast.expr.AnnotationExpr annotationsItem : n.getAnnotations()) {
-            annotationsItem.accept(this, arg);
-            if (annotationsCount != n.getAnnotations().size() - 1) {
-                printer.print(" ");
-            }
-            annotationsCount++;
-        }
-        if (!n.getAnnotations().isEmpty()) {
-            printer.println();
-        }
-        printer.print("?");
-        if (n.getExtendedType().isPresent()) {
-            printer.print(" ");
-            printer.print("extends");
-            printer.print(" ");
-            if (n.getExtendedType().isPresent()) {
-                n.getExtendedType().get().accept(this, arg);
-            }
-        }
-        if (n.getSuperType().isPresent()) {
-            printer.print(" ");
-            printer.print("super");
-            printer.print(" ");
-            if (n.getSuperType().isPresent()) {
-                n.getSuperType().get().accept(this, arg);
-            }
-        }
-        printOrphanCommentsEnding(n);
     }
 }

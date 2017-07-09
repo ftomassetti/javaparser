@@ -162,6 +162,7 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
                 }
                 String countName = csmList.getProperty().camelCaseName() + "Count";
                 body.addStatement("int " + countName + " = 0;");
+
                 ForeachStmt loop = new ForeachStmt();
                 String iteratorName = ((CsmList) csmElement).getProperty().camelCaseName() + "Item";
                 ParameterizedType parameterizedType = (ParameterizedType) getter.getGenericReturnType();
@@ -194,7 +195,16 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
                 }
                 loopBody.addStatement(countName + "++;");
                 loop.setBody(loopBody);
-                body.addStatement(loop);
+
+                if (option) {
+                    IfStmt optionalListWrapper = new IfStmt();
+                    optionalListWrapper.setCondition(JavaParser.parseExpression("n." + getterName+"().isPresent()"));
+                    optionalListWrapper.setThenStmt(loop);
+                    body.addStatement(optionalListWrapper);
+                } else {
+                    body.addStatement(loop);
+                }
+
                 if (!csmList.getFollowing().isNone()) {
                     IfStmt ifStmt = new IfStmt();
                     if (option) {
