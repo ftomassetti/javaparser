@@ -32,6 +32,7 @@ import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.*;
 import com.github.javaparser.metamodel.BaseNodeMetaModel;
 import com.github.javaparser.metamodel.JavaParserMetaModel;
+import com.github.javaparser.printer.concretesyntaxmodel.CsmArrayLevels;
 import com.github.javaparser.printer.concretesyntaxmodel.CsmConditional;
 import com.github.javaparser.printer.concretesyntaxmodel.CsmElement;
 import com.github.javaparser.printer.concretesyntaxmodel.CsmMix;
@@ -235,8 +236,7 @@ public class ConcreteSyntaxModel {
         concreteSyntaxModelByClass.put(VariableDeclarator.class, sequence(
                 comment(),
                 child(ObservableProperty.NAME),
-                // FIXME: we should introduce a derived property
-                // list(ObservableProperty.EXTRA_ARRAY_LEVELS),
+                new CsmArrayLevels(),
                 conditional(ObservableProperty.INITIALIZER, IS_PRESENT, sequence(space(), token(GeneratedJavaParserConstants.ASSIGN), space(),
                         child(ObservableProperty.INITIALIZER)))
         ));

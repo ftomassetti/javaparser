@@ -249,11 +249,24 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
                 body.addStatement("printer.print(n." + getterName + "());");
                 body.addStatement("printer.print(\"'\");");
             } else if (csmElement instanceof CsmString) {
-                CsmString csmString = (CsmString)csmElement;
+                CsmString csmString = (CsmString) csmElement;
                 String getterName = getterName(csmString.getProperty());
                 body.addStatement("printer.print(\"\\\"\");");
                 body.addStatement("printer.print(n." + getterName + "());");
                 body.addStatement("printer.print(\"\\\"\");");
+            } else if (csmElement instanceof CsmArrayLevels) {
+                body.addStatement("Type commonType = n.getAncestorOfType(NodeWithVariables.class).get().getMaximumCommonType();");
+                body.addStatement("Type type = n.getType();");
+                body.addStatement("ArrayType arrayType = null;");
+                body.addStatement("for (int i = commonType.getArrayLevel(); i < type.getArrayLevel(); i++) {\n" +
+                        "            if (arrayType == null) {\n" +
+                        "                arrayType = (ArrayType) type;\n" +
+                        "            } else {\n" +
+                        "                arrayType = (ArrayType) arrayType.getComponentType();\n" +
+                        "            }\n" +
+                        "            printAnnotations(arrayType.getAnnotations(), true, arg);\n" +
+                        "            printer.print(\"[]\");\n" +
+                        "        }");
             } else {
                 throw new UnsupportedOperationException(csmElement.toString());
             }
