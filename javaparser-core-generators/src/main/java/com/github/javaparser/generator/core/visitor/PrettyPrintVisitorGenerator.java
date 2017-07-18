@@ -62,9 +62,9 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
     }
 
     private String conditionCode(BaseNodeMetaModel node, CsmConditional csmConditional) throws NoSuchMethodException {
+        String getterName = getterName(csmConditional.getProperty());
         switch (csmConditional.getCondition()) {
             case IS_EMPTY: {
-                String getterName = "get" + Utils.capitalize(csmConditional.getProperty().camelCaseName());
                 Method getter = node.getType().getMethod(getterName);
                 boolean optional = isOptional((ParameterizedType) getter.getGenericReturnType());
                 if (optional) {
@@ -74,7 +74,6 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
                 }
             }
             case IS_NOT_EMPTY: {
-                String getterName = "get" + Utils.capitalize(csmConditional.getProperty().camelCaseName());
                 Method getter = node.getType().getMethod(getterName);
                 boolean optional = isOptional((ParameterizedType) getter.getGenericReturnType());
                 if (optional) {
@@ -84,12 +83,13 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
                 }
             }
             case IS_PRESENT: {
-                String getterName = "get" + Utils.capitalize(csmConditional.getProperty().camelCaseName());
                 return "n." + getterName + "().isPresent()";
             }
             case FLAG: {
-                String getterName = "is" + Utils.capitalize(csmConditional.getProperty().camelCaseName());
-                if (csmConditional.getProperty() == ObservableProperty.THEN_BLOCK || csmConditional.getProperty() == ObservableProperty.ELSE_BLOCK) {
+                getterName = "is" + Utils.capitalize(csmConditional.getProperty().camelCaseName());
+                if (csmConditional.getProperty() == ObservableProperty.THEN_BLOCK
+                        || csmConditional.getProperty() == ObservableProperty.ELSE_BLOCK
+                        || csmConditional.getProperty() == ObservableProperty.UNKNOWN_TYPE) {
                     getterName = "has" + Utils.capitalize(csmConditional.getProperty().camelCaseName());
                 }
                 return "n." + getterName + "()";
@@ -97,6 +97,14 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
             default:
                 throw new UnsupportedOperationException(csmConditional.getCondition().name());
         }
+    }
+
+    private String getterName(ObservableProperty property) {
+        String prefix = "get";
+        if (property == ObservableProperty.UNKNOWN_TYPE) {
+            prefix = "has";
+        }
+        return prefix + Utils.capitalize(property.camelCaseName());
     }
 
     private void processCsmElement(BaseNodeMetaModel node, BlockStmt body, CsmElement csmElement) {
@@ -129,7 +137,7 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
             } else if (csmElement instanceof CsmAttribute) {
                 CsmAttribute csmAttribute = (CsmAttribute)csmElement;
                 // If the thing has a method asString let's call it
-                String getterName = "get" + Utils.capitalize(csmAttribute.getProperty().camelCaseName());
+                String getterName = getterName(csmAttribute.getProperty());
                 if (node.getType().equals(BooleanLiteralExpr.class)) {
                     body.addStatement("printer.print(String.valueOf(n.getValue()));");
                 } else if (csmAttribute.getProperty() == ObservableProperty.OPERATOR || node.getType().equals(PrimitiveType.class)) {
@@ -145,7 +153,7 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
                 // nothing to do
             } else if (csmElement instanceof CsmList) {
                 CsmList csmList = (CsmList) csmElement;
-                String getterName = "get" + Utils.capitalize(csmList.getProperty().camelCaseName());
+                String getterName = getterName(csmList.getProperty());
                 Method getter = node.getType().getMethod(getterName);
                 boolean option = isOptional((ParameterizedType) getter.getGenericReturnType());
                 if (!csmList.getPreceeding().isNone()) {
@@ -236,12 +244,14 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
                 body.addStatement(ifStmt);
             } else if (csmElement instanceof CsmChar) {
                 CsmChar csmChar = (CsmChar)csmElement;
-                String getterName = "get" + Utils.capitalize(csmChar.getProperty().camelCaseName());
+                String getterName = getterName(csmChar.getProperty());
                 body.addStatement("printer.print(n." + getterName + "());");
             } else if (csmElement instanceof CsmString) {
                 CsmString csmString = (CsmString)csmElement;
-                String getterName = "get" + Utils.capitalize(csmString.getProperty().camelCaseName());
+                String getterName = getterName(csmString.getProperty());
+                body.addStatement("printer.print(\"\\\"\");");
                 body.addStatement("printer.print(n." + getterName + "());");
+                body.addStatement("printer.print(\"\\\"\");");
             } else {
                 throw new UnsupportedOperationException(csmElement.toString());
             }
