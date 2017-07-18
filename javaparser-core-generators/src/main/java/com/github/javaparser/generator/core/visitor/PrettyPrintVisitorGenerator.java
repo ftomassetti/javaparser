@@ -245,7 +245,9 @@ public class PrettyPrintVisitorGenerator extends VisitorGenerator {
             } else if (csmElement instanceof CsmChar) {
                 CsmChar csmChar = (CsmChar)csmElement;
                 String getterName = getterName(csmChar.getProperty());
+                body.addStatement("printer.print(\"'\");");
                 body.addStatement("printer.print(n." + getterName + "());");
+                body.addStatement("printer.print(\"'\");");
             } else if (csmElement instanceof CsmString) {
                 CsmString csmString = (CsmString)csmElement;
                 String getterName = getterName(csmString.getProperty());
