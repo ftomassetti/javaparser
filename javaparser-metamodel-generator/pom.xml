@@ -3,11 +3,7 @@
     <parent>
         <artifactId>javaparser-parent</artifactId>
         <groupId>com.github.javaparser</groupId>
-<<<<<<< HEAD
         <version>3.2.13-SNAPSHOT</version>
-=======
-        <version>3.2.11-SNAPSHOT</version>
->>>>>>> handling CsmList in generation of PrettyPrintVisitor
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
