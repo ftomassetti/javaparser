@@ -4,6 +4,7 @@ import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.generator.core.node.*;
 import com.github.javaparser.generator.core.other.TokenKindGenerator;
 import com.github.javaparser.generator.core.visitor.*;
+import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import com.github.javaparser.utils.Log;
 import com.github.javaparser.utils.SourceRoot;
 
@@ -19,7 +20,7 @@ public class CoreGenerator {
     private static final ParserConfiguration parserConfiguration = new ParserConfiguration()
 //                                .setStoreTokens(false)
 //                                .setAttributeComments(false)
-//                                .setLexicalPreservationEnabled(true)
+                                .setLexicalPreservationEnabled(true)
             ;
 
     public static void main(String[] args) throws Exception {
@@ -29,12 +30,12 @@ public class CoreGenerator {
         Log.setAdapter(new Log.StandardOutStandardErrorAdapter());
         final Path root = Paths.get(args[0], "..", "javaparser-core", "src", "main", "java");
         final SourceRoot sourceRoot = new SourceRoot(root, parserConfiguration)
-//                .setPrinter(LexicalPreservingPrinter::print)
+                .setPrinter(LexicalPreservingPrinter::print)
                 ;
 
         final Path generatedJavaCcRoot = Paths.get(args[0], "..", "javaparser-core", "target", "generated-sources", "javacc");
         final SourceRoot generatedJavaCcSourceRoot = new SourceRoot(generatedJavaCcRoot, parserConfiguration)
-//                .setPrinter(LexicalPreservingPrinter::print)
+                .setPrinter(LexicalPreservingPrinter::print)
                 ;
 
         new CoreGenerator().run(sourceRoot, generatedJavaCcSourceRoot);
