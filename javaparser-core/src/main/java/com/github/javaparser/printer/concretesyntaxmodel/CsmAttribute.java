@@ -76,4 +76,11 @@ public class CsmAttribute implements CsmElement {
         throw new UnsupportedOperationException("getTokenType does not know how to handle property "
                 + property + " with text: " + text);
     }
+
+    @Override
+    public String toString() {
+        return "CsmAttribute{" +
+                "property=" + property +
+                '}';
+    }
 }

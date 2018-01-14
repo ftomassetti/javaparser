@@ -112,4 +112,14 @@ public class CsmConditional implements CsmElement {
             elseElement.prettyPrint(node, printer);
         }
     }
+
+    @Override
+    public String toString() {
+        return "CsmConditional{" +
+                "condition=" + condition +
+                ", properties=" + properties +
+                ", thenElement=" + thenElement +
+                ", elseElement=" + elseElement +
+                '}';
+    }
 }

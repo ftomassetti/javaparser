@@ -45,4 +45,9 @@ public class CsmUnindent implements CsmElement {
     public boolean canBePartOfCalculatedSyntaxModel() {
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "CsmUnindent";
+    }
 }

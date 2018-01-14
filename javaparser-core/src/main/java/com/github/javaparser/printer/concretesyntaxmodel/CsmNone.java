@@ -31,4 +31,8 @@ public class CsmNone implements CsmElement {
 
     }
 
+    @Override
+    public String toString() {
+        return "CsmNone";
+    }
 }

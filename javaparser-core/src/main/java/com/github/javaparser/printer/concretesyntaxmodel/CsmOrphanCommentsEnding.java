@@ -56,4 +56,8 @@ public class CsmOrphanCommentsEnding implements CsmElement {
         }
     }
 
+    @Override
+    public String toString() {
+        return "CsmOrphanCommentsEnding";
+    }
 }

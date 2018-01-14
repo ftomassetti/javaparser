@@ -117,4 +117,15 @@ public class CsmList implements CsmElement {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        return "CsmList{" +
+                "property=" + property +
+                ", separatorPost=" + separatorPost +
+                ", separatorPre=" + separatorPre +
+                ", preceeding=" + preceeding +
+                ", following=" + following +
+                '}';
+    }
 }

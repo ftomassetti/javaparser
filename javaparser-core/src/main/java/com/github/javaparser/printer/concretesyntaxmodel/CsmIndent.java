@@ -45,4 +45,9 @@ public class CsmIndent implements CsmElement {
     public boolean canBePartOfCalculatedSyntaxModel() {
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "CsmIndent";
+    }
 }
