@@ -51,4 +51,9 @@ public class CsmMix implements CsmElement {
     public String toString() {
         return "CsmMix[" + String.join(", ", elements.stream().map(e -> e.toString()).collect(Collectors.toList())) + "]";
     }
+
+    @Override
+    public boolean canBePartOfCalculatedSyntaxModel() {
+        return true;
+    }
 }
