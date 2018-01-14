@@ -40,4 +40,9 @@ public class CsmUnindent implements CsmElement {
     public boolean equals(Object obj) {
         return obj instanceof CsmUnindent;
     }
+
+    @Override
+    public String toString() {
+        return "CsmUnindent";
+    }
 }

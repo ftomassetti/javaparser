@@ -632,14 +632,14 @@ public class Difference {
                         throw new UnsupportedOperationException("kept " + kept.element + " vs " + nodeTextEl);
                     }
                 } else if (diffEl instanceof Removed) {
-                    Removed removed = (Removed)diffEl;
+                    Removed removed = (Removed) diffEl;
                     if ((removed.element instanceof CsmChild) && nodeTextEl instanceof ChildTextElement) {
-                        ChildTextElement actualChild = (ChildTextElement)nodeTextEl;
+                        ChildTextElement actualChild = (ChildTextElement) nodeTextEl;
                         if (actualChild.isComment()) {
-                            CsmChild csmChild = (CsmChild)removed.element;
+                            CsmChild csmChild = (CsmChild) removed.element;
                             // We expected to remove a proper node but we found a comment in between.
                             // If the comment is associated to the node we want to remove we remove it as well, otherwise we keep it
-                            Comment comment = (Comment)actualChild.getChild();
+                            Comment comment = (Comment) actualChild.getChild();
                             if (!comment.isOrphan() && comment.getCommentedNode().isPresent() && comment.getCommentedNode().get().equals(csmChild.getChild())) {
                                 nodeText.removeElement(nodeTextIndex);
                             } else {
@@ -667,8 +667,24 @@ public class Difference {
                             diffIndex++;
                         }
                     } else if ((removed.element instanceof CsmToken) && nodeTextEl instanceof TokenTextElement
-                            && ((CsmToken)removed.element).getTokenType() == ((TokenTextElement)nodeTextEl).getTokenKind()) {
+                            && ((CsmToken) removed.element).getTokenType() == ((TokenTextElement) nodeTextEl).getTokenKind()) {
                         nodeText.removeElement(nodeTextIndex);
+                        diffIndex++;
+                    } else if (removed.element instanceof CsmIndent) {
+                        for (int i = 0; i < STANDARD_INDENTATION_SIZE && !indentation.isEmpty(); i++) {
+                            indentation.remove(indentation.size() - 1);
+                            if (nodeTextIndex >= 1 && nodeText.getElements().get(nodeTextIndex - 1).isWhiteSpace()) {
+                                nodeText.getElements().remove(nodeTextIndex - 1);
+                                nodeTextIndex--;
+                            }
+                        }
+                        diffIndex++;
+                    } else if (removed.element instanceof CsmUnindent) {
+                        for (int i = 0; i < STANDARD_INDENTATION_SIZE && !indentation.isEmpty(); i++) {
+                            indentation.add(new TokenTextElement(SPACE));
+                            nodeText.getElements().add(new TokenTextElement(SPACE));
+                            nodeTextIndex++;
+                        }
                         diffIndex++;
                     } else if (nodeTextEl instanceof TokenTextElement
                             && nodeTextEl.isWhiteSpaceOrComment()) {
