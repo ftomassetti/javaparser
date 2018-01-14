@@ -38,4 +38,11 @@ public class CsmChar implements CsmElement {
         printer.print(property.getValueAsStringAttribute(node));
         printer.print("'");
     }
+
+    @Override
+    public String toString() {
+        return "CsmChar{" +
+                "property=" + property +
+                '}';
+    }
 }

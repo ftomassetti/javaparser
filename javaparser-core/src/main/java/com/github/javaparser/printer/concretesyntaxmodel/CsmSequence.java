@@ -48,4 +48,11 @@ public class CsmSequence implements CsmElement {
     public void prettyPrint(Node node, SourcePrinter printer) {
         elements.forEach(e -> e.prettyPrint(node, printer));
     }
+
+    @Override
+    public String toString() {
+        return "CsmSequence{" +
+                "elements=" + elements +
+                '}';
+    }
 }

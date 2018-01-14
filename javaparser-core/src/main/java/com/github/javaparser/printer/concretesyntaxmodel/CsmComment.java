@@ -54,4 +54,8 @@ public class CsmComment implements CsmElement {
         node.getComment().ifPresent(c -> process(c, printer));
     }
 
+    @Override
+    public String toString() {
+        return "CsmComment{}";
+    }
 }
