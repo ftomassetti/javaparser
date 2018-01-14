@@ -26,6 +26,7 @@ import com.github.javaparser.printer.SourcePrinter;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class CsmSequence implements CsmElement {
     private List<CsmElement> elements;
@@ -47,5 +48,10 @@ public class CsmSequence implements CsmElement {
     @Override
     public void prettyPrint(Node node, SourcePrinter printer) {
         elements.forEach(e -> e.prettyPrint(node, printer));
+    }
+
+    @Override
+    public String toString() {
+        return "CsmSequence[" + String.join(", ", elements.stream().map(e -> e.toString()).collect(Collectors.toList())) + "]";
     }
 }
