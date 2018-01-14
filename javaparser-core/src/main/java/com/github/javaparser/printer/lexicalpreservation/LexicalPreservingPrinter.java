@@ -373,46 +373,51 @@ public class LexicalPreservingPrinter {
     }
 
     private static NodeText interpret(Node node, CsmElement csm, NodeText nodeText) {
-        LexicalDifferenceCalculator.CalculatedSyntaxModel calculatedSyntaxModel = new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csm, node);
+        try {
+            LexicalDifferenceCalculator.CalculatedSyntaxModel calculatedSyntaxModel = new LexicalDifferenceCalculator().calculatedSyntaxModelForNode(csm, node);
 
-        List<TokenTextElement> indentation = findIndentation(node);
+            List<TokenTextElement> indentation = findIndentation(node);
 
-        boolean pendingIndentation = false;
-        for (CsmElement element : calculatedSyntaxModel.elements) {
-            if (pendingIndentation && !(element instanceof CsmToken && ((CsmToken)element).isNewLine())) {
-                indentation.forEach(nodeText::addElement);
-            }
-            pendingIndentation = false;
-            if (element instanceof LexicalDifferenceCalculator.CsmChild) {
-                nodeText.addChild(((LexicalDifferenceCalculator.CsmChild) element).getChild());
-            } else if (element instanceof CsmToken) {
-                CsmToken csmToken = (CsmToken) element;
-                nodeText.addToken(csmToken.getTokenType(), csmToken.getContent(node));
-                if (csmToken.isNewLine()) {
-                    pendingIndentation = true;
+            boolean pendingIndentation = false;
+            for (CsmElement element : calculatedSyntaxModel.elements) {
+                if (pendingIndentation && !(element instanceof CsmToken && ((CsmToken) element).isNewLine())) {
+                    indentation.forEach(nodeText::addElement);
                 }
-            } else if (element instanceof CsmMix) {
-                CsmMix csmMix = (CsmMix)element;
-                csmMix.getElements().forEach(e -> interpret(node, e, nodeText));
-            } else {
-                throw new UnsupportedOperationException(element.getClass().getSimpleName());
+                pendingIndentation = false;
+                if (element instanceof LexicalDifferenceCalculator.CsmChild) {
+                    nodeText.addChild(((LexicalDifferenceCalculator.CsmChild) element).getChild());
+                } else if (element instanceof CsmToken) {
+                    CsmToken csmToken = (CsmToken) element;
+                    nodeText.addToken(csmToken.getTokenType(), csmToken.getContent(node));
+                    if (csmToken.isNewLine()) {
+                        pendingIndentation = true;
+                    }
+                } else if (element instanceof CsmMix) {
+                    CsmMix csmMix = (CsmMix) element;
+                    csmMix.getElements().forEach(e -> interpret(node, e, nodeText));
+                } else {
+                    throw new UnsupportedOperationException(element.getClass().getSimpleName());
+                }
             }
+            // Array brackets are a pain... we do not have a way to represent them explicitly in the AST
+            // so they have to be handled in a special way
+            if (node instanceof VariableDeclarator) {
+                VariableDeclarator variableDeclarator = (VariableDeclarator) node;
+                if (!variableDeclarator.getParentNode().isPresent()) {
+                    throw new RuntimeException("VariableDeclarator without parent: I cannot handle the array levels");
+                }
+                NodeWithVariables<?> nodeWithVariables = (NodeWithVariables) variableDeclarator.getParentNode().get();
+                int extraArrayLevels = variableDeclarator.getType().getArrayLevel() - nodeWithVariables.getMaximumCommonType().getArrayLevel();
+                for (int i = 0; i < extraArrayLevels; i++) {
+                    nodeText.addElement(new TokenTextElement(LBRACKET));
+                    nodeText.addElement(new TokenTextElement(RBRACKET));
+                }
+            }
+            return nodeText;
+        } catch (RuntimeException e) {
+            throw new RuntimeException("An error prevented from interpreting the CSM " + csm+" for node <<<\n"
+                    + node + "\n>>> with node text: " + nodeText, e);
         }
-        // Array brackets are a pain... we do not have a way to represent them explicitly in the AST
-        // so they have to be handled in a special way
-        if (node instanceof VariableDeclarator) {
-            VariableDeclarator variableDeclarator = (VariableDeclarator)node;
-            if (!variableDeclarator.getParentNode().isPresent()) {
-                throw new RuntimeException("VariableDeclarator without parent: I cannot handle the array levels");
-            }
-            NodeWithVariables<?> nodeWithVariables = (NodeWithVariables)variableDeclarator.getParentNode().get();
-            int extraArrayLevels = variableDeclarator.getType().getArrayLevel() - nodeWithVariables.getMaximumCommonType().getArrayLevel();
-            for (int i=0; i<extraArrayLevels; i++) {
-                nodeText.addElement(new TokenTextElement(LBRACKET));
-                nodeText.addElement(new TokenTextElement(RBRACKET));
-            }
-        }
-        return nodeText;
     }
 
     // Visible for testing
