@@ -114,4 +114,9 @@ public class CsmToken implements CsmElement {
     public boolean isNewLine() {
         return TokenTypes.isEndOfLineToken(tokenType);
     }
+
+    @Override
+    public boolean canBePartOfCalculatedSyntaxModel() {
+        return true;
+    }
 }

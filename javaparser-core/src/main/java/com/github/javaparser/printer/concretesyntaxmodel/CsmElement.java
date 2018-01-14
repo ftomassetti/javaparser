@@ -142,4 +142,12 @@ public interface CsmElement {
     static CsmElement block(CsmElement content) {
         return sequence(token(GeneratedJavaParserConstants.LBRACE), indent(), content, unindent(), token(GeneratedJavaParserConstants.RBRACE));
     }
+
+    /**
+     * Only some CsmElements should be part of a CalculatedSyntaxModel.
+     * It should not contain condition or lists, just tokens and node children.
+     */
+    default boolean canBePartOfCalculatedSyntaxModel() {
+        return false;
+    }
 }

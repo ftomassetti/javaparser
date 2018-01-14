@@ -24,6 +24,8 @@ class LexicalDifferenceCalculator {
         final List<CsmElement> elements;
 
         CalculatedSyntaxModel(List<CsmElement> elements) {
+            elements.forEach(e -> { if (!e.canBePartOfCalculatedSyntaxModel()) throw new RuntimeException("The CsmElement " + e
+                    + " cannot be part of a CalculatedSyntaxModel"); });
             this.elements = elements;
         }
 
@@ -83,6 +85,11 @@ class LexicalDifferenceCalculator {
         @Override
         public int hashCode() {
             return child.hashCode();
+        }
+
+        @Override
+        public boolean canBePartOfCalculatedSyntaxModel() {
+            return true;
         }
     }
 
