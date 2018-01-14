@@ -56,6 +56,6 @@ public class CsmComment implements CsmElement {
 
     @Override
     public String toString() {
-        return "CsmComment{}";
+        return "CsmComment";
     }
 }

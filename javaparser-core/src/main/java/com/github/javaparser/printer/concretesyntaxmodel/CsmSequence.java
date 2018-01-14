@@ -26,6 +26,7 @@ import com.github.javaparser.printer.SourcePrinter;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class CsmSequence implements CsmElement {
     private List<CsmElement> elements;
@@ -51,8 +52,8 @@ public class CsmSequence implements CsmElement {
 
     @Override
     public String toString() {
-        return "CsmSequence{" +
-                "elements=" + elements +
-                '}';
+        return "CsmSequence[" +
+                String.join(", ", elements.stream().map(Object::toString).collect(Collectors.toList()))
+                + ']';
     }
 }
