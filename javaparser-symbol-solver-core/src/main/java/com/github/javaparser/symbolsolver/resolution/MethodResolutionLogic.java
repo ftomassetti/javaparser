@@ -16,11 +16,14 @@
 
 package com.github.javaparser.symbolsolver.resolution;
 
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.resolution.MethodAmbiguityException;
 import com.github.javaparser.resolution.MethodUsage;
 import com.github.javaparser.resolution.declarations.*;
 import com.github.javaparser.resolution.types.*;
 import com.github.javaparser.symbolsolver.core.resolution.Context;
+import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserAnonymousClassDeclaration;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserClassDeclaration;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserEnumDeclaration;
@@ -64,6 +67,11 @@ public class MethodResolutionLogic {
         }
         // TODO implement this decently
         return variadicValues.get(0);
+    }
+
+    public static boolean isApplicable(ResolvedMethodDeclaration method, MethodCallExpr methodCallExpr, TypeSolver typeSolver) {
+        List<ResolvedType> argumentsTypes = methodCallExpr.getArguments().stream().map(a -> JavaParserFacade.get(typeSolver).getType(a)).collect(Collectors.toList());
+        return isApplicable(method, methodCallExpr.getNameAsString(), argumentsTypes, typeSolver);
     }
 
     public static boolean isApplicable(ResolvedMethodDeclaration method, String name, List<ResolvedType> argumentsTypes, TypeSolver typeSolver) {
@@ -694,5 +702,29 @@ public class MethodResolutionLogic {
         }
     }
 
+    public static SymbolReference<ResolvedMethodDeclaration> solveMethodInTypeWithNewApi(
+            ResolvedReferenceTypeDeclaration typeDeclaration, MethodCallExpr methodCallExpr, TypeSolver typeSolver) {
+        // Find all possible methods
+        List<MethodUsage> methodDeclarations = new LinkedList<>();
+        if (typeDeclaration instanceof JavaParserClassDeclaration) {
+            JavaParserClassDeclaration javaParserClassDeclaration = (JavaParserClassDeclaration)typeDeclaration;
+            methodDeclarations.addAll(javaParserClassDeclaration.getAllMethods());
+        } else {
+            throw new UnsupportedOperationException(typeDeclaration.getClass().getCanonicalName());
+        }
 
+        // TODO pick the one most suitable, not the first suitable one
+        for (MethodUsage methodUsage : methodDeclarations) {
+            if (methodUsage.getDeclaration().isGeneric()) {
+                if (new TypeInference(typeSolver).isGenericMethodApplicable(methodCallExpr, methodUsage.getDeclaration())) {
+                    return SymbolReference.solved(methodUsage.getDeclaration());
+                }
+            } else {
+                if (MethodResolutionLogic.isApplicable(methodUsage.getDeclaration(), methodCallExpr, typeSolver)) {
+                    return SymbolReference.solved(methodUsage.getDeclaration());
+                }
+            }
+        }
+        return SymbolReference.unsolved(ResolvedMethodDeclaration.class);
+    }
 }

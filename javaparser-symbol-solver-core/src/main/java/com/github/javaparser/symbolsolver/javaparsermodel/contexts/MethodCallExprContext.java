@@ -165,6 +165,15 @@ public class MethodCallExprContext extends AbstractJavaParserContext<MethodCallE
     public SymbolReference<ResolvedMethodDeclaration> solveMethodWithNewAPI(MethodCallExpr methodCallExpr, TypeSolver typeSolver) {
         // Find all possible methods
         // Replace some types already?
+
+        Collection<ResolvedReferenceTypeDeclaration> rrtds = findTypeDeclarations(wrappedNode.getScope(), typeSolver);
+        for (ResolvedReferenceTypeDeclaration rrtd : rrtds) {
+            SymbolReference<ResolvedMethodDeclaration> res = MethodResolutionLogic.solveMethodInTypeWithNewApi(rrtd, methodCallExpr, typeSolver);
+            if (res.isSolved()) {
+                return res;
+            }
+        }
+        return SymbolReference.unsolved(ResolvedMethodDeclaration.class);
     }
 
     ///
