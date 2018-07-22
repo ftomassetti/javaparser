@@ -237,12 +237,18 @@ public class JavaParserFacade {
      * Given a method call find out to which method declaration it corresponds.
      */
     public SymbolReference<ResolvedMethodDeclaration> solve(MethodCallExpr methodCallExpr, boolean solveLambdas) {
+
+        SymbolReference<ResolvedMethodDeclaration> resWithNewAPI = JavaParserFactory.getContext(methodCallExpr, typeSolver)
+                .solveMethodWithNewAPI(methodCallExpr, typeSolver);
+
+
         List<ResolvedType> argumentTypes = new LinkedList<>();
         List<LambdaArgumentTypePlaceholder> placeholders = new LinkedList<>();
 
         solveArguments(methodCallExpr, methodCallExpr.getArguments(), solveLambdas, argumentTypes, placeholders);
 
-        SymbolReference<ResolvedMethodDeclaration> res = JavaParserFactory.getContext(methodCallExpr, typeSolver).solveMethod(methodCallExpr.getName().getId(), argumentTypes, false, typeSolver);
+        SymbolReference<ResolvedMethodDeclaration> res = JavaParserFactory.getContext(methodCallExpr, typeSolver)
+                .solveMethod(methodCallExpr.getName().getId(), argumentTypes, false, typeSolver);
         for (LambdaArgumentTypePlaceholder placeholder : placeholders) {
             placeholder.setMethod(res);
         }

@@ -35,6 +35,7 @@ import com.github.javaparser.symbolsolver.model.typesystem.*;
 import com.github.javaparser.symbolsolver.reflectionmodel.ReflectionClassDeclaration;
 import com.github.javaparser.symbolsolver.reflectionmodel.ReflectionEnumDeclaration;
 import com.github.javaparser.symbolsolver.reflectionmodel.ReflectionInterfaceDeclaration;
+import com.github.javaparser.symbolsolver.resolution.typeinference.TypeInference;
 
 import java.util.*;
 import java.util.stream.Collectors;

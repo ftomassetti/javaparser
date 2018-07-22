@@ -56,11 +56,34 @@ public class TypeInference {
     /// Public instance methods
     ///
 
-    public Optional<InstantiationSet> instantiationInference(MethodCallExpr methodCallExpr, ResolvedMethodDeclaration methodDeclaration) {
+    public boolean isGenericMethodApplicable(MethodCallExpr methodCallExpr,
+                                             ResolvedMethodDeclaration methodDeclaration) {
+        if (!methodDeclaration.isGeneric()) {
+            throw new IllegalArgumentException("Generic method expected");
+        }
+        return instantiationInference(methodCallExpr, methodDeclaration).isPresent();
+    }
+
+    public boolean isGenericMethodApplicable(List<Expression> argumentExpressions,
+                                             ResolvedMethodDeclaration methodDeclaration) {
+        if (!methodDeclaration.isGeneric()) {
+            throw new IllegalArgumentException("Generic method expected");
+        }
+        return instantiationInference(argumentExpressions, methodDeclaration).isPresent();
+    }
+
+    /**
+     * This figures out if a given method call is compatible with a given method and it figures out also the type arguments
+     * to be used with that method, if it is generic.
+     */
+    public Optional<InstantiationSet> instantiationInference(MethodCallExpr methodCallExpr,
+                                                             ResolvedMethodDeclaration methodDeclaration) {
         return instantiationInference(methodCallExpr.getArguments(), methodDeclaration);
     }
 
-    public Optional<InstantiationSet> instantiationInference(List<Expression> argumentExpressions, ResolvedMethodDeclaration methodDeclaration) {
+
+    public Optional<InstantiationSet> instantiationInference(List<Expression> argumentExpressions,
+                                                             ResolvedMethodDeclaration methodDeclaration) {
 //        if (methodCallExpr.getTypeArguments().isPresent()) {
 //            throw new IllegalArgumentException("Type inference unnecessary as type arguments have been specified");
 //        }

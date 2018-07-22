@@ -16,6 +16,7 @@
 
 package com.github.javaparser.symbolsolver.core.resolution;
 
+import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.resolution.MethodUsage;
 import com.github.javaparser.resolution.declarations.*;
 import com.github.javaparser.resolution.types.ResolvedType;
@@ -94,5 +95,9 @@ public interface Context {
         } else {
             return Optional.empty();
         }
+    }
+
+    default SymbolReference<ResolvedMethodDeclaration> solveMethodWithNewAPI(MethodCallExpr methodCallExpr, TypeSolver typeSolver) {
+        throw new UnsupportedOperationException(this.getClass().getCanonicalName());
     }
 }
