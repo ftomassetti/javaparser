@@ -40,7 +40,7 @@ public abstract class AbstractNameLogicTest extends AbstractResolutionTest {
         assertTrue(parseResult.isSuccessful());
         Node root = parseResult.getResult().get();
         List<Node> allNames = root.findAll(Node.class).stream()
-                .filter(NameLogic::isAName)
+                .filter(Node::isAName)
                 .collect(Collectors.toList());
         List<Node> matchingNames = allNames.stream()
                 .filter(n -> NameLogic.nameAsString(n).equals(name))

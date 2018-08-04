@@ -21,6 +21,7 @@
 package com.github.javaparser.ast.type;
 
 import com.github.javaparser.ast.AllFieldsConstructor;
+import com.github.javaparser.ast.NameNode;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.AnnotationExpr;
@@ -57,7 +58,7 @@ import java.util.function.Consumer;
  *
  * @author Julio Vilmar Gesser
  */
-public final class ClassOrInterfaceType extends ReferenceType implements NodeWithSimpleName<ClassOrInterfaceType>, NodeWithAnnotations<ClassOrInterfaceType>, NodeWithTypeArguments<ClassOrInterfaceType> {
+public final class ClassOrInterfaceType extends ReferenceType implements NodeWithSimpleName<ClassOrInterfaceType>, NodeWithAnnotations<ClassOrInterfaceType>, NodeWithTypeArguments<ClassOrInterfaceType>, NameNode<ClassOrInterfaceType> {
 
     @OptionalProperty
     private ClassOrInterfaceType scope;
@@ -298,5 +299,10 @@ public final class ClassOrInterfaceType extends ReferenceType implements NodeWit
     @Generated("com.github.javaparser.generator.core.node.TypeCastingGenerator")
     public Optional<ClassOrInterfaceType> toClassOrInterfaceType() {
         return Optional.of(this);
+    }
+
+    @Override
+    public boolean isAName() {
+        return true;
     }
 }

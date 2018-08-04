@@ -21,12 +21,14 @@
 package com.github.javaparser.ast.expr;
 
 import com.github.javaparser.ast.AllFieldsConstructor;
+import com.github.javaparser.ast.NameNode;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.nodeTypes.NodeWithScope;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.nodeTypes.NodeWithTypeArguments;
 import com.github.javaparser.ast.observer.ObservableProperty;
 import com.github.javaparser.ast.stmt.ExplicitConstructorInvocationStmt;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.visitor.GenericVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitor;
@@ -50,7 +52,7 @@ import java.util.function.Consumer;
  *
  * @author Julio Vilmar Gesser
  */
-public final class FieldAccessExpr extends Expression implements NodeWithSimpleName<FieldAccessExpr>, NodeWithTypeArguments<FieldAccessExpr>, NodeWithScope<FieldAccessExpr>, Resolvable<ResolvedValueDeclaration> {
+public final class FieldAccessExpr extends Expression implements NodeWithSimpleName<FieldAccessExpr>, NodeWithTypeArguments<FieldAccessExpr>, NodeWithScope<FieldAccessExpr>, Resolvable<ResolvedValueDeclaration>, NameNode<FieldAccessExpr> {
 
     private Expression scope;
 
@@ -294,5 +296,18 @@ public final class FieldAccessExpr extends Expression implements NodeWithSimpleN
      */
     public boolean isTopLevel() {
         return !isInternal();
+    }
+
+    @Override
+    public boolean isAName() {
+        return this.getScope().isAName();
+    }
+
+    @Override
+    public String asString() {
+        if (!isAName()) {
+            throw new IllegalStateException();
+        }
+        return this.getScope().asNameNode().asString() + "." + getName().asString();
     }
 }

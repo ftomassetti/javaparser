@@ -1,6 +1,7 @@
 package com.github.javaparser.symbolsolver.resolution.naming;
 
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.NameNode;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.*;
@@ -25,36 +26,15 @@ import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
  */
 public class NameLogic {
 
-    public static boolean isSimpleName(Node node) {
-        return !isQualifiedName(node);
-    }
-
-    public static boolean isQualifiedName(Node node) {
-        if (!isAName(node)) {
-            throw new IllegalArgumentException();
-        }
-        return nameAsString(node).contains(".");
-    }
-
-    public static boolean isAName(Node node) {
+    public static NameNode getQualifier(NameNode<?> node) {
         if (node instanceof FieldAccessExpr) {
             FieldAccessExpr fieldAccessExpr = (FieldAccessExpr)node;
-            return isAName(fieldAccessExpr.getScope());
-        } else {
-            return node instanceof SimpleName || node instanceof Name
-                    || node instanceof ClassOrInterfaceType || node instanceof NameExpr;
-        }
-    }
-
-    public static Node getQualifier(Node node) {
-        if (node instanceof FieldAccessExpr) {
-            FieldAccessExpr fieldAccessExpr = (FieldAccessExpr)node;
-            return fieldAccessExpr.getScope();
+            return fieldAccessExpr.getScope().asNameNode();
         }
         throw new UnsupportedOperationException(node.getClass().getCanonicalName());
     }
 
-    public static Node getRightMostName(Node node) {
+    public static NameNode getRightMostName(NameNode<?> node) {
         if (node instanceof FieldAccessExpr) {
             FieldAccessExpr fieldAccessExpr = (FieldAccessExpr)node;
             return fieldAccessExpr.getName();
@@ -62,15 +42,15 @@ public class NameLogic {
         throw new UnsupportedOperationException(node.getClass().getCanonicalName());
     }
 
-    public static NameRole classifyRole(Node name) {
-        if (!isAName(name)) {
+    public static NameRole classifyRole(NameNode<?> name) {
+        if (!name.isAName()) {
             throw new IllegalArgumentException("The given node is not a name");
         }
-        if (!name.getParentNode().isPresent()) {
+        if (!name.asNode().getParentNode().isPresent()) {
             throw new IllegalArgumentException("We cannot understand the role of a name if it has no parent");
         }
         if (whenParentIs(Name.class, name, (p, c) -> p.getQualifier().isPresent() && p.getQualifier().get() == c)) {
-            return classifyRole(name.getParentNode().get());
+            return classifyRole(name.asNode().getParentNode().get().asNameNode());
         }
         if (whenParentIs(PackageDeclaration.class, name, (p, c) -> p.getName() == c)) {
             return NameRole.DECLARATION;
@@ -123,14 +103,14 @@ public class NameLogic {
         if (whenParentIs(ObjectCreationExpr.class, name, (p, c) -> p.getType() == c)) {
             return NameRole.REFERENCE;
         }
-        if (name.getParentNode().isPresent() && NameLogic.isAName(name.getParentNode().get())) {
-            return classifyRole(name.getParentNode().get());
+        if (name.asNode().getParentNode().isPresent() && name.asNode().getParentNode().get().isAName()) {
+            return classifyRole(name.asNode().getParentNode().get().asNameNode());
         }
-        throw new UnsupportedOperationException("Unable to classify role of name contained in "+ name.getParentNode().get().getClass().getSimpleName());
+        throw new UnsupportedOperationException("Unable to classify role of name contained in "+ name.asNode().getParentNode().get().getClass().getSimpleName());
     }
 
-    public static NameCategory classifyReference(Node name, TypeSolver typeSolver) {
-        if (!name.getParentNode().isPresent()) {
+    public static NameCategory classifyReference(NameNode<?> name, TypeSolver typeSolver) {
+        if (!name.asNode().getParentNode().isPresent()) {
             throw new IllegalArgumentException("We cannot understand the category of a name if it has no parent");
         }
         if (classifyRole(name) != NameRole.REFERENCE) {
@@ -157,15 +137,15 @@ public class NameLogic {
     /**
      * JLS 6.5.2. Reclassification of Contextually Ambiguous Names
      */
-    private static NameCategory reclassificationOfContextuallyAmbiguousNames(Node name, NameCategory ambiguousCategory,
+    private static NameCategory reclassificationOfContextuallyAmbiguousNames(NameNode<?> name, NameCategory ambiguousCategory,
                                                                              TypeSolver typeSolver) {
         if (!ambiguousCategory.isNeedingDisambiguation()) {
             throw new IllegalArgumentException("The Name Category is not ambiguous: " + ambiguousCategory);
         }
-        if (ambiguousCategory == NameCategory.AMBIGUOUS_NAME && isSimpleName(name)) {
+        if (ambiguousCategory == NameCategory.AMBIGUOUS_NAME && name.isSimpleName()) {
             return reclassificationOfContextuallyAmbiguousSimpleAmbiguousName(name, typeSolver);
         }
-        if (ambiguousCategory == NameCategory.AMBIGUOUS_NAME && isQualifiedName(name)) {
+        if (ambiguousCategory == NameCategory.AMBIGUOUS_NAME && name.isQualifiedName()) {
             return reclassificationOfContextuallyAmbiguousQualifiedAmbiguousName(name, typeSolver);
         }
         if (ambiguousCategory == NameCategory.PACKAGE_OR_TYPE_NAME) {
@@ -174,7 +154,7 @@ public class NameLogic {
         throw new UnsupportedOperationException();
     }
 
-    private static NameCategory reclassificationOfContextuallyAmbiguosPackageOrTypeName(Node name, TypeSolver typeSolver) {
+    private static NameCategory reclassificationOfContextuallyAmbiguosPackageOrTypeName(NameNode<?> name, TypeSolver typeSolver) {
         // 6.5.4.1. Simple PackageOrTypeNames
         //
         // If the PackageOrTypeName, Q, is a valid TypeIdentifier and occurs in the scope of a type named Q, then the
@@ -183,8 +163,8 @@ public class NameLogic {
         // Otherwise, the PackageOrTypeName is reclassified as a PackageName. The meaning of the PackageOrTypeName is
         // the meaning of the reclassified name.
 
-        if (isSimpleName(name)) {
-            if (JavaParserFactory.getContext(name, typeSolver).solveType(nameAsString(name), typeSolver).isSolved()) {
+        if (name.isSimpleName()) {
+            if (JavaParserFactory.getContext(name.asNode(), typeSolver).solveType(name.asString(), typeSolver).isSolved()) {
                 return NameCategory.TYPE_NAME;
             } else {
                 return NameCategory.PACKAGE_NAME;
@@ -200,8 +180,8 @@ public class NameLogic {
         // Otherwise, it is reclassified as a PackageName. The meaning of the qualified PackageOrTypeName is the meaning
         // of the reclassified name.
 
-        if (isQualifiedName(name)) {
-            if (JavaParserFactory.getContext(name, typeSolver).solveType(nameAsString(name), typeSolver).isSolved()) {
+        if (name.isQualifiedName()) {
+            if (JavaParserFactory.getContext(name.asNode(), typeSolver).solveType(name.asString(), typeSolver).isSolved()) {
                 return NameCategory.TYPE_NAME;
             } else {
                 return NameCategory.PACKAGE_NAME;
@@ -211,13 +191,13 @@ public class NameLogic {
         throw new UnsupportedOperationException();
     }
 
-    private static NameCategory reclassificationOfContextuallyAmbiguousQualifiedAmbiguousName(Node nameNode,
+    private static NameCategory reclassificationOfContextuallyAmbiguousQualifiedAmbiguousName(NameNode<?> nameNode,
                                                                                            TypeSolver typeSolver) {
         // If the AmbiguousName is a qualified name, consisting of a name, a ".", and an Identifier, then the name to
         // the left of the "." is first reclassified, for it is itself an AmbiguousName. There is then a choice:
 
-        Node leftName = NameLogic.getQualifier(nameNode);
-        String rightName = NameLogic.nameAsString(NameLogic.getRightMostName(nameNode));
+        NameNode leftName = NameLogic.getQualifier(nameNode);
+        String rightName = NameLogic.getRightMostName(nameNode).asString();
         NameCategory leftNameCategory = classifyReference(leftName, typeSolver);
 
         // * If the name to the left of the "." is reclassified as a PackageName, then:
@@ -230,7 +210,7 @@ public class NameLogic {
         //        a package of that name actually exists.
 
         if (leftNameCategory == NameCategory.PACKAGE_NAME) {
-            if (typeSolver.hasType(nameAsString(nameNode))) {
+            if (typeSolver.hasType(nameNode.asString())) {
                 return NameCategory.TYPE_NAME;
             } else {
                 return NameCategory.PACKAGE_NAME;
@@ -248,8 +228,8 @@ public class NameLogic {
         //      * Otherwise, a compile-time error occurs.
 
         if (leftNameCategory == NameCategory.TYPE_NAME) {
-            SymbolReference<ResolvedTypeDeclaration> scopeTypeRef = JavaParserFactory.getContext(leftName, typeSolver)
-                    .solveType(NameLogic.nameAsString(leftName), typeSolver);
+            SymbolReference<ResolvedTypeDeclaration> scopeTypeRef = JavaParserFactory.getContext(leftName.asNode(), typeSolver)
+                    .solveType(leftName.asString(), typeSolver);
             if (scopeTypeRef.isSolved()) {
                 ResolvedTypeDeclaration scopeType = scopeTypeRef.getCorrespondingDeclaration();
                 if (scopeType instanceof ResolvedReferenceTypeDeclaration) {
@@ -268,7 +248,7 @@ public class NameLogic {
                     throw new UnsupportedOperationException();
                 }
             } else {
-                throw new UnsolvedSymbolException("Unable to solve context type: " + NameLogic.nameAsString(leftName));
+                throw new UnsolvedSymbolException("Unable to solve context type: " + leftName.asString());
             }
         }
 
@@ -283,7 +263,7 @@ public class NameLogic {
         throw new UnsupportedOperationException();
     }
 
-    private static NameCategory reclassificationOfContextuallyAmbiguousSimpleAmbiguousName(Node nameNode,
+    private static NameCategory reclassificationOfContextuallyAmbiguousSimpleAmbiguousName(NameNode<?> nameNode,
                                                                                            TypeSolver typeSolver) {
         // If the AmbiguousName is a simple name, consisting of a single Identifier:
         //
@@ -291,11 +271,8 @@ public class NameLogic {
         //   declaration (§8.4.1, §8.8.1, §14.20) or field declaration (§8.3) with that name, then the AmbiguousName is
         //   reclassified as an ExpressionName.
 
-        String name = nameAsString(nameNode);
-        Context context = JavaParserFactory.getContext(nameNode, typeSolver);
-//        if (context.solveSymbolAsValue(name, typeSolver).isPresent()) {
-//            return NameCategory.EXPRESSION_NAME;
-//        }
+        String name = nameNode.asString();
+        Context context = JavaParserFactory.getContext(nameNode.asNode(), typeSolver);
         if (context.localVariableDeclarationInScope(name).isPresent()) {
             return NameCategory.EXPRESSION_NAME;
         }
@@ -330,12 +307,12 @@ public class NameLogic {
      *
      * Most users do not want to call directly this method but call classifyReference instead.
      */
-    public static NameCategory syntacticClassificationAccordingToContext(Node name) {
+    public static NameCategory syntacticClassificationAccordingToContext(NameNode<?> name) {
 
-        if (name.getParentNode().isPresent()) {
-            Node parent = name.getParentNode().get();
-            if (isAName(parent) && nameAsString(name).equals(nameAsString(parent))) {
-                return syntacticClassificationAccordingToContext(parent);
+        if (name.asNode().getParentNode().isPresent()) {
+            Node parent = name.asNode().getParentNode().get();
+            if (parent.isAName() && name.asString().equals(parent.asNameNode().asString())) {
+                return syntacticClassificationAccordingToContext(parent.asNameNode());
             }
         }
 
@@ -370,18 +347,18 @@ public class NameLogic {
         if (name instanceof ClassOrInterfaceType) {
             return NameCategory.TYPE_NAME;
         }
-        if (name.getParentNode().isPresent() && name.getParentNode().get() instanceof ClassOrInterfaceType) {
+        if (name.asNode().getParentNode().isPresent() && name.asNode().getParentNode().get() instanceof ClassOrInterfaceType) {
             return NameCategory.TYPE_NAME;
         }
-        if (name.getParentNode().isPresent() && name.getParentNode().get() instanceof FieldAccessExpr) {
+        if (name.asNode().getParentNode().isPresent() && name.asNode().getParentNode().get() instanceof FieldAccessExpr) {
             return NameCategory.EXPRESSION_NAME;
         }
 
         throw new UnsupportedOperationException("Unable to classify category of name contained in "
-                + name.getParentNode().get().getClass().getSimpleName() + ". See " + name + " at " + name.getRange());
+                + name.asNode().getParentNode().get().getClass().getSimpleName() + ". See " + name + " at " + name.asNode().getRange());
     }
 
-    private static boolean isSyntacticallyAAmbiguousName(Node name) {
+    private static boolean isSyntacticallyAAmbiguousName(NameNode<?> name) {
         // A name is syntactically classified as an AmbiguousName in these contexts:
         //
         // 1. To the left of the "." in a qualified ExpressionName
@@ -410,7 +387,7 @@ public class NameLogic {
         return false;
     }
 
-    private static boolean isSyntacticallyAPackageOrTypeName(Node name) {
+    private static boolean isSyntacticallyAPackageOrTypeName(NameNode<?> name) {
         // A name is syntactically classified as a PackageOrTypeName in these contexts:
         //
         // 1. To the left of the "." in a qualified TypeName
@@ -429,7 +406,7 @@ public class NameLogic {
         return false;
     }
 
-    private static boolean isSyntacticallyAMethodName(Node name) {
+    private static boolean isSyntacticallyAMethodName(NameNode<?> name) {
         // A name is syntactically classified as a MethodName in this context:
         //
         // 1. Before the "(" in a method invocation expression (§15.12)
@@ -441,7 +418,7 @@ public class NameLogic {
         return false;
     }
 
-    private static boolean isSyntacticallyAModuleName(Node name) {
+    private static boolean isSyntacticallyAModuleName(NameNode<?> name) {
         // A name is syntactically classified as a ModuleName in these contexts:
         //
         // 1. In a requires directive in a module declaration (§7.7.1)
@@ -462,7 +439,7 @@ public class NameLogic {
         return false;
     }
 
-    private static boolean isSyntacticallyAPackageName(Node name) {
+    private static boolean isSyntacticallyAPackageName(NameNode<?> name) {
         // A name is syntactically classified as a PackageName in these contexts:
         //
         // 1. To the right of exports or opens in a module declaration
@@ -481,19 +458,7 @@ public class NameLogic {
         return false;
     }
 
-    private static boolean isSyntacticallyATypeName(Node name) {
-
-//        if (name instanceof ClassOrInterfaceType
-//                && whenParentIs(ClassOrInterfaceType.class, name, (p, c) ->
-//                p.getScope().isPresent() && p.getScope().get() == c && whenParentIs(ObjectCreationExpr.class, )
-//            )) {
-//
-//        }
-//
-//        if (name instanceof ClassOrInterfaceType
-//                || whenParentIs(ClassOrInterfaceType.class, name)) {
-//            return true;
-//        }
+    private static boolean isSyntacticallyATypeName(NameNode<?> name) {
 
         // A name is syntactically classified as a TypeName in these contexts:
         //
@@ -624,8 +589,10 @@ public class NameLogic {
         // 6. The type in a field declaration of a class or interface (§8.3, §9.3)
 
         if (whenParentIs(VariableDeclarator.class, name, (p1, c1) ->
-                p1.getType() == c1 && whenParentIs(FieldDeclaration.class, p1, (p2, c2) ->
-                p2.getVariables().contains(c2)))) {
+                p1.getType() == c1 && whenParentIs(FieldDeclaration.class, p1, (p2, c2) -> {
+                        FieldDeclaration p2AsFd = (FieldDeclaration)p2;
+                        return p2AsFd.getVariables().contains(c2.asNode());
+                }))) {
             return true;
         }
 
@@ -719,7 +686,7 @@ public class NameLogic {
         return false;
     }
 
-    private static boolean isSyntacticallyAnExpressionName(Node name) {
+    private static boolean isSyntacticallyAnExpressionName(NameNode<?> name) {
         // A name is syntactically classified as an ExpressionName in these contexts:
         //
         // 1. As the qualifying expression in a qualified superclass constructor invocation (§8.8.7.1)
@@ -821,50 +788,21 @@ public class NameLogic {
         return false;
     }
 
-    public static String nameAsString(Node name) {
-        if (!isAName(name)) {
-            throw new IllegalArgumentException("A name was expected");
-        }
-        if (name instanceof Name) {
-            return ((Name)name).asString();
-        } else if (name instanceof SimpleName) {
-            return ((SimpleName) name).getIdentifier();
-        } else if (name instanceof ClassOrInterfaceType) {
-            return ((ClassOrInterfaceType) name).asString();
-        } else if (name instanceof FieldAccessExpr) {
-            FieldAccessExpr fieldAccessExpr = (FieldAccessExpr) name;
-            if (isAName(fieldAccessExpr.getScope())) {
-                return nameAsString(fieldAccessExpr.getScope()) + "." + nameAsString(fieldAccessExpr.getName());
-            } else {
-                throw new IllegalArgumentException();
-            }
-        } else if (name instanceof NameExpr) {
-            return ((NameExpr)name).getNameAsString();
-        } else {
-            throw new UnsupportedOperationException("Unknown type of name found: " + name + " ("
-                    + name.getClass().getCanonicalName() + ")");
-        }
-    }
-
-    private interface PredicateOnParentAndChild<P extends Node, C extends Node> {
+    private interface PredicateOnParentAndChild<P extends Node, C extends NameNode> {
         boolean isSatisfied(P parent, C child);
     }
 
-    private static <P extends Node, C extends Node> boolean whenParentIs(Class<P> parentClass,
+    private static <P extends Node, C extends Node & NameNode> boolean whenParentIs(Class<P> parentClass,
                                                                          C child) {
         return whenParentIs(parentClass, child, (p, c) -> true);
     }
 
-    private static <P extends Node, C extends Node> boolean whenParentIs(Class<P> parentClass,
+    private static <P extends Node, C extends NameNode> boolean whenParentIs(Class<P> parentClass,
                                                                          C child,
                                                                          PredicateOnParentAndChild<P, C> predicate) {
-        if (child.getParentNode().isPresent()) {
-            Node parent = child.getParentNode().get();
-            if (parentClass.isInstance(parent)) {
-                return predicate.isSatisfied(parentClass.cast(parent), child);
-            } else {
-                return false;
-            }
+        if (child.asNode().getParentNode().isPresent()) {
+            Node parent = child.asNode().getParentNode().get();
+            return parentClass.isInstance(parent) && predicate.isSatisfied(parentClass.cast(parent), child);
         } else {
             return false;
         }

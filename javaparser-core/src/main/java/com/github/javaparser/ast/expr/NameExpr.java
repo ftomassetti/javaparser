@@ -21,6 +21,7 @@
 package com.github.javaparser.ast.expr;
 
 import com.github.javaparser.ast.AllFieldsConstructor;
+import com.github.javaparser.ast.NameNode;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.observer.ObservableProperty;
 import com.github.javaparser.ast.stmt.ExplicitConstructorInvocationStmt;
@@ -46,7 +47,7 @@ import java.util.Optional;
  *
  * @author Julio Vilmar Gesser
  */
-public final class NameExpr extends Expression implements NodeWithSimpleName<NameExpr>, Resolvable<ResolvedValueDeclaration> {
+public final class NameExpr extends Expression implements NodeWithSimpleName<NameExpr>, Resolvable<ResolvedValueDeclaration>, NameNode<NameExpr> {
 
     private SimpleName name;
 
@@ -175,5 +176,15 @@ public final class NameExpr extends Expression implements NodeWithSimpleName<Nam
     @Generated("com.github.javaparser.generator.core.node.TypeCastingGenerator")
     public Optional<NameExpr> toNameExpr() {
         return Optional.of(this);
+    }
+
+    @Override
+    public boolean isAName() {
+        return true;
+    }
+
+    @Override
+    public String asString() {
+        return getNameAsString();
     }
 }

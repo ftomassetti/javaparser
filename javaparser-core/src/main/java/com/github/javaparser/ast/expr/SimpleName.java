@@ -21,6 +21,7 @@
 package com.github.javaparser.ast.expr;
 
 import com.github.javaparser.ast.AllFieldsConstructor;
+import com.github.javaparser.ast.NameNode;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.nodeTypes.NodeWithIdentifier;
 import com.github.javaparser.ast.observer.ObservableProperty;
@@ -40,7 +41,7 @@ import com.github.javaparser.TokenRange;
  *
  * @see Name
  */
-public final class SimpleName extends Node implements NodeWithIdentifier<SimpleName> {
+public final class SimpleName extends Node implements NodeWithIdentifier<SimpleName>, NameNode<SimpleName> {
 
     @NonEmptyProperty
     private String identifier;
@@ -123,5 +124,11 @@ public final class SimpleName extends Node implements NodeWithIdentifier<SimpleN
             return false;
         return super.replace(node, replacementNode);
     }
+
+    @Override
+    public boolean isAName() {
+        return true;
+    }
+
 
 }

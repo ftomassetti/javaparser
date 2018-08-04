@@ -26,11 +26,16 @@ import com.github.javaparser.TokenRange;
 import com.github.javaparser.ast.comments.BlockComment;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.LineComment;
+import com.github.javaparser.ast.expr.FieldAccessExpr;
+import com.github.javaparser.ast.expr.Name;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.nodeTypes.NodeWithRange;
 import com.github.javaparser.ast.nodeTypes.NodeWithTokenRange;
 import com.github.javaparser.ast.observer.AstObserver;
 import com.github.javaparser.ast.observer.ObservableProperty;
 import com.github.javaparser.ast.observer.PropagatingAstObserver;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.CloneVisitor;
 import com.github.javaparser.ast.visitor.EqualsVisitor;
 import com.github.javaparser.ast.visitor.HashCodeVisitor;
@@ -1001,4 +1006,17 @@ public abstract class Node implements Cloneable, HasParentNode<Node>, Visitable,
             return nodes.get(cursor);
         }
     }
+
+    public boolean isAName() {
+        return false;
+    }
+
+    public NameNode<?> asNameNode() {
+        if (this instanceof NameNode) {
+            return (NameNode)this;
+        } else {
+            throw new UnsupportedOperationException();
+        }
+    }
+
 }

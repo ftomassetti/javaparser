@@ -22,11 +22,13 @@ package com.github.javaparser.ast.expr;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.AllFieldsConstructor;
+import com.github.javaparser.ast.NameNode;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithIdentifier;
 import com.github.javaparser.ast.observer.ObservableProperty;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.CloneVisitor;
 import com.github.javaparser.ast.visitor.GenericVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitor;
@@ -54,7 +56,7 @@ import com.github.javaparser.metamodel.OptionalProperty;
  * @author Julio Vilmar Gesser
  * @see SimpleName
  */
-public final class Name extends Node implements NodeWithIdentifier<Name>, NodeWithAnnotations<Name> {
+public final class Name extends Node implements NodeWithIdentifier<Name>, NodeWithAnnotations<Name>, NameNode<Name> {
 
     @NonEmptyProperty
     private String identifier;
@@ -251,4 +253,10 @@ public final class Name extends Node implements NodeWithIdentifier<Name>, NodeWi
             return false;
         }
     }
+
+    @Override
+    public boolean isAName() {
+        return true;
+    }
+
 }
