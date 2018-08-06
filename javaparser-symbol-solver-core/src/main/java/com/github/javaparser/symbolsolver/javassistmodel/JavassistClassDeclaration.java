@@ -294,7 +294,7 @@ public class JavassistClassDeclaration extends AbstractClassDeclaration {
     @Override
     public ResolvedReferenceType getSuperClass() {
         try {
-            String superClassName = JavassistUtils.internalNameToCanonicalName(classReader().getClassName());
+            String superClassName = JavassistUtils.internalNameToCanonicalName(classReader().getSuperName());
             ResolvedReferenceTypeDeclaration superClass;
             if (superClassName != null) {
                 superClass = typeSolver.solveType(superClassName);
@@ -317,7 +317,7 @@ public class JavassistClassDeclaration extends AbstractClassDeclaration {
         try {
             if (ctClass.getGenericSignature() == null) {
                 return Arrays.stream(classReader().getInterfaces())
-                        .map(i -> typeSolver.solveType(i))
+                        .map(i -> typeSolver.solveType(JavassistUtils.internalNameToCanonicalName(i)))
                         .map(i -> new ReferenceTypeImpl(i, typeSolver))
                         .collect(Collectors.toList());
             } else {
