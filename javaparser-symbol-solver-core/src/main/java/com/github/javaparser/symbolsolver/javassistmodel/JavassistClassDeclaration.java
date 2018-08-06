@@ -31,15 +31,14 @@ import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.model.typesystem.ReferenceTypeImpl;
 import com.github.javaparser.symbolsolver.resolution.MethodResolutionLogic;
 import com.github.javaparser.symbolsolver.resolution.SymbolSolver;
-import javassist.CtClass;
-import javassist.CtField;
-import javassist.CtMethod;
-import javassist.NotFoundException;
+import javassist.*;
 import javassist.bytecode.AccessFlag;
 import javassist.bytecode.BadBytecode;
 import javassist.bytecode.SignatureAttribute;
 import javassist.bytecode.SyntheticAttribute;
+import org.objectweb.asm.ClassReader;
 
+import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Predicate;
@@ -50,11 +49,14 @@ import java.util.stream.Collectors;
  */
 public class JavassistClassDeclaration extends AbstractClassDeclaration {
 
-
-
     private CtClass ctClass;
     private TypeSolver typeSolver;
     private JavassistTypeDeclarationAdapter javassistTypeDeclarationAdapter;
+
+    // For some queries we use ClassReader from ASM because differently from CtClass from Javassist it does not
+    // automatically try to load classes. This is an issue because sometimes classes are not available in the classpool
+    // but they are available through other typesolvers (not necessarily JarTypeSolver)
+    private ClassReader classReader;
 
     public JavassistClassDeclaration(CtClass ctClass, TypeSolver typeSolver) {
         if (ctClass == null) {
@@ -292,17 +294,19 @@ public class JavassistClassDeclaration extends AbstractClassDeclaration {
     @Override
     public ResolvedReferenceType getSuperClass() {
         try {
-            if (ctClass.getSuperclass() == null) {
-                return new ReferenceTypeImpl(typeSolver.solveType(Object.class.getCanonicalName()), typeSolver);
+            String superClassName = JavassistUtils.internalNameToCanonicalName(classReader().getClassName());
+            ResolvedReferenceTypeDeclaration superClass;
+            if (superClassName != null) {
+                superClass = typeSolver.solveType(superClassName);
+            } else {
+                superClass = typeSolver.solveType(Object.class.getCanonicalName());
             }
             if (ctClass.getGenericSignature() == null) {
-                return new ReferenceTypeImpl(new JavassistClassDeclaration(ctClass.getSuperclass(), typeSolver), typeSolver);
+                return new ReferenceTypeImpl(superClass, typeSolver);
             }
 
             SignatureAttribute.ClassSignature classSignature = SignatureAttribute.toClassSignature(ctClass.getGenericSignature());
             return JavassistUtils.signatureTypeToType(classSignature.getSuperClass(), typeSolver, this).asReferenceType();
-        } catch (NotFoundException e) {
-            throw new RuntimeException(e);
         } catch (BadBytecode e) {
             throw new RuntimeException(e);
         }
@@ -312,8 +316,8 @@ public class JavassistClassDeclaration extends AbstractClassDeclaration {
     public List<ResolvedReferenceType> getInterfaces() {
         try {
             if (ctClass.getGenericSignature() == null) {
-                return Arrays.stream(ctClass.getInterfaces())
-                        .map(i -> new JavassistInterfaceDeclaration(i, typeSolver))
+                return Arrays.stream(classReader().getInterfaces())
+                        .map(i -> typeSolver.solveType(i))
                         .map(i -> new ReferenceTypeImpl(i, typeSolver))
                         .collect(Collectors.toList());
             } else {
@@ -322,8 +326,6 @@ public class JavassistClassDeclaration extends AbstractClassDeclaration {
                         .map(i -> JavassistUtils.signatureTypeToType(i, typeSolver, this).asReferenceType())
                         .collect(Collectors.toList());
             }
-        } catch (NotFoundException e) {
-            throw new RuntimeException(e);
         } catch (BadBytecode e) {
             throw new RuntimeException(e);
         }
@@ -391,5 +393,16 @@ public class JavassistClassDeclaration extends AbstractClassDeclaration {
         In case the name is composed of the internal type only, i.e. f.getName() returns B, it will also works.
          */
         return this.internalTypes().stream().anyMatch(f -> f.getName().endsWith(name));
+    }
+
+    private ClassReader classReader() {
+        if (this.classReader == null) {
+            try {
+                this.classReader = new ClassReader(ctClass.toBytecode());
+            } catch (IOException|CannotCompileException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return this.classReader;
     }
 }

@@ -174,8 +174,8 @@ class JavassistUtils {
         }
     }
 
-    private static String internalNameToCanonicalName(String typeName) {
-        return typeName.replaceAll("\\$", ".");
+    public static String internalNameToCanonicalName(String typeName) {
+        return typeName.replaceAll("/", ".").replaceAll("\\$", ".");
     }
 
     private static ResolvedType objectTypeArgumentToType(SignatureAttribute.ObjectType typeArgument, TypeSolver typeSolver, ResolvedTypeParametrizable typeParametrizable) {

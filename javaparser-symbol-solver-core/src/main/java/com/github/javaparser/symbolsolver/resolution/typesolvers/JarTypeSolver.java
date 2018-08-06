@@ -156,6 +156,7 @@ public class JarTypeSolver implements TypeSolver {
     private class ClasspathElement {
         private JarFile jarFile;
         private JarEntry entry;
+        private CtClass ctClass;
 
         ClasspathElement(JarFile jarFile, JarEntry entry) {
             this.jarFile = jarFile;
@@ -163,9 +164,12 @@ public class JarTypeSolver implements TypeSolver {
         }
 
         CtClass toCtClass() throws IOException {
-            try (InputStream is = jarFile.getInputStream(entry)) {
-                return classPool.makeClass(is);
+            if (ctClass == null) {
+                try (InputStream is = jarFile.getInputStream(entry)) {
+                    ctClass = classPool.makeClass(is);
+                }
             }
+            return ctClass;
         }
     }
 }
