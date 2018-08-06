@@ -40,10 +40,19 @@
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
         </dependency>
+        <!--
+        Using old version because newer versions cause this issue:
+
+        [INFO] --- maven-enforcer-plugin:3.0.0-M1:enforce (enforce-versions) @ javaparser-symbol-solver-core ---
+        [INFO] Restricted to JDK 1.8 yet org.ow2.asm:asm:jar:6.2.1:compile contains module-info.class targeted to JDK 1.9
+        [WARNING] Rule 1: org.apache.maven.plugins.enforcer.EnforceBytecodeVersion failed with message:
+        Found Banned Dependency: org.ow2.asm:asm:jar:6.2.1
+        Use 'mvn dependency:tree' to locate the source of the banned dependencies.
+        -->
         <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
-            <version>6.2.1</version>
+            <version>5.2</version>
         </dependency>
         <dependency>
             <groupId>com.github.javaparser</groupId>
