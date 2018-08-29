@@ -103,7 +103,12 @@ public final class JavaParser {
 
     private GeneratedJavaParser getParserForProvider(Provider provider) {
         if (astParser == null) {
-            astParser = new GeneratedJavaParser(provider);
+            astParser = new GeneratedJavaParser(provider) {
+                @Override
+                public Statement Statement() throws ParseException {
+                    return super.Statement();
+                }
+            };
         } else {
             astParser.reset(provider);
         }
