@@ -1,0 +1,66 @@
+Statement Statement():
+{
+	Statement ret;
+}
+{
+    try {
+        ( LOOKAHEAD(2)
+            ret = LabeledStatement()
+        |
+            ret = AssertStatement()
+        |
+            ret = Block()
+        |
+            ret = EmptyStatement()
+        |
+            ret = StatementExpression()
+        |
+            ret = SwitchStatement()
+        |
+            ret = IfStatement()
+        |
+            ret = WhileStatement()
+        |
+            ret = DoStatement()
+        |
+            ret = ForStatement()
+        |
+            ret = BreakStatement()
+        |
+            ret = ContinueStatement()
+        |
+            ret = ReturnStatement()
+        |
+            ret = ThrowStatement()
+        |
+            ret = SynchronizedStatement()
+        |
+            ret = TryStatement()
+        |
+            ret = UnlessStatement()
+        )
+        { return ret; }
+    } catch (ParseException e) {
+        TokenRange errorRange = recover(SEMICOLON, e);
+        return new UnparsableStmt(errorRange);
+    }
+}
+
+UnlessStmt UnlessStatement():
+/*
+ * The disambiguating algorithm of JavaCC automatically binds dangling
+ * else's to the innermost if statement.  The LOOKAHEAD specification
+ * is to tell JavaCC that we know what we are doing.
+ */
+{
+	Expression condition;
+	Statement thenStmt;
+	Statement elseStmt = null;
+	JavaToken begin;
+}
+{
+  "unless" {begin=token();} "(" condition = Expression() ")" {} thenStmt = Statement() [ LOOKAHEAD(1) "else" {} elseStmt = Statement() ]
+  {
+      return new UnlessStmt(range(begin, token()), condition, thenStmt, elseStmt);
+  }
+}
